@@ -79,7 +79,7 @@
   --input: rgba(15, 23, 42, 0.12);
 
   /* Focus ring = brand */
-  --ring: #0b57d0;
+  --ring: var(--primary);
 
   /* =========================================================
      Custom tokens hérités (bars / pills / soft bg)

@@ -1,6 +1,5 @@
 import { Container } from "@/components/layout/container";
 import ProtectionPill from "@/components/special/ProtectionPill";
-import GarantiePage from "../garantie/page";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

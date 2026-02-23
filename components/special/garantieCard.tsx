@@ -21,7 +21,7 @@ export function GarantieCard({
             <CardHeader className="p-0">
                 <div className={`relative h-24 bg-primary ${headerClassName ?? ""}`}>
                     {/* petit bandeau plus clair */}
-                    <div className="absolute bottom-0 left-0 h-2 w-full bg-blue-300/70" />
+                    <div className="absolute bottom-0 left-0 h-2 w-full bg-accent" />
 
                     {/* Icône centrée */}
                     <div className="absolute inset-0 flex items-center justify-center">
