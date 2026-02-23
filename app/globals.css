@@ -1,26 +1,157 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* shadcn/tailwind.css n'est généralement pas nécessaire */
+/* @import "shadcn/tailwind.css"; */
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* =========================================================
+   Brand tokens (Light)
+   Base brand: #0b57d0
+========================================================= */
+
+:root {
+  /* Radius global proche de ton ancien DS */
+  --radius: 16px;
+
+  /* Surface */
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+
+  /* Brand */
+  --primary: #0945a4;
+  /* ancien --ifm-color-primary */
+  --primary-foreground: #ffffff;
+
+  --secondary: #f3f6fb;
+  /* neutre légèrement bleuté */
+  --secondary-foreground: #0a0a0a;
+
+  --muted: #f5f7fb;
+  --muted-foreground: #5b677a;
+
+  --accent: #eef4ff;
+  --accent-foreground: #0a0a0a;
+
+  --destructive: #dc2626;
+  --border: rgba(15, 23, 42, 0.12);
+  --input: rgba(15, 23, 42, 0.12);
+
+  /* Focus ring = brand */
+  --ring: #0b57d0;
+
+  /* =========================================================
+     Custom tokens hérités (bars / pills / soft bg)
+  ========================================================= */
+  --mk-bar-bg: rgba(11, 87, 208, 0.55);
+  --mk-bar-border: rgba(11, 87, 208, 0.20);
+  --mk-bar-fg: rgba(255, 255, 255, 0.95);
+  --mk-bar-icon-bg: rgba(255, 255, 255, 0.16);
+
+  --mk-pill-border: rgba(11, 87, 208, 0.55);
+  --mk-pill-hover-bg: rgba(11, 87, 208, 0.10);
+  --mk-pill-hover-border: rgba(11, 87, 208, 0.70);
+
+  --mk-soft-bg: rgba(11, 87, 208, 0.06);
+
+  /* Option : ombres comme avant */
+  --mk-shadow-sm: 0 8px 18px rgba(0, 0, 0, 0.10);
+  --mk-shadow-md: 0 12px 26px rgba(0, 0, 0, 0.14);
+}
+
+/* =========================================================
+   Dark mode (basé sur ton ancien thème dark)
+   Primary: #5593f6
+========================================================= */
+
+.dark {
+  --background: #0b0f1a;
+  --foreground: #f8fafc;
+
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+
+  --primary: #5593f6;
+  /* ancien dark primary */
+  --primary-foreground: #071022;
+
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f8fafc;
+
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(248, 250, 252, 0.70);
+
+  --accent: rgba(85, 147, 246, 0.14);
+  --accent-foreground: #f8fafc;
+
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.14);
+
+  --ring: #5593f6;
+
+  --mk-bar-bg: rgba(85, 147, 246, 0.45);
+  --mk-bar-border: rgba(153, 190, 250, 0.22);
+  --mk-bar-fg: rgba(255, 255, 255, 0.95);
+  --mk-bar-icon-bg: rgba(255, 255, 255, 0.14);
+
+  --mk-pill-border: rgba(85, 147, 246, 0.55);
+  --mk-pill-hover-bg: rgba(85, 147, 246, 0.14);
+  --mk-pill-hover-border: rgba(153, 190, 250, 0.55);
+
+  --mk-soft-bg: rgba(85, 147, 246, 0.10);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
 }
