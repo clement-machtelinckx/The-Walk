@@ -5,59 +5,60 @@ import { ContactCard } from "@/components/special/contactCard";
 import { Container } from "@/components/layout/container";
 import { ContactDialog } from "@/components/special/contactDialog";
 import { mdiPhone } from "@mdi/js";
-import { Button } from "@/components/ui/button";
+import { CONTACTS } from "@/config/contact";
+import { Reveal } from "@/components/ui/reveal";
 
 
-type DialogType = "partner" | "become" | "customer" | null;
+type DialogType = "partner" | "becomePartner" | "customer" | null;
 
 export default function AppelerAgence() {
     const [open, setOpen] = useState<DialogType>(null);
 
-    const dialogData =
-        open === "partner"
-            ? { title: "Contact", phone: "02 79 02 77 28", email: "partenaires@markassur.com" }
-            : open === "become"
-                ? { title: "Contact", phone: "02 79 02 77 28", email: "devenir@markassur.com" }
-                : open === "customer"
-                    ? { title: "Contact", phone: "02 79 02 77 28", email: "contact@markassur.com" }
-                    : null;
+    const dialogData = open ? CONTACTS[open] : null;
 
     return (
         <>
-            <section>
+            <section className="py-16 md:py-24">
                 <Container>
-                    <h1 className="mt-16 text-center text-4xl font-semibold">
-                        Accueil téléphonique du lundi au vendredi de 9h à 18h.
+                    <h1 className="text-center text-5xl font-semibold text-primary">
+                        Accueil téléphonique
                     </h1>
+                    <h2 className="mt-2 text-center text-lg font-medium text-muted-foreground">
+                        Du lundi au vendredi de 9h à 18h.
+                    </h2>
                 </Container>
             </section>
 
-            <section>
+            <section className="">
                 <Container>
-                    <div className="m-16 grid gap-10 md:grid-cols-3">
-                        <ContactCard
-                            title="VOUS ETES PARTENAIRE"
-                            buttonLabel="Cliquez ici"
-                            iconPath={mdiPhone}
-                            className="whitespace-pre-line"
-                            onClick={() => setOpen("partner")}
-                        />
-
-                        <ContactCard
-                            title="VOUS SOUHAITEZ DEVENIR PARTENAIRE"
-                            buttonLabel="Cliquez ici"
-                            iconPath={mdiPhone}
-                            className="whitespace-pre-line"
-                            onClick={() => setOpen("become")}
-                        />
-
-                        <ContactCard
-                            title="VOUS ETES PARTICULIER"
-                            buttonLabel="Cliquez ici"
-                            iconPath={mdiPhone}
-                            className="whitespace-pre-line"
-                            onClick={() => setOpen("customer")}
-                        />
+                    <div className="grid gap-10 md:grid-cols-3">
+                        <Reveal delay={10}>
+                            <ContactCard
+                                title="VOUS ÊTES PARTENAIRE"
+                                buttonLabel="Cliquez ici"
+                                iconPath={mdiPhone}
+                                className="whitespace-pre-line"
+                                onClick={() => setOpen("partner")}
+                            />
+                        </Reveal>
+                        <Reveal delay={80}>
+                            <ContactCard
+                                title="VOUS SOUHAITEZ DEVENIR PARTENAIRE"
+                                buttonLabel="Cliquez ici"
+                                iconPath={mdiPhone}
+                                className="whitespace-pre-line"
+                                onClick={() => setOpen("becomePartner")}
+                            />
+                        </Reveal>
+                        <Reveal delay={160}>
+                            <ContactCard
+                                title="VOUS ÊTES PARTICULIER"
+                                buttonLabel="Cliquez ici"
+                                iconPath={mdiPhone}
+                                className="whitespace-pre-line"
+                                onClick={() => setOpen("customer")}
+                            />
+                        </Reveal>
                     </div>
                 </Container>
             </section>
@@ -66,7 +67,7 @@ export default function AppelerAgence() {
                 <ContactDialog
                     open={open !== null}
                     onOpenChange={(v) => setOpen(v ? open : null)}
-                    title={dialogData.title}
+                    title={dialogData.label}
                     phone={dialogData.phone}
                     email={dialogData.email}
                     imageSrc="/bebe-pigeon.jpg"

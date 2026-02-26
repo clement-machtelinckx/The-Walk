@@ -8,6 +8,13 @@ import {
     mdiIncognito,
     mdiCogOutline,
 } from "@mdi/js";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Garanties",
+    description:
+        "Découvrez nos garanties d'assurance pour audioprothèses : Perte, Vol, Casse. Protégez vos patients et sécurisez leur investissement avec nos solutions adaptées.",
+};
 
 const GARANTIES = [
     {

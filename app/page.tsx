@@ -4,6 +4,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Container } from "@/components/layout/container";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Image from 'next/image';
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Accueil",
+  description:
+    "Solutions d’assurance pour audioprothésistes : garanties, protection d’activité et accompagnement.",
+};
 
 export default function HomePage() {
   return (

@@ -2,6 +2,16 @@ import { Container } from "@/components/layout/container";
 import { InfoCard } from "@/components/special/infoCard";
 import { ContactForm } from "@/components/form/contact/contact-form";
 import { mdiEmailOutline, mdiPhone } from "@mdi/js";
+import { CONTACTS } from "@/config/contact";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Formulaire de contact",
+    description:
+        "Contactez-nous pour obtenir des informations sur nos solutions d'assurance, réaliser un contrat ou déclarer un sinistre.",
+};
+
+const c = CONTACTS.protecaudio;
 
 export default function ContactFormPage() {
     return (
@@ -23,9 +33,9 @@ export default function ContactFormPage() {
                             logoSrc="/logo-transparent.svg"
                             logoAlt="Protec'audio"
                             title="Nous contacter"
-                            phone="09 80 08 50 47"
-                            hours="Du lundi au vendredi de 9h00 à 12h00 et de 14h00 à 18h00."
-                            email="contact@protecaudio.fr"
+                            phone={c.phone}
+                            hours={c.hours}
+                            email={c.email}
                             description="Vous bénéficierez d’un échange avec un de nos experts pour obtenir la meilleure couverture assurantielle."
                             phoneIconPath={mdiPhone}
                             emailIconPath={mdiEmailOutline}

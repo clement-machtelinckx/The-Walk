@@ -11,9 +11,11 @@ import { mdiMenu, mdiClose } from "@mdi/js";
 type NavItem = { href: string; label: string };
 
 const NAV_ITEMS: NavItem[] = [
+    { href: "/", label: "Accueil" },
     { href: "/garantie", label: "Garanties audioprothèses" },
     { href: "/protection", label: "Protection de votre activité" },
     { href: "/contact", label: "Contact" },
+
 ];
 
 export function MenuBurger() {

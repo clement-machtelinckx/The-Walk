@@ -1,6 +1,14 @@
 import { Container } from "@/components/layout/container";
 import { ContactCard } from "@/components/special/contactCard";
 import { mdiPhone, mdiHeadset, mdiEmail } from "@mdi/js";
+import { Reveal } from "@/components/ui/reveal";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Contact",
+    description:
+        "Contactez-nous pour obtenir des informations sur nos solutions d'assurance, réaliser un contrat ou déclarer un sinistre.",
+};
 
 
 export default function Contact() {
@@ -13,33 +21,39 @@ export default function Contact() {
                 </Container>
             </section>
 
-            <section className="mb-32">
+            <section className="">
                 <Container>
                     <div className="grid gap-10 md:grid-cols-3">
                         <div>
-                            <ContactCard
-                                title={"CONTACTER NOTRE CABINET"}
-                                href="/appeler-agence"
-                                buttonLabel="Appeler"
-                                iconPath={mdiPhone}
-                                className="whitespace-pre-line"
-                            />
+                            <Reveal delay={10}>
+                                <ContactCard
+                                    title={"CONTACTER NOTRE CABINET"}
+                                    href="/appeler-agence"
+                                    buttonLabel="Appeler"
+                                    iconPath={mdiPhone}
+                                    className="whitespace-pre-line"
+                                />
+                            </Reveal>
                         </div>
                         <div>
-                            <ContactCard
-                                title="ETRE RAPPELÉ"
-                                href="/contact/form"
-                                buttonLabel="Être rappelé"
-                                iconPath={mdiHeadset}
-                            />
+                            <Reveal delay={80}>
+                                <ContactCard
+                                    title="ETRE RAPPELÉ"
+                                    href="/contact/form"
+                                    buttonLabel="Être rappelé"
+                                    iconPath={mdiHeadset}
+                                />
+                            </Reveal>
                         </div>
                         <div>
-                            <ContactCard
-                                title="ENVOYER UN E-MAIL"
-                                href="/contact/form"
-                                buttonLabel="Envoyer un e-mail"
-                                iconPath={mdiEmail}
-                            />
+                            <Reveal delay={160}>
+                                <ContactCard
+                                    title="ENVOYER UN E-MAIL"
+                                    href="/contact/form"
+                                    buttonLabel="Envoyer un e-mail"
+                                    iconPath={mdiEmail}
+                                />
+                            </Reveal>
                         </div>
                     </div>
                 </Container>

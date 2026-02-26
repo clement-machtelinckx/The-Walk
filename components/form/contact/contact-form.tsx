@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CONTACTS, type ContactKey } from "@/config/contact";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,17 +45,19 @@ const JOB_FUNCTIONS = [
 ] as const;
 
 // mapping redirection emails
-const INSURANCE_EMAIL: Record<InsuranceType, string> = {
-    garantie_audioprothese: "contact@protecaudio.fr",
-    rc_pro: "contact@rossard-assurances.fr",
-    multirisque_pro: "contact@rossard-assurances.fr",
-    protection_juridique: "contact@rossard-assurances.fr",
-    sante_prevoyance: "contact@rossard-assurances.fr",
-    epargne_retraite: "contact@rossard-assurances.fr",
+const INSURANCE_EMAIL: Record<InsuranceType, ContactKey> = {
+    garantie_audioprothese: "protecaudio",
+    rc_pro: "rossard",
+    multirisque_pro: "rossard",
+    protection_juridique: "rossard",
+    sante_prevoyance: "rossard",
+    epargne_retraite: "rossard",
 };
 
 function buildMailto(values: ContactFormValues) {
-    const to = INSURANCE_EMAIL[values.insuranceType];
+    const contactKey = INSURANCE_EMAIL[values.insuranceType];
+    const toEmail = CONTACTS[contactKey].email;
+
     const subject = `[Contact] ${insuranceLabel[values.insuranceType]} — ${values.lastName} ${values.firstName}`;
 
     const lines = [
@@ -78,7 +81,7 @@ function buildMailto(values: ContactFormValues) {
     ];
 
     const body = encodeURIComponent(lines.join("\n"));
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
+    return `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${body}`;
 }
 
 export function ContactForm() {
@@ -110,7 +113,6 @@ export function ContactForm() {
         const href = buildMailto(values);
         setSubmitted(true);
 
-        // petit delay pour laisser l’UI réagir
         setTimeout(() => {
             window.location.href = href;
         }, 150);
@@ -380,7 +382,6 @@ export function ContactForm() {
                     </CardContent>
                 </Card>
 
-                {/* Submit */}
                 <div className="flex flex-wrap items-center gap-3">
                     <Button type="submit" size="lg">
                         Envoyer

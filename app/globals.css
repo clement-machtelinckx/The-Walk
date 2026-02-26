@@ -59,13 +59,13 @@
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
 
-  /* Brand */
-  --primary: #0945a4;
-  /* ancien --ifm-color-primary */
+  /* Brand protecaudio*/
+  --primary: #4f85c3;
+
   --primary-foreground: #ffffff;
 
   --secondary: #f3f6fb;
-  /* neutre légèrement bleuté */
+
   --secondary-foreground: #0a0a0a;
 
   --muted: #f5f7fb;

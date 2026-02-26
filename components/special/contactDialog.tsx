@@ -40,7 +40,7 @@ export function ContactDialog({
                     className
                 )}
             >
-                <div className="grid min-h-[520px] min-w-[700px] md:grid-cols-2">
+                <div className="grid min-h-[520px] md:grid-cols-2">
                     {imageSrc ? (
                         <div className="relative hidden md:block md:min-h-[520px]">
                             <Image
@@ -65,7 +65,7 @@ export function ContactDialog({
                             </DialogTitle>
                         </DialogHeader>
 
-                        <div className="mt-6 space-y-3 text-xl text-center">
+                        <div className="mt-6 space-y-3 text-xl text-center ">
                             <div className="flex justify-center gap-2">
                                 <span className="font-semibold">Mail :</span>
                                 <Link href={mailHref} className="text-primary underline-offset-4 hover:underline">

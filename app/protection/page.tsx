@@ -2,6 +2,13 @@ import { Container } from "@/components/layout/container";
 import ProtectionPill from "@/components/special/ProtectionPill";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Protection",
+    description:
+        "Découvrez nos solutions de protection d’activité pour audioprothésistes : Responsabilité Civile Professionnelle, Protection Juridique, Perte d’Exploitation. Protégez votre activité et sécurisez votre avenir avec nos offres adaptées.",
+};
 
 
 export default function Protection() {

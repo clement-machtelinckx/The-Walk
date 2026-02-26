@@ -50,7 +50,7 @@ export function ParallaxBackground() {
             {/* Top-right (grand motif) */}
             <div
                 className={cn(
-                    "absolute -right-16 -top-100 opacity-30 blur-[0.2px] will-change-transform",
+                    "absolute -right-16 -top-100 opacity-10 blur-[0.2px] will-change-transform",
                     "h-[1170px] w-[1530px] md:h-[1170px] md:w-[1530px]"
                 )}
                 style={{ transform: `translate3d(0, ${layer1}px, 0)` }}
@@ -68,7 +68,7 @@ export function ParallaxBackground() {
             {/* Left-middle (motif partiel) */}
             <div
                 className={cn(
-                    "absolute -left-24 top-[35%] opacity-25 will-change-transform",
+                    "absolute -left-24 top-[35%] opacity-10 will-change-transform",
                     "h-[570px] w-[570px] md:h-[780px] md:w-[780px]"
                 )}
                 style={{ transform: `translate3d(0, ${layer2}px, 0)` }}
@@ -82,7 +82,7 @@ export function ParallaxBackground() {
                 />
             </div>
 
-            {/* pas sur de celui la sa fait charger */}
+            {/* pas sur de celui la sa fait chargé */}
 
             {/* <div
                 className={cn(
