@@ -4,9 +4,9 @@ import { useState } from "react";
 import { ContactCard } from "@/components/special/contactCard";
 import { Container } from "@/components/layout/container";
 import { ContactDialog } from "@/components/special/contactDialog";
-import { mdiPhone } from "@mdi/js";
 import { CONTACTS } from "@/config/contact";
 import { Reveal } from "@/components/ui/reveal";
+import { Phone } from "lucide-react";
 
 
 type DialogType = "partner" | "becomePartner" | "customer" | null;
@@ -36,7 +36,7 @@ export default function AppelerAgence() {
                             <ContactCard
                                 title="VOUS ÊTES PARTENAIRE"
                                 buttonLabel="Cliquez ici"
-                                iconPath={mdiPhone}
+                                icon={Phone}
                                 className="whitespace-pre-line"
                                 onClick={() => setOpen("partner")}
                             />
@@ -45,7 +45,7 @@ export default function AppelerAgence() {
                             <ContactCard
                                 title="VOUS SOUHAITEZ DEVENIR PARTENAIRE"
                                 buttonLabel="Cliquez ici"
-                                iconPath={mdiPhone}
+                                icon={Phone}
                                 className="whitespace-pre-line"
                                 onClick={() => setOpen("becomePartner")}
                             />
@@ -54,7 +54,7 @@ export default function AppelerAgence() {
                             <ContactCard
                                 title="VOUS ÊTES PARTICULIER"
                                 buttonLabel="Cliquez ici"
-                                iconPath={mdiPhone}
+                                icon={Phone}
                                 className="whitespace-pre-line"
                                 onClick={() => setOpen("customer")}
                             />

@@ -1,7 +1,21 @@
 import Link from "next/link";
 import { Container } from "@/components/layout/container";
 
-const COLUMNS = [
+type ContactMap = Record<string, string>;
+
+type Column = {
+    title: string;
+    orias?: string;
+    body: string;
+    linkLabel: string;
+    linkHref: string;
+    linkTone: string;
+    phone?: ContactMap;
+    mail?: ContactMap;
+    address?: ContactMap;
+};
+
+const COLUMNS: readonly Column[] = [
     {
         title: "Cabinet Eurossur",
         orias: "n° ORIAS 07001927 - www.orias.fr",
@@ -10,6 +24,9 @@ const COLUMNS = [
         linkLabel: "Mentions légales et médiateur",
         linkHref: "/mentions-legales",
         linkTone: "text-blue-300 hover:text-blue-200",
+        phone: { standard: "05 56 79 01 10" },
+        mail: { email: "contact@eurossur.fr" },
+        address: { adresse: "74 rue Georges Bonnac Tour 6 33000 Bordeaux" },
     },
     {
         title: "Cabinet Mark’assur",
@@ -19,6 +36,8 @@ const COLUMNS = [
         linkLabel: "Mentions légales et médiateur",
         linkHref: "/mentions-legales",
         linkTone: "text-white/80 hover:text-white",
+        phone: { gestion: "02 79 02 77 28", commercial: "02 79 02 77 27" },
+        mail: { email: "contact@markassur.com" },
     },
     {
         title: "Cabinet Rossard Courtage",
@@ -28,8 +47,73 @@ const COLUMNS = [
         linkLabel: "Mentions légales et médiateur",
         linkHref: "/mentions-legales",
         linkTone: "text-yellow-300 hover:text-yellow-200",
+        phone: { standard: "02 79 02 77 27" },
     },
 ] as const;
+
+function normalizePhone(phone: string) {
+    // tel: nécessite souvent sans espaces
+    return phone.replace(/[^\d+]/g, "");
+}
+
+function prettyLabel(kind: "phone" | "mail" | "address", key: string) {
+    const k = key.toLowerCase();
+    if (kind === "phone") {
+        if (k.includes("gestion")) return "Gestion";
+        if (k.includes("commercial")) return "Commercial";
+        if (k.includes("standard") || k.includes("default")) return "Téléphone";
+        return key;
+    }
+    if (kind === "mail") {
+        if (k.includes("email") || k.includes("default")) return "Email";
+        return key;
+    }
+    // address
+    if (k.includes("adresse") || k.includes("default")) return "Adresse";
+    return key;
+}
+
+function ContactList({
+    kind,
+    data,
+}: {
+    kind: "phone" | "mail" | "address";
+    data?: ContactMap;
+}) {
+    if (!data) return null;
+
+    const entries = Object.entries(data).filter(([, v]) => Boolean(v?.trim()));
+    if (entries.length === 0) return null;
+
+    return (
+        <div className="space-y-1">
+            {entries.map(([key, value]) => {
+                const label = prettyLabel(kind, key);
+
+                let href: string | null = null;
+                if (kind === "phone") href = `tel:${normalizePhone(value)}`;
+                if (kind === "mail") href = `mailto:${value}`;
+                // address => pas de href par défaut (tu peux ajouter maps: plus tard)
+
+                return (
+                    <div key={`${kind}-${key}`} className="text-sm text-white/70">
+                        <span className="text-white/50">{label} :</span>{" "}
+                        {href ? (
+                            <a
+                                href={href}
+                                className="underline underline-offset-4 hover:text-white"
+                            >
+                                {value}
+                            </a>
+                        ) : (
+                            <span>{value}</span>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
 
 export function Footer() {
     return (
@@ -50,6 +134,13 @@ export function Footer() {
                             </div>
 
                             <p className="text-sm leading-relaxed text-white/60">{col.body}</p>
+
+                            {/* Contacts */}
+                            <div className="space-y-2">
+                                <ContactList kind="phone" data={col.phone} />
+                                <ContactList kind="mail" data={col.mail} />
+                                <ContactList kind="address" data={col.address} />
+                            </div>
 
                             <Link
                                 href={col.linkHref}

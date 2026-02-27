@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { mdiEmailOutline, mdiPhone } from "@mdi/js";
+import { Phone, Mail } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
 import { InfoCard } from "@/components/special/infoCard";
@@ -29,8 +29,8 @@ export default function JoinPage() {
                             hours={c.hours}
                             email={c.email}
                             description="Vous bénéficierez d’un échange avec un de nos experts pour obtenir la meilleure couverture assurantielle."
-                            phoneIconPath={mdiPhone}
-                            emailIconPath={mdiEmailOutline}
+                            phoneIcon={Phone}
+                            emailIcon={Mail}
                         />
                     </div>
 
@@ -38,22 +38,24 @@ export default function JoinPage() {
                     <div className="space-y-8 lg:col-span-2">
                         <div className="space-y-4">
                             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-                                Rejoindre le cabinet <span className="text-primary">Protec’audio</span> c’est :
+                                Rejoindre le cabinet{" "}
+                                <span className="text-primary">Protec’audio</span> c’est :
                             </h1>
 
                             <div className="space-y-3 text-sm leading-relaxed text-muted-foreground md:text-base">
                                 <p>
-                                    Participer à une aventure professionnelle motivante et développer votre expertise dans un
-                                    environnement en pleine expansion.
+                                    Participer à une aventure professionnelle motivante et développer
+                                    votre expertise dans un environnement en pleine expansion.
                                 </p>
                                 <p>
-                                    Choisir un métier dont vous pouvez être fier, avec un engagement pour chaque client : proposer la
-                                    meilleure solution pour le protéger.
+                                    Choisir un métier dont vous pouvez être fier, avec un engagement pour
+                                    chaque client : proposer la meilleure solution pour le protéger.
                                 </p>
                                 <p>
-                                    Acquérir une solide expérience commerciale “phygitale” : l’efficacité du face à face alliée aux
-                                    apports du digital et de l’IA. Bénéficier de la force d’un groupe qui vous offre des possibilités de
-                                    mobilité géographique et/ou professionnelle.
+                                    Acquérir une solide expérience commerciale “phygitale” : l’efficacité
+                                    du face à face alliée aux apports du digital et de l’IA. Bénéficier de
+                                    la force d’un groupe qui vous offre des possibilités de mobilité
+                                    géographique et/ou professionnelle.
                                 </p>
                             </div>
                         </div>

@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
 import { getTransport } from "@/lib/mailer";
 import { CONTACTS, type ContactKey } from "@/config/contact";
-import { contactFormSchema, insuranceLabel, type InsuranceType } from "@/components/form/contact/contact-schema";
+import {
+    contactFormSchema,
+    insuranceLabel,
+    type InsuranceType,
+} from "@/components/form/contact/contact-schema";
+import { buildContactEmail } from "@/lib/email-templates/contact";
 
-export const runtime = "nodejs"; // nodemailer => runtime node
+export const runtime = "nodejs";
 
-// même mapping que ton mailto (on garde identique)
 const INSURANCE_EMAIL: Record<InsuranceType, ContactKey> = {
     garantie_audioprothese: "protecaudio",
     rc_pro: "rossard",
@@ -16,19 +21,9 @@ const INSURANCE_EMAIL: Record<InsuranceType, ContactKey> = {
     epargne_retraite: "rossard",
 };
 
-// petit anti-bot (honeypot)
 const ServerSchema = contactFormSchema.extend({
-    website: z.string().optional().default(""), // champ caché côté front
+    website: z.string().optional().default(""),
 });
-
-function escapeHtml(input: string) {
-    return input
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
 
 export async function POST(req: Request) {
     try {
@@ -44,7 +39,6 @@ export async function POST(req: Request) {
 
         const { website, ...values } = parsed.data;
 
-        // honeypot rempli => bot => on répond OK sans envoyer
         if (website && website.trim().length > 0) {
             return NextResponse.json({ ok: true, routedTo: "default" });
         }
@@ -52,60 +46,44 @@ export async function POST(req: Request) {
         const contactKey = INSURANCE_EMAIL[values.insuranceType];
         const toEmail = CONTACTS[contactKey].email;
 
-        const subject = `[Contact] ${insuranceLabel[values.insuranceType]} — ${values.lastName} ${values.firstName}`;
-
-        const lines = [
-            `Vous êtes: ${values.userType}`,
-            `Fonction: ${values.jobFunction}`,
-            "",
-            `Nom: ${values.lastName}`,
-            `Prénom: ${values.firstName}`,
-            `Email: ${values.email}`,
-            `Téléphone: ${values.phone}`,
-            "",
-            `Raison sociale: ${values.companyName || "-"}`,
-            `Adresse entreprise: ${values.companyAddress || "-"}`,
-            `Code postal: ${values.postalCode}`,
-            `Ville: ${values.city}`,
-            "",
-            `Type d’assurance: ${insuranceLabel[values.insuranceType]}`,
-            "",
-            "Demande:",
-            values.message,
-        ];
-
-        const text = lines.join("\n");
-        const html = `
-      <h2>Nouveau message via le formulaire</h2>
-      <p><strong>Assurance :</strong> ${escapeHtml(insuranceLabel[values.insuranceType])}</p>
-      <p><strong>Vous êtes :</strong> ${escapeHtml(values.userType)}</p>
-      <p><strong>Fonction :</strong> ${escapeHtml(values.jobFunction)}</p>
-      <hr />
-      <p><strong>Nom :</strong> ${escapeHtml(values.lastName)}</p>
-      <p><strong>Prénom :</strong> ${escapeHtml(values.firstName)}</p>
-      <p><strong>Email :</strong> ${escapeHtml(values.email)}</p>
-      <p><strong>Téléphone :</strong> ${escapeHtml(values.phone)}</p>
-      <hr />
-      <p><strong>Raison sociale :</strong> ${escapeHtml(values.companyName || "-")}</p>
-      <p><strong>Adresse :</strong> ${escapeHtml(values.companyAddress || "-")}</p>
-      <p><strong>CP / Ville :</strong> ${escapeHtml(values.postalCode)} ${escapeHtml(values.city)}</p>
-      <hr />
-      <p><strong>Message :</strong></p>
-      <pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(values.message)}</pre>
-    `;
+        const mail = buildContactEmail(
+            {
+                insuranceLabel: insuranceLabel[values.insuranceType],
+                userType: values.userType,
+                jobFunction: values.jobFunction,
+                firstName: values.firstName,
+                lastName: values.lastName,
+                email: values.email,
+                phone: values.phone,
+                companyName: values.companyName || undefined,
+                companyAddress: values.companyAddress || undefined,
+                postalCode: values.postalCode,
+                city: values.city,
+                message: values.message,
+            },
+            {
+                brandName: "ProtecAudio",
+                logoUrl: process.env.MAIL_LOGO_URL,
+                footerText: process.env.MAIL_FOOTER_TEXT,
+            }
+        );
 
         const transporter = getTransport();
-
-        await transporter.sendMail({
+        const info = await transporter.sendMail({
             from: process.env.MAIL_FROM!,
             to: toEmail,
-            subject,
-            text,
-            html,
+            subject: mail.subject,
+            text: mail.text,
+            html: mail.html,
             replyTo: values.email,
         });
 
-        return NextResponse.json({ ok: true, routedTo: contactKey, toEmail });
+        return NextResponse.json({
+            ok: true,
+            routedTo: contactKey,
+            toEmail,
+            messageId: info.messageId,
+        });
     } catch (err) {
         console.error("POST /api/contact error:", err);
         return NextResponse.json(

@@ -119,7 +119,7 @@ export default function HomePage() {
 
               <div className="pt-2">
                 <Button asChild>
-                  <Link href="/contact">Demande d&apos;informations</Link>
+                  <Link href="/contact">Demander un devis</Link>
                 </Button>
               </div>
             </div>
@@ -178,9 +178,38 @@ export default function HomePage() {
 
               <div className="pt-2">
                 <Button asChild>
-                  <Link href="/contact">Demande d&apos;informations</Link>
+                  <Link href="/contact">Demander un devis</Link>
                 </Button>
               </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* CHIFFRES CLÉS */}
+      <section className="py-16 md:py-24">
+        <Container>
+          <h2 className="text-center text-2xl font-semibold tracking-tight md:text-3xl">
+            Nos chiffres clés
+          </h2>
+
+          <div className="mt-10 grid gap-6 text-center md:grid-cols-3">
+            <div className="p-8">
+              <p className="text-lg font-semibold md:text-xl">
+                + 600 000 Appareils Assurés
+              </p>
+            </div>
+
+            <div className="p-8">
+              <p className="text-lg font-semibold md:text-xl">
+                + 9 000 sinistres pris en charge / an
+              </p>
+            </div>
+
+            <div className="p-8">
+              <p className="text-lg font-semibold md:text-xl">
+                + 3 000 centres auditifs partenaires
+              </p>
             </div>
           </div>
         </Container>

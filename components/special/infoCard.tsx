@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { LucideIcon as LucideIconType } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
-import { MdiIcon } from "@/components/ui/icon";
+import LucideIcon from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -23,8 +26,8 @@ type Props = {
 
     className?: string;
 
-    phoneIconPath?: string;
-    emailIconPath?: string;
+    phoneIcon?: LucideIconType;
+    emailIcon?: LucideIconType;
 };
 
 export function InfoCard({
@@ -46,10 +49,10 @@ export function InfoCard({
 
     className,
 
-    phoneIconPath,
-    emailIconPath,
+    phoneIcon,
+    emailIcon,
 }: Props) {
-    const phoneHref = `tel:${phone.replace(/\s/g, "")}`;
+    const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
     const emailHref = `mailto:${email}`;
 
     return (
@@ -71,17 +74,12 @@ export function InfoCard({
                 <div className="my-6 h-px w-full bg-border" />
 
                 {/* Titre */}
-                <h2 className="text-2xl font-semibold tracking-tight text-primary">
-                    {title}
-                </h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-primary">{title}</h2>
 
                 {/* Phone */}
                 <div className="mt-6 flex gap-4">
                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-foreground text-background">
-                        <MdiIcon
-                            path={phoneIconPath ?? "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Z"}
-                            size={1}
-                        />
+                        <LucideIcon icon={phoneIcon ?? Phone} className="h-5 w-5" />
                     </div>
 
                     <div className="space-y-1">
@@ -92,19 +90,14 @@ export function InfoCard({
                         >
                             {phone}
                         </Link>
-                        {hours ? (
-                            <p className="text-sm text-muted-foreground">{hours}</p>
-                        ) : null}
+                        {hours ? <p className="text-sm text-muted-foreground">{hours}</p> : null}
                     </div>
                 </div>
 
                 {/* Email */}
                 <div className="mt-6 flex gap-4">
                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-foreground text-background">
-                        <MdiIcon
-                            path={emailIconPath ?? "M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z"}
-                            size={1}
-                        />
+                        <LucideIcon icon={emailIcon ?? Mail} className="h-5 w-5" />
                     </div>
 
                     <div className="space-y-1">
@@ -120,9 +113,7 @@ export function InfoCard({
 
                 {/* Description */}
                 {description ? (
-                    <p className="mt-6 leading-relaxed text-muted-foreground">
-                        {description}
-                    </p>
+                    <p className="mt-6 leading-relaxed text-muted-foreground">{description}</p>
                 ) : null}
             </CardContent>
         </Card>

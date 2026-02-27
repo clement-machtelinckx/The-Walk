@@ -1,14 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { MapPin, EyeOff, Settings } from "lucide-react";
+
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { GarantieCard } from "@/components/special/garantieCard";
-import {
-    mdiMapMarkerQuestionOutline,
-    mdiIncognito,
-    mdiCogOutline,
-} from "@mdi/js";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Garanties",
@@ -21,20 +18,19 @@ const GARANTIES = [
         title: "GARANTIE PERTE",
         body:
             "Cette couverture est pertinente pour des appareils de petite taille, elle offre la possibilité de remplacer le dispositif égaré en l’absence d’une participation des dispositifs des régimes obligatoires et mutuelles.*",
-        icon: mdiMapMarkerQuestionOutline,
+        icon: MapPin,
     },
     {
         title: "GARANTIE VOL",
         body:
             "La garantie vol protège l'assuré contre la soustraction frauduleuse de son audioprothèse. Elle entre en jeu lorsque l'appareil est dérobé, que ce soit par effraction, agression ou à l'insu de son propriétaire.*",
-        icon: mdiIncognito,
+        icon: EyeOff,
     },
     {
         title: "GARANTIE CASSE",
         body:
             "La garantie casse couvre les dégâts matériels subis par l'audioprothèse suite à un évènement soudain et imprévu. Cette protection assure la réparation ou le remplacement de l'appareil endommagé, permettant ainsi à l'assuré de retrouver rapidement l'usage de son dispositif auditif.*",
-        icon: mdiCogOutline,
-
+        icon: Settings,
     },
 ] as const;
 
@@ -51,13 +47,13 @@ export default function GarantiePage() {
                             </h1>
 
                             <p className="max-w-prose leading-relaxed text-muted-foreground font-semibold">
-                                Audioprothésistes, sécurisez chaque appareillage, proposez à vos
-                                patients une sérénité totale. Assurance Perte, Vol, Casse.
+                                Audioprothésistes, sécurisez chaque appareillage, proposez à vos patients
+                                une sérénité totale. Assurance Perte, Vol, Casse.
                             </p>
 
                             <div className="pt-2">
                                 <Button asChild size="lg">
-                                    <Link href="/contact">Prendre RDV</Link>
+                                    <Link href="https://eurossur-audio.fr/contact/">Prendre RDV</Link>
                                 </Button>
                             </div>
                         </div>
@@ -84,15 +80,20 @@ export default function GarantiePage() {
                             Nos garanties
                         </h2>
                         <p className="mx-auto max-w-4xl text-center leading-relaxed text-muted-foreground font-semibold">
-                            En proposant nos solutions, les audioprothésistes offrent à leurs
-                            patients une tranquillité d’esprit. Des couvertures indispensables,
-                            efficaces et totalement adaptées à la protection des appareillages.
+                            En proposant nos solutions, les audioprothésistes offrent à leurs patients
+                            une tranquillité d’esprit. Des couvertures indispensables, efficaces et
+                            totalement adaptées à la protection des appareillages.
                         </p>
                     </div>
 
                     <div className="mt-10 grid gap-6 md:grid-cols-3">
                         {GARANTIES.map((g) => (
-                            <GarantieCard key={g.title} title={g.title} body={g.body} iconPath={g.icon} />
+                            <GarantieCard
+                                key={g.title}
+                                title={g.title}
+                                body={g.body}
+                                icon={g.icon}
+                            />
                         ))}
                     </div>
 
@@ -124,9 +125,9 @@ export default function GarantiePage() {
                                 pendant 2 ans selon l’âge ou la situation du patient.
                                 <br />
                                 <br />
-                                Avec nos programmes, les audioprothésistes apportent une solution
-                                aux utilisateurs afin de préserver leur investissement et assurer
-                                la continuité de leur correction auditive indispensable.
+                                Avec nos programmes, les audioprothésistes apportent une solution aux
+                                utilisateurs afin de préserver leur investissement et assurer la
+                                continuité de leur correction auditive indispensable.
                             </p>
                         </div>
 
@@ -143,35 +144,6 @@ export default function GarantiePage() {
                 </Container>
             </section>
 
-            {/* CHIFFRES CLÉS */}
-            <section className="py-16 md:py-24">
-                <Container>
-                    <h2 className="text-center text-2xl font-semibold tracking-tight md:text-3xl">
-                        Nos chiffres clés audioprothèses
-                    </h2>
-
-                    <div className="mt-10 grid gap-6 text-center md:grid-cols-3">
-                        <div className="p-8">
-                            <p className="text-lg font-semibold md:text-xl">
-                                + 600 000 Appareils Assurés
-                            </p>
-                        </div>
-
-                        <div className="p-8">
-                            <p className="text-lg font-semibold md:text-xl">
-                                + 9 000 sinistres pris en charge / an
-                            </p>
-                        </div>
-
-                        <div className="p-8">
-                            <p className="text-lg font-semibold md:text-xl">
-                                + 3 000 centres auditifs partenaires
-                            </p>
-                        </div>
-                    </div>
-                </Container>
-            </section>
-
             {/* CTA */}
             <section className="py-16 md:py-24">
                 <Container>
@@ -182,8 +154,7 @@ export default function GarantiePage() {
                             </h2>
 
                             <p className="max-w-prose leading-relaxed text-muted-foreground font-semibold">
-                                Nous sommes à vos côtés pour vous aider à protéger vos biens et
-                                votre équipe.
+                                Nous sommes à vos côtés pour vous aider à protéger vos biens et votre équipe.
                             </p>
 
                             <Button asChild size="lg">

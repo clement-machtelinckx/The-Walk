@@ -1,34 +1,33 @@
-import { Container } from "@/components/layout/container";
-import { MdiIcon } from "@/components/ui/icon";
-import {
-    mdiFileDocumentOutline,
-    mdiShieldOutline,
-    mdiScaleBalance,
-    mdiHeartPlusOutline,
-    mdiPiggyBankOutline,
-} from "@mdi/js";
+import * as React from "react";
+import type { LucideIcon as LucideIconType } from "lucide-react";
+import { FileText, Shield, Scale, HeartPulse, PiggyBank } from "lucide-react";
 
+import { Container } from "@/components/layout/container";
+import LucideIcon from "@/components/ui/icon";
 
 type Group = {
     title: string;
+    subtitle: string;
     items: string[];
-    icon: string;
+    icon: LucideIconType;
 };
 
 const GROUPS: Group[] = [
     {
         title: "Responsabilité Civile Professionnelle",
+        subtitle: "Protection jusqu’à 8M€ pour votre activité professionnelle",
         items: [
             "RC Professionnelle",
-            "RC médicale incluse",
+            "RC Médicale incluse",
             "Biens confiés couverts",
             "Défense pénale",
             "Garanties modulables",
         ],
-        icon: mdiFileDocumentOutline,
+        icon: FileText,
     },
     {
         title: "Multirisque Professionnel",
+        subtitle: "Votre cabinet et matériel protégés 24h/24",
         items: [
             "Locaux protégés",
             "Matériel couvert",
@@ -36,10 +35,11 @@ const GROUPS: Group[] = [
             "Dégâts des eaux",
             "Perte d’exploitation",
         ],
-        icon: mdiShieldOutline,
+        icon: Shield,
     },
     {
         title: "Protection Juridique",
+        subtitle: "Assistance et défense en cas de litige (Option)",
         items: [
             "Assistance juridique",
             "Défense en cas de litige",
@@ -47,25 +47,29 @@ const GROUPS: Group[] = [
             "Protection contractuelle",
             "Sécurité réglementaire",
         ],
-        icon: mdiScaleBalance,
+        icon: Scale,
     },
     {
         title: "Santé & Prévoyance",
+        subtitle: "Protection complète pour votre activité professionnelle et votre sérénité",
         items: [
-            "Santé individuelle & collective",
-            "Prévoyance individuelle & collective",
+            "Mutuelle individuelle & collective",
+            "Prévoyance arrêt de travail",
+            "Protection invalidité",
+            "Sécurité familiale",
         ],
-        icon: mdiHeartPlusOutline,
+        icon: HeartPulse,
     },
     {
         title: "Épargne & Retraite",
+        subtitle: "Solutions personnalisées pour sécuriser votre avenir et celui de vos proches",
         items: [
             "Préparation retraite",
             "Optimisation fiscale",
             "Épargne long terme",
             "Sécurisation du patrimoine",
         ],
-        icon: mdiPiggyBankOutline,
+        icon: PiggyBank,
     },
 ];
 
@@ -77,26 +81,25 @@ function Chip({ children }: { children: React.ReactNode }) {
     );
 }
 
-function GroupBlock({ title, items, icon }: Group) {
+function GroupBlock({ title, subtitle, items, icon }: Group) {
     return (
         <div className="space-y-5">
             <div className="flex items-center gap-4 rounded-2xl bg-primary px-6 py-5 shadow-sm">
                 {/* Icône */}
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                    <MdiIcon path={icon} size={1} className="text-white" />
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20">
+                    <LucideIcon icon={icon} className="h-8 w-8 text-white" />
                 </div>
 
-                <h3 className="text-lg font-semibold text-white md:text-xl">
-                    {title}
-                </h3>
+                <div className="space-y-1">
+                    <h3 className="text-lg font-semibold text-white md:text-xl">{title}</h3>
+                    <p className="text-sm text-white/80 md:text-base">{subtitle}</p>
+                </div>
             </div>
 
             {/* Chips */}
             <div className="flex flex-wrap gap-4">
                 {items.map((it) => (
-
-                    <Chip key={it} >{it}</Chip>
-
+                    <Chip key={it}>{it}</Chip>
                 ))}
             </div>
         </div>

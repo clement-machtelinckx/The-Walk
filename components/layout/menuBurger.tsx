@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Menu } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { MdiIcon } from "@/components/ui/icon";
-import { mdiMenu, mdiClose } from "@mdi/js";
+import LucideIcon from "@/components/ui/icon";
 
 type NavItem = { href: string; label: string };
 
@@ -15,7 +16,6 @@ const NAV_ITEMS: NavItem[] = [
     { href: "/garantie", label: "Garanties audioprothèses" },
     { href: "/protection", label: "Protection de votre activité" },
     { href: "/contact", label: "Contact" },
-
 ];
 
 export function MenuBurger() {
@@ -31,7 +31,7 @@ export function MenuBurger() {
                     className="md:hidden"
                     aria-label="Ouvrir le menu"
                 >
-                    <MdiIcon path={mdiMenu} size={1} />
+                    <LucideIcon icon={Menu} className="h-5 w-5" />
                 </Button>
             </SheetTrigger>
 
@@ -39,15 +39,17 @@ export function MenuBurger() {
                 <SheetHeader className="space-y-1">
                     <SheetTitle className="flex items-center justify-between">
                         <span>Menu</span>
-                        {/* <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setOpen(false)}
-                            aria-label="Fermer le menu"
-                        >
-                            <MdiIcon path={mdiClose} size={1} />
-                        </Button> */}
+                        {/* Si tu veux le bouton fermer :
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(false)}
+              aria-label="Fermer le menu"
+            >
+              <LucideIcon icon={X} className="h-5 w-5" />
+            </Button>
+            */}
                     </SheetTitle>
                 </SheetHeader>
 
@@ -67,13 +69,7 @@ export function MenuBurger() {
 
                     <Separator />
 
-                    {/* <Button asChild className="w-full" onClick={() => setOpen(false)}>
-                        <Link href="/contact">Demander un devis</Link>
-                    </Button> */}
-
-                    <p className="text-xs text-muted-foreground">
-                        Réponse sous 48h ouvrées.
-                    </p>
+                    <p className="text-xs text-muted-foreground">Réponse sous 48h ouvrées.</p>
                 </div>
             </SheetContent>
         </Sheet>

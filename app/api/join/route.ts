@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+
 import { getTransport } from "@/lib/mailer";
 import { CONTACTS } from "@/config/contact";
+import { buildJoinEmail } from "@/lib/email-templates/join";
 
 export const runtime = "nodejs";
 
@@ -22,17 +24,8 @@ const JoinSchema = z.object({
         .min(8)
         .max(20)
         .regex(/^[0-9+().\s-]+$/),
-    website: z.string().optional().default(""), // honeypot
+    website: z.string().optional().default(""),
 });
-
-function escapeHtml(input: string) {
-    return input
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
 
 function extFromName(name: string) {
     const idx = name.lastIndexOf(".");
@@ -59,7 +52,6 @@ export async function POST(req: Request) {
             );
         }
 
-        // Honeypot rempli => bot => on répond OK sans rien faire
         if (parsed.data.website.trim().length > 0) {
             return NextResponse.json({ ok: true });
         }
@@ -69,7 +61,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ ok: false, error: "CV requis." }, { status: 400 });
         }
 
-        // Validation fichier
         if (cv.size > MAX_CV_BYTES) {
             return NextResponse.json(
                 { ok: false, error: "Fichier trop lourd (max 5MB)." },
@@ -87,7 +78,7 @@ export async function POST(req: Request) {
         }
 
         if (!AllowedMime.includes(cv.type as any)) {
-            // Certains navigateurs peuvent envoyer un type vide => on tolère si extension OK
+            // tolérance: certains navigateurs peuvent envoyer un type vide
             if (cv.type && cv.type.trim().length > 0) {
                 return NextResponse.json(
                     { ok: false, error: "Type de fichier invalide." },
@@ -97,44 +88,43 @@ export async function POST(req: Request) {
         }
 
         const toEmail = CONTACTS.recrutement.email;
-        const from = process.env.MAIL_FROM!;
-        const subject = `[Candidature] ${parsed.data.lastName} ${parsed.data.firstName}`;
 
-        const text = `Nouvelle candidature via le formulaire JOIN
+        const cvBytes = Buffer.from(await cv.arrayBuffer());
+        const cvMeta = {
+            filename: cv.name,
+            sizeKb: Math.round(cv.size / 1024),
+            mimeType: cv.type || undefined,
+        };
 
-Nom: ${parsed.data.lastName}
-Prénom: ${parsed.data.firstName}
-Email: ${parsed.data.email}
-Téléphone: ${parsed.data.phone}
-
-CV: ${cv.name} (${Math.round(cv.size / 1024)} KB)
-`;
-
-        const html = `
-      <h2>Nouvelle candidature</h2>
-      <p><strong>Nom :</strong> ${escapeHtml(parsed.data.lastName)}</p>
-      <p><strong>Prénom :</strong> ${escapeHtml(parsed.data.firstName)}</p>
-      <p><strong>Email :</strong> <a href="mailto:${escapeHtml(parsed.data.email)}">${escapeHtml(parsed.data.email)}</a></p>
-      <p><strong>Téléphone :</strong> ${escapeHtml(parsed.data.phone)}</p>
-      <hr />
-      <p><strong>CV :</strong> ${escapeHtml(cv.name)} (${Math.round(cv.size / 1024)} KB)</p>
-    `;
-
-        const bytes = Buffer.from(await cv.arrayBuffer());
+        const mail = buildJoinEmail(
+            {
+                firstName: parsed.data.firstName,
+                lastName: parsed.data.lastName,
+                email: parsed.data.email,
+                phone: parsed.data.phone,
+            },
+            cvMeta,
+            {
+                brandName: "ProtecAudio",
+                logoUrl: process.env.MAIL_LOGO_URL,
+                footerText: process.env.MAIL_FOOTER_TEXT,
+            }
+        );
 
         const transporter = getTransport();
         const info = await transporter.sendMail({
-            from,
+            from: process.env.MAIL_FROM!,
             to: toEmail,
-            subject,
-            text,
-            html,
+            subject: mail.subject,
+            text: mail.text,
+            html: mail.html,
             replyTo: parsed.data.email,
             attachments: [
                 {
                     filename: cv.name,
-                    content: bytes,
-                    contentType: cv.type || undefined,
+                    content: cvBytes,
+                    contentType: cv.type || "application/octet-stream",
+                    contentDisposition: "attachment",
                 },
             ],
         });

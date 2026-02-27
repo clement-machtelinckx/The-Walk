@@ -27,8 +27,11 @@ export function Header() {
                         <Link href="/garantie" className="text-sm text-muted-foreground hover:text-foreground">
                             Garanties audioprotheses
                         </Link>
-                        <Link href="/protection" className="text-sm text-muted-foreground hover:text-foreground">
+                        {/* <Link href="/protection" className="text-sm text-muted-foreground hover:text-foreground">
                             Protection de votre activité
+                        </Link> */}
+                        <Link href="/protection" className="text-sm text-muted-foreground hover:text-foreground">
+                            Solutions audioprothésistes
                         </Link>
                         {/* <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
                             Contact

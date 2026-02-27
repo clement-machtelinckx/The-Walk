@@ -82,7 +82,6 @@ export const CONTACTS: Record<ContactKey, ContactInfo> = {
     },
 };
 
-// helpers (évite de dupliquer la logique tel/mail)
 export function telHref(phone: string) {
     return `tel:${phone.replace(/\s/g, "")}`;
 }

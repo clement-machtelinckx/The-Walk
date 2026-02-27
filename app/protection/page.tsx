@@ -3,6 +3,7 @@ import ProtectionPill from "@/components/special/ProtectionPill";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { AudioCentersBlock } from "@/components/special/audioCenter";
 
 export const metadata: Metadata = {
     title: "Protection",
@@ -22,7 +23,11 @@ export default function Protection() {
                     </Button> */}
                 </Container>
             </section>
-
+            <section>
+                <Container>
+                    <AudioCentersBlock />
+                </Container>
+            </section>
             <section className="py-16 md:py-24">
                 <Container>
                     <h2 className="text-center text-2xl font-semibold tracking-tight md:text-3xl">

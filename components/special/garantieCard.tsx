@@ -1,18 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MdiIcon } from "@/components/ui/icon";
+import LucideIcon from "@/components/ui/icon";
+import type { LucideIcon as LucideIconType } from "lucide-react";
 
 type GarantieCardProps = {
     title: string;
     body: string;
-    /** Path MDI (ex: mdiMapMarkerQuestion) */
-    iconPath?: string;
+    /** Icône Lucide (ex: MapPin, Shield, etc.) */
+    icon?: LucideIconType;
     headerClassName?: string;
 };
 
 export function GarantieCard({
     title,
     body,
-    iconPath,
+    icon,
     headerClassName,
 }: GarantieCardProps) {
     return (
@@ -24,11 +25,11 @@ export function GarantieCard({
 
                     {/* Icône */}
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white">
-                            {iconPath ? (
-                                <MdiIcon path={iconPath} size={2} />
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-white">
+                            {icon ? (
+                                <LucideIcon icon={icon} className="h-10 w-10 text-white" />
                             ) : (
-                                <span className="text-lg font-semibold">◎</span>
+                                <span className="text-xl font-semibold">◎</span>
                             )}
                         </div>
                     </div>

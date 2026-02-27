@@ -1,17 +1,18 @@
 import Link from "next/link";
+import type { LucideIcon as LucideIconType } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MdiIcon } from "@/components/ui/icon";
+import LucideIcon from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
 type ContactCardProps = {
     title: string;
     buttonLabel: string;
-    iconPath: string;
+    icon: LucideIconType;
     className?: string;
 
     href?: string;
-
     onClick?: () => void;
 };
 
@@ -20,7 +21,7 @@ export function ContactCard({
     href,
     onClick,
     buttonLabel,
-    iconPath,
+    icon,
     className,
 }: ContactCardProps) {
     const isAction = typeof onClick === "function";
@@ -29,17 +30,13 @@ export function ContactCard({
         <Card className={cn("rounded-2xl shadow-sm", className)}>
             <CardContent className="flex flex-col items-center gap-5 p-8 text-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <MdiIcon path={iconPath} size={1.2} />
+                    <LucideIcon icon={icon} className="h-7 w-7" />
                 </div>
 
                 <h2 className="text-base font-semibold tracking-wide">{title}</h2>
 
                 {isAction ? (
-                    <Button
-                        type="button"
-                        onClick={onClick}
-                        className="rounded-full px-6"
-                    >
+                    <Button type="button" onClick={onClick} className="rounded-full px-6">
                         <span className="inline-flex items-center gap-2">
                             <span aria-hidden>›</span>
                             {buttonLabel}

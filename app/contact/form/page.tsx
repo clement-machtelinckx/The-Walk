@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
+import { Phone, Mail } from "lucide-react";
+
 import { Container } from "@/components/layout/container";
 import { InfoCard } from "@/components/special/infoCard";
 import { ContactForm } from "@/components/form/contact/contact-form";
-import { mdiEmailOutline, mdiPhone } from "@mdi/js";
 import { CONTACTS } from "@/config/contact";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Formulaire de contact",
@@ -37,8 +38,8 @@ export default function ContactFormPage() {
                             hours={c.hours}
                             email={c.email}
                             description="Vous bénéficierez d’un échange avec un de nos experts pour obtenir la meilleure couverture assurantielle."
-                            phoneIconPath={mdiPhone}
-                            emailIconPath={mdiEmailOutline}
+                            phoneIcon={Phone}
+                            emailIcon={Mail}
                         />
                     </div>
 
