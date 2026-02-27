@@ -12,6 +12,18 @@ export const metadata: Metadata = {
     "Solutions d’assurance pour audioprothésistes : garanties, protection d’activité et accompagnement.",
 };
 
+const PARTNERS = [
+  { src: "/partenaires/athuil.jpg", name: "Athuil" },
+  { src: "/partenaires/audition_conseil.jpg", name: "Audition conseil" },
+  { src: "/partenaires/audition_fabre.png", name: "Audition Fabre" },
+  { src: "/partenaires/constant_audition.jpg", name: "Constant Audition" },
+  { src: "/partenaires/gouesnard_bis.jpg", name: "Gouesnard" },
+  { src: "/partenaires/phenomene_audition.jpg", name: "Phénomène Audition" },
+  { src: "/partenaires/renard_wwwvect.jpg", name: "Renard" },
+  { src: "/partenaires/alsace_acoustique.jpg", name: "Alsace Acoustique" },
+
+] as const;
+
 export default function HomePage() {
   return (
     <>
@@ -20,7 +32,7 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
             {/* Logo */}
             <Image
-              src="/logo-transparent.svg"
+              src="/logo-transparent.png"
               alt="Logo de ProtecAudio"
               width={420}
               height={160}
@@ -29,14 +41,14 @@ export default function HomePage() {
             />
 
             {/* Sous-titre / distributeurs */}
-            <p className="mt-4 text-sm text-muted-foreground">
+            {/* <p className="mt-4 text-sm text-muted-foreground">
               Distribué par <span className="font-semibold text-foreground">Eurossur</span>,{" "}
               <span className="font-semibold text-foreground">Mark’assur</span> &{" "}
               <span className="font-semibold text-foreground">Rossard</span>
-            </p>
+            </p> */}
 
             {/* Séparateur */}
-            <div className="mt-6 h-px w-56 bg-foreground/30" />
+            {/* <div className="mt-6 h-px w-56 bg-foreground/30" /> */}
 
             {/* Titre */}
             <h1 className="mt-10 text-4xl font-semibold tracking-tight md:text-6xl">
@@ -113,9 +125,9 @@ export default function HomePage() {
             </div>
 
             {/* Colonne droite */}
-            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border bg-muted">
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl  bg-muted">
               <Image
-                src="/bebe-pigeon.jpg"
+                src="/images/Module_1.png"
                 alt="Illustration activité professionnelle"
                 fill
                 className="object-cover"
@@ -130,9 +142,9 @@ export default function HomePage() {
           {/* Bloc 2 : image à gauche, texte à droite */}
           <div className="grid items-center gap-10 md:grid-cols-2">
             {/* Colonne gauche */}
-            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border bg-muted">
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl  bg-muted">
               <Image
-                src="/bebe-pigeon.jpg"
+                src="/images/Module_2.png"
                 alt="Illustration dispositifs auditifs"
                 fill
                 className="object-cover"
@@ -180,19 +192,19 @@ export default function HomePage() {
             Nos partenaires historique(s)
           </h2>
           <div className="mx-auto w-full max-w-6xl">
-            <Carousel
-              opts={{ align: "start" }}
-              className="w-full"
-            >
+            <Carousel opts={{ align: "start" }} className="w-full">
               <CarouselContent className="-ml-4">
-                {Array.from({ length: 10 }).map((_, index) => (
-                  <CarouselItem key={index} className="pl-4 basis-[85%] sm:basis-[33.333%] lg:basis-[20%]">
-                    <div className="relative aspect-square w-full overflow-hidden rounded-2xl border bg-muted">
+                {PARTNERS.map((p) => (
+                  <CarouselItem
+                    key={p.src}
+                    className="pl-4 basis-[85%] sm:basis-[33.333%] lg:basis-[20%]"
+                  >
+                    <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-white">
                       <Image
-                        src="/bebe-pigeon.jpg"
-                        alt="Bébé Pigeon"
+                        src={p.src}
+                        alt={`Logo ${p.name}`}
                         fill
-                        className="object-cover"
+                        className="object-contain p-6"
                         sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 85vw"
                       />
                     </div>

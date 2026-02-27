@@ -11,7 +11,7 @@ export function Header() {
                 <div className="flex h-16 items-center justify-between">
                     <Link href="/" className="font-semibold tracking-tight">
                         <Image
-                            src="/logo-transparent.svg"
+                            src="/logo-transparent.png"
                             alt="Protec'audio Logo"
                             width={60}
                             height={30}
@@ -30,16 +30,19 @@ export function Header() {
                         <Link href="/protection" className="text-sm text-muted-foreground hover:text-foreground">
                             Protection de votre activité
                         </Link>
-                        <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
+                        {/* <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
                             Contact
+                        </Link> */}
+                        <Link href="/join" className="text-sm text-muted-foreground hover:text-foreground">
+                            Nous rejoindre
                         </Link>
                     </nav>
 
                     <div className="flex items-center gap-2">
                         {/* Desktop CTA */}
-                        {/* <Button asChild className="hidden md:inline-flex">
-                            <Link href="/contact">Demander un devis</Link>
-                        </Button> */}
+                        <Button asChild className="hidden md:inline-flex">
+                            <Link href="/contact">Contact</Link>
+                        </Button>
 
                         {/* Mobile burger */}
                         <MenuBurger />

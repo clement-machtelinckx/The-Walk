@@ -30,7 +30,7 @@ export default function ContactFormPage() {
                     {/* gauche: 1 col */}
                     <div className="lg:col-span-1">
                         <InfoCard
-                            logoSrc="/logo-transparent.svg"
+                            logoSrc="/logo-transparent.png"
                             logoAlt="Protec'audio"
                             title="Nous contacter"
                             phone={c.phone}

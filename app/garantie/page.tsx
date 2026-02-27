@@ -132,7 +132,7 @@ export default function GarantiePage() {
 
                         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border bg-muted">
                             <Image
-                                src="/bebe-pigeon.jpg"
+                                src="/images/appareil_auditif.jpg"
                                 alt="Illustration appareils assurés"
                                 fill
                                 className="object-cover"
