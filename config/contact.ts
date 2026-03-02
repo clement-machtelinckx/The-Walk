@@ -15,14 +15,13 @@ export type ContactInfo = {
     hours?: string;
 };
 
-export const PLACEHOLDER_CONTACT: ContactInfo = {
+/* export const PLACEHOLDER_CONTACT: ContactInfo = {
     label: "Contact",
     phone: "XX XX XX XX XX",
     email: "placeholder@example.com",
     hours: "Du lundi au vendredi de 9h à 18h.",
 };
-
-// pointe sur placeholder le temps d'avoir les vrais data 
+*/
 
 // export const CONTACTS: Record<ContactKey, ContactInfo> = {
 //     default: PLACEHOLDER_CONTACT,
@@ -34,7 +33,7 @@ export const PLACEHOLDER_CONTACT: ContactInfo = {
 //     placeholder: PLACEHOLDER_CONTACT,
 // };
 
-// a activer une fois les data des contact reçus 
+// à activer une fois les data des contacts reçus
 
 export const CONTACTS: Record<ContactKey, ContactInfo> = {
     default: {
@@ -62,13 +61,11 @@ export const CONTACTS: Record<ContactKey, ContactInfo> = {
         label: "ProtecAudio",
         phone: "09 80 08 50 47",
         email: "contact@protecaudio.fr",
-        // email: "clement.machtelinckx@laplateforme.io",
     },
     rossard: {
         label: "Rossard Assurances",
         phone: "02 00 00 00 00",
         email: "contact@rossard-assurances.fr",
-        // email: "clement.machtelinckx@laplateforme.io",
     },
     recrutement: {
         label: "Recrutement",

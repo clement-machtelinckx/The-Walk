@@ -218,7 +218,7 @@ export default function HomePage() {
       <section className="py-16 md:py-24">
         <Container>
           <h2 className="text-center text-2xl text-primary font-bold tracking-tight md:text-3xl mb-10">
-            Nos partenaires historique(s)
+            Nos partenaires historiques
           </h2>
           <div className="mx-auto w-full max-w-6xl">
             <Carousel opts={{ align: "start" }} className="w-full">

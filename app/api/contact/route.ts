@@ -68,9 +68,14 @@ export async function POST(req: Request) {
             }
         );
 
+        const mailFrom = process.env.MAIL_FROM;
+        if (!mailFrom) {
+            throw new Error("Variable MAIL_FROM requise.");
+        }
+
         const transporter = getTransport();
         const info = await transporter.sendMail({
-            from: process.env.MAIL_FROM!,
+            from: mailFrom,
             to: toEmail,
             subject: mail.subject,
             text: mail.text,
@@ -81,7 +86,6 @@ export async function POST(req: Request) {
         return NextResponse.json({
             ok: true,
             routedTo: contactKey,
-            toEmail,
             messageId: info.messageId,
         });
     } catch (err) {

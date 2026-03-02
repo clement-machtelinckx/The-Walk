@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import {NextResponse} from "next/server";
+import {z} from "zod";
 
-import { getTransport } from "@/lib/mailer";
-import { CONTACTS } from "@/config/contact";
-import { buildJoinEmail } from "@/lib/email-templates/join";
+import {getTransport} from "@/lib/mailer";
+import {CONTACTS} from "@/config/contact";
+import {buildJoinEmail} from "@/lib/email-templates/join";
 
 export const runtime = "nodejs";
 
@@ -47,24 +47,24 @@ export async function POST(req: Request) {
         const parsed = JoinSchema.safeParse(raw);
         if (!parsed.success) {
             return NextResponse.json(
-                { ok: false, error: "Champs invalides.", details: parsed.error.flatten() },
-                { status: 400 }
+                {ok: false, error: "Champs invalides.", details: parsed.error.flatten()},
+                {status: 400}
             );
         }
 
         if (parsed.data.website.trim().length > 0) {
-            return NextResponse.json({ ok: true });
+            return NextResponse.json({ok: true});
         }
 
         const cv = formData.get("cv");
         if (!(cv instanceof File)) {
-            return NextResponse.json({ ok: false, error: "CV requis." }, { status: 400 });
+            return NextResponse.json({ok: false, error: "CV requis."}, {status: 400});
         }
 
         if (cv.size > MAX_CV_BYTES) {
             return NextResponse.json(
-                { ok: false, error: "Fichier trop lourd (max 5MB)." },
-                { status: 400 }
+                {ok: false, error: "Fichier trop lourd (max 5MB)."},
+                {status: 400}
             );
         }
 
@@ -72,8 +72,8 @@ export async function POST(req: Request) {
         const allowedExt = ["pdf", "doc", "docx"];
         if (!allowedExt.includes(ext)) {
             return NextResponse.json(
-                { ok: false, error: "Format invalide (PDF, DOC, DOCX)." },
-                { status: 400 }
+                {ok: false, error: "Format invalide (PDF, DOC, DOCX)."},
+                {status: 400}
             );
         }
 
@@ -81,8 +81,8 @@ export async function POST(req: Request) {
             // tolérance: certains navigateurs peuvent envoyer un type vide
             if (cv.type && cv.type.trim().length > 0) {
                 return NextResponse.json(
-                    { ok: false, error: "Type de fichier invalide." },
-                    { status: 400 }
+                    {ok: false, error: "Type de fichier invalide."},
+                    {status: 400}
                 );
             }
         }
@@ -111,9 +111,14 @@ export async function POST(req: Request) {
             }
         );
 
+        const mailFrom = process.env.MAIL_FROM;
+        if (!mailFrom) {
+            throw new Error("Variable MAIL_FROM requise.");
+        }
+
         const transporter = getTransport();
         const info = await transporter.sendMail({
-            from: process.env.MAIL_FROM!,
+            from: mailFrom,
             to: toEmail,
             subject: mail.subject,
             text: mail.text,
@@ -131,14 +136,13 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             ok: true,
-            toEmail,
             messageId: info.messageId,
         });
     } catch (err) {
         console.error("POST /api/join error:", err);
         return NextResponse.json(
-            { ok: false, error: "Erreur serveur lors de l’envoi." },
-            { status: 500 }
+            {ok: false, error: "Erreur serveur lors de l’envoi."},
+            {status: 500}
         );
     }
 }

@@ -82,7 +82,7 @@ export function ParallaxBackground() {
                 />
             </div>
 
-            {/* pas sur de celui la sa fait chargé */}
+            {/* pas sûr de celui-là, ça fait chargé */}
 
             {/* <div
                 className={cn(

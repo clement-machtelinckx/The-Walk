@@ -25,7 +25,7 @@ export function Header() {
                             Accueil
                         </Link>
                         <Link href="/garantie" className="text-sm text-muted-foreground hover:text-foreground">
-                            Garanties audioprotheses
+                            Garanties audioprothèses
                         </Link>
                         {/* <Link href="/protection" className="text-sm text-muted-foreground hover:text-foreground">
                             Protection de votre activité

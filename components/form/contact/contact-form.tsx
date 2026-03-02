@@ -51,7 +51,7 @@ export function ContactForm() {
     const [submitted, setSubmitted] = React.useState(false);
     const [isSending, setIsSending] = React.useState(false);
     const [serverError, setServerError] = React.useState<string | null>(null);
-    const [routedTo, setRoutedTo] = React.useState<string | null>(null);
+
 
     const form = useForm<ContactFormClientValues>({
         resolver: zodResolver(contactFormSchema) as any,
@@ -93,7 +93,6 @@ export function ContactForm() {
                 return;
             }
 
-            setRoutedTo(data?.toEmail ?? null);
             setSubmitted(true);
         } catch {
             setServerError("Impossible d’envoyer le message (réseau).");
@@ -110,11 +109,6 @@ export function ContactForm() {
                 </CardHeader>
                 <CardContent className="space-y-4 text-muted-foreground">
                     <p>Votre demande a bien été envoyée à l’équipe.</p>
-                    {routedTo ? (
-                        <p className="text-sm">
-                            Destinataire (debug): <span className="font-medium">{routedTo}</span>
-                        </p>
-                    ) : null}
 
                     <div className="flex flex-wrap gap-3">
                         <Button
