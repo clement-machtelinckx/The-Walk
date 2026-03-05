@@ -6,6 +6,7 @@ type ContactMap = Record<string, string>;
 type Column = {
     title: string;
     orias?: string;
+    oriasHref?: string;
     body: string;
     linkLabel: string;
     linkHref: string;
@@ -18,7 +19,8 @@ type Column = {
 const COLUMNS: readonly Column[] = [
     {
         title: "Cabinet Eurossur",
-        orias: "n° ORIAS 07001927 - www.orias.fr",
+        orias: "n° ORIAS 07-001-927",
+        oriasHref: "https://www.orias.fr/home/showIntermediaire/422495226",
         body: "Cabinet de courtage expert de l’assurance des appareils auditifs depuis 1999. Service sinistre 100% en France, certifié par les assureurs.",
         linkLabel: "Mentions légales et médiateur",
         linkHref: "/mentions-legales",
@@ -29,7 +31,8 @@ const COLUMNS: readonly Column[] = [
     },
     {
         title: "Cabinet Mark’assur",
-        orias: "n° ORIAS 09-049-435 (www.orias.fr)",
+        orias: "n° ORIAS 09-049-435",
+        oriasHref: "https://www.orias.fr/home/showIntermediaire/510669823",
         body: "Créé en 2009, Mark’assur est un courtier spécialiste dans la protection de l’aide auditive et de l’audioprothésiste.",
         linkLabel: "Mentions légales et médiateur",
         linkHref: "/mentions-legales",
@@ -40,6 +43,7 @@ const COLUMNS: readonly Column[] = [
     {
         title: "Cabinet Rossard Courtage",
         orias: "",
+        oriasHref: "",
         body: "Rossard Courtage est un cabinet de courtage en assurance pour les entreprises et les professionnels créé en 2001. Entreprise familiale et à l’écoute des clients, Rossard Courtage s’engage à apporter la meilleure offre et à toujours défendre les intérêts auprès des compagnies d’assurances partenaires.",
         linkLabel: "Mentions légales et médiateur",
         linkHref: "/mentions-legales",
@@ -108,7 +112,7 @@ function ContactList({ kind, data }: { kind: "phone" | "mail" | "address"; data?
 
 export function Footer() {
     return (
-        <footer className="border-t border-white/10 bg-zinc-900 font-heading text-white">
+        <footer className="font-heading border-t border-white/10 bg-zinc-900 text-white">
             <Container>
                 <div className="grid gap-10 py-12 md:grid-cols-3">
                     {COLUMNS.map((col) => (
@@ -120,7 +124,18 @@ export function Footer() {
                                 </h3>
 
                                 {col.orias ? (
-                                    <p className="text-xs text-white/50">{col.orias}</p>
+                                    col.oriasHref ? (
+                                        <a
+                                            href={col.oriasHref}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-white/50 underline underline-offset-2 hover:text-white/70"
+                                        >
+                                            {col.orias}
+                                        </a>
+                                    ) : (
+                                        <p className="text-xs text-white/50">{col.orias}</p>
+                                    )
                                 ) : null}
                             </div>
 
