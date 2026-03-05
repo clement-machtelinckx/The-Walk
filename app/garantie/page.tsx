@@ -241,7 +241,7 @@ export default function GarantiePage() {
 
                         <div className="bg-muted relative aspect-[16/10] w-full overflow-hidden rounded-2xl border">
                             <Image
-                                src="/images/protection.png"
+                                src="/images/protection.jpg"
                                 alt="Illustration protection activité"
                                 fill
                                 className="object-cover"
