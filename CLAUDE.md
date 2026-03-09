@@ -8,7 +8,6 @@ Site Skeleton — reusable starter for French-language showcase websites built w
 
 This repository is intended to serve as a clean, clonable base for quickly launching new websites with a shared architecture, reusable components, generic forms, and email workflows.
 
-
 ## Commands
 
 ```bash
@@ -26,41 +25,67 @@ No test framework is configured.
 
 ### Directory layout
 
-- `app/` — Pages and API routes (App Router). Each page exports metadata for SEO.
+- `app/` — Pages and API routes (App Router). Each page can export metadata for SEO.
 - `components/ui/` — shadcn/ui primitives (do not edit manually; use `npx shadcn@latest add <component>`).
-- `components/layout/` — Header, Footer, Container, ParallaxBackground.
+- `components/layout/` — Shared layout building blocks such as Header, Footer, Container, MenuBurger, ParallaxBackground.
 - `components/form/` — Form components with colocated Zod schemas (`*-schema.ts`).
-- `components/special/` — Business-specific components (GarantieCard, ProtectionPill, etc.).
-- `config/contact.ts` — Centralized contact info for all cabinets (Eurossur, Mark'assur, Rossard) with helper functions `telHref()` and `mailHref()`.
+- `components/special/` — Reusable or project-specific components kept as examples and optional building blocks.
+- `config/site.ts` — Centralized site configuration (name, domain, SEO defaults, logo, OG image, contact info).
+- `config/contact.ts` — Centralized contact entries and helpers `telHref()` / `mailHref()`.
 - `lib/mailer.ts` — Nodemailer SMTP transporter (configured via env vars).
-- `lib/email-templates/` — HTML email builders: `shared.ts` (layout + utilities like `escapeHtml`, `kvTable`), `contact.ts`, `join.ts`.
+- `lib/email-templates/` — HTML email builders:
+  - `shared.ts` — shared layout + helpers (`escapeHtml`, `kvTable`, etc.)
+  - `contact.ts` — contact form email
+  - `join.ts` — job application email
 - `lib/utils.ts` — `cn()` helper (clsx + tailwind-merge).
 
 ### Path alias
 
-`@/*` maps to the project root (configured in tsconfig.json and components.json).
+`@/*` maps to the project root (configured in `tsconfig.json` and `components.json`).
 
 ### Key patterns
 
-- **Form flow:** Form component uses react-hook-form + Zod resolver → POST to `/api/<endpoint>` → server validates with same Zod schema → sends email via Nodemailer → returns JSON response.
-- **Email routing:** Contact form emails route to different addresses based on insurance type (see `app/api/contact/route.ts`).
-- **Anti-bot:** Both forms include a honeypot `website` field.
-- **File uploads:** Join form accepts PDF/DOC/DOCX (max 5MB), sent as email attachment.
+- **Form flow:** form component uses react-hook-form + Zod resolver → POST to `/api/<endpoint>` → server validates with the same Zod schema (or equivalent server schema) → sends email via Nodemailer → returns JSON response.
+- **Generic email routing:** contact form emails can be routed to different inboxes depending on request type.
+- **Anti-bot:** forms include a honeypot `website` field.
+- **File uploads:** join form accepts PDF/DOC/DOCX files (max 5MB), sent as email attachment.
 
 ### API routes
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/contact` | Contact form → email routed by insurance type |
+| `POST /api/contact` | Contact form → email routed by request type |
 | `POST /api/join` | Job application → email with CV attachment |
 
-### Environment variables (required for email)
+### Environment variables
 
-`SMTP_HOST`, `SMTP_PORT` (default 587), `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`. Optional: `MAIL_LOGO_URL`, `MAIL_FOOTER_TEXT`.
+Required for email:
+- `SMTP_HOST`
+- `SMTP_PORT` (default 587)
+- `SMTP_USER`
+- `SMTP_PASS`
+- `MAIL_FROM`
+
+Optional:
+- `MAIL_LOGO_URL`
+- `MAIL_FOOTER_TEXT`
 
 ## Conventions
 
-- All content is in French — keep copy, labels, and validation messages in French.
-- Icons use `lucide-react` (migrated from MDI).
-- Design tokens defined as CSS custom properties in `app/globals.css` (primary: #4f85c3).
+- Default copy, labels, and validation messages are in French.
+- Icons use `lucide-react`.
+- Design tokens are defined as CSS custom properties in `app/globals.css`.
 - Components use `cn()` from `lib/utils` for conditional class merging.
+- Prefer keeping the starter generic and configurable rather than tied to a specific business domain.
+
+## Notes for refactoring
+
+- Prefer **neutralizing** business-specific code over deleting it too early when it may be reused on future projects.
+- Keep reusable mechanics (forms, mailer, upload handling, layout patterns) even if some pages do not use them immediately.
+- Favor centralized configuration via `config/site.ts` and `config/contact.ts`.
+- When adapting this starter to a new project:
+  - update `config/site.ts`
+  - update `config/contact.ts`
+  - replace placeholder assets in `public/`
+  - adjust metadata, navigation, and page content
+  - remove unused pages only if they are clearly not needed

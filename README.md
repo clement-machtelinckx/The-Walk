@@ -1,7 +1,9 @@
-# ProtecAudio
+# Site Skeleton
 
-Site vitrine de **ProtecAudio** — solutions d'assurance et de protection pour audioprothésistes.
-Contenu intégralement en **français**. Domaine cible : `protecaudio.fr`.
+Starter Next.js réutilisable pour créer rapidement des sites vitrines modernes avec une architecture propre, des composants réutilisables et une base déjà câblée pour les formulaires et les emails.
+
+Contenu par défaut en **français**.  
+Ce dépôt est pensé pour être cloné puis adapté à chaque nouveau projet.
 
 ## Stack technique
 
@@ -19,11 +21,13 @@ Contenu intégralement en **français**. Domaine cible : `protecaudio.fr`.
 ```bash
 # Prérequis : Node.js >= 20
 npm install
-cp .env.example .env.local   # voir section Variables d'environnement
-npm run dev                   # http://localhost:3000
+cp .env.example .env.local
+npm run dev
 ```
 
-### Scripts disponibles
+Le site sera disponible sur `http://localhost:3000`.
+
+## Scripts disponibles
 
 | Commande        | Description                |
 |-----------------|----------------------------|
@@ -32,9 +36,9 @@ npm run dev                   # http://localhost:3000
 | `npm start`     | Serveur de production      |
 | `npm run lint`  | ESLint                     |
 
-> Il n'y a pas de framework de test configuré pour l'instant.
+> Aucun framework de test n’est configuré pour l’instant.
 
-## Variables d'environnement
+## Variables d’environnement
 
 Créer un fichier `.env.local` à la racine :
 
@@ -46,52 +50,47 @@ SMTP_USER=user@example.com
 SMTP_PASS=motdepasse
 
 # Expéditeur des emails (requis)
-MAIL_FROM="ProtecAudio <noreply@protecaudio.fr>"
+MAIL_FROM="Site Skeleton <noreply@example.com>"
 
 # Optionnel
-MAIL_LOGO_URL=https://protecaudio.fr/logo-transparent.png
-MAIL_FOOTER_TEXT=ProtecAudio — Tous droits réservés.
+MAIL_LOGO_URL=https://site-skeleton.com/logo-placeholder.svg
+MAIL_FOOTER_TEXT=Site Skeleton — Tous droits réservés.
 ```
 
-Les routes API (`/api/contact`, `/api/join`) lèvent une erreur explicite si les variables SMTP ou `MAIL_FROM` sont
-absentes.
+Les routes API (`/api/contact`, `/api/join`) renvoient une erreur explicite si les variables SMTP ou `MAIL_FROM` sont absentes.
 
 ## Structure du projet
 
-```
+```text
 app/
-├── page.tsx                  # Page d'accueil
+├── page.tsx                  # Page d'accueil d'exemple
 ├── layout.tsx                # Layout racine (Header, Footer, Parallax)
-├── globals.css               # Tokens CSS (primary: #4f85c3)
+├── globals.css               # Tokens CSS globaux
 ├── contact/                  # Page contact
 │   └── form/                 # Page formulaire contact
-├── garantie/                 # Garanties audioprothèses
-├── protection/               # Solutions audioprothésistes
-├── join/                     # Page "Nous rejoindre"
-├── appeler-agence/           # Page appel agence
-├── mentions-legales/         # Mentions légales
 ├── api/
-│   ├── contact/route.ts      # POST — formulaire contact → email routé par type d'assurance
+│   ├── contact/route.ts      # POST — formulaire contact → email
 │   └── join/route.ts         # POST — candidature avec CV en pièce jointe
 ├── robots.ts                 # robots.txt dynamique
 └── sitemap.ts                # sitemap.xml dynamique
 
 components/
 ├── ui/                       # Primitives shadcn/ui (ne pas modifier à la main)
-├── layout/                   # Header, Footer, Container, ParallaxBackground, MenuBurger
+├── layout/                   # Header, Footer, Container, MenuBurger, ParallaxBackground
 ├── form/
 │   ├── contact/              # Formulaire contact + schéma Zod
 │   └── join/                 # Formulaire candidature + schéma Zod
-└── special/                  # Composants métier (GarantieCard, ProtectionPill, ContactCard…)
+└── special/                  # Composants optionnels / réutilisables conservés comme base
 
 config/
-└── contact.ts                # Coordonnées centralisées des cabinets + helpers telHref/mailHref
+├── site.ts                   # Configuration globale du site
+└── contact.ts                # Coordonnées centralisées + helpers telHref/mailHref
 
 lib/
 ├── mailer.ts                 # Transport Nodemailer (SMTP)
 ├── utils.ts                  # cn() — clsx + tailwind-merge
 └── email-templates/
-    ├── shared.ts             # Layout email HTML + utilitaires (escapeHtml, kvTable)
+    ├── shared.ts             # Layout email HTML + utilitaires
     ├── contact.ts            # Template email contact
     └── join.ts               # Template email candidature
 ```
@@ -100,21 +99,19 @@ lib/
 
 ### Formulaires
 
-Form component (`react-hook-form` + Zod resolver) → `POST /api/<endpoint>` → le serveur re-valide avec le même schéma
-Zod → envoi email via Nodemailer → réponse JSON.
+Form component (`react-hook-form` + Zod resolver) → `POST /api/<endpoint>` → le serveur revalide les données → envoi email via Nodemailer → réponse JSON.
 
-### Routage email
+### Routage email générique
 
-Le formulaire de contact route vers des adresses différentes selon le type d'assurance choisi (voir `INSURANCE_EMAIL`
-dans `app/api/contact/route.ts`).
+Le formulaire de contact peut router les emails vers différentes adresses selon le type de demande choisi.
 
 ### Anti-bot
 
-Les deux formulaires incluent un champ honeypot `website` (caché en CSS).
+Les formulaires incluent un champ honeypot `website` masqué.
 
 ### Upload fichier
 
-Le formulaire candidature accepte PDF/DOC/DOCX (max 5 Mo), envoyé en pièce jointe de l'email.
+Le formulaire de candidature accepte PDF/DOC/DOCX (max 5 Mo), envoyé en pièce jointe.
 
 ### Composants shadcn/ui
 
@@ -126,31 +123,62 @@ npx shadcn@latest add <component>
 
 ### Alias de chemin
 
-`@/*` pointe vers la racine du projet (tsconfig.json + components.json).
+`@/*` pointe vers la racine du projet (`tsconfig.json` + `components.json`).
 
-## TODO avant mise en production
+## Comment réutiliser ce starter
 
-### Données de contact placeholder
+### 1. Cloner le dépôt
+```bash
+git clone <url-du-repo> mon-nouveau-site
+cd mon-nouveau-site
+```
 
-Les valeurs suivantes dans `config/contact.ts` sont des **placeholders** à remplacer :
+### 2. Changer le remote si nécessaire
+```bash
+git remote remove origin
+git remote add origin <url-du-nouveau-repo>
+```
 
-- [ ] **Rossard** — téléphone `02 00 00 00 00` (ligne 56) → remplacer par le vrai numéro
-- [ ] **Recrutement** — email `recrutement@protec.test` (ligne 61) → remplacer par une vraie adresse (le TLD `.test` est
-  réservé et ne fonctionne pas)
-- [ ] Supprimer l'entrée `placeholder` du type `ContactKey` et de `CONTACTS` une fois les vrais contacts en place
+### 3. Adapter la configuration
+Modifier en priorité :
+- `config/site.ts`
+- `config/contact.ts`
 
-### Configuration
+### 4. Remplacer les placeholders
+- logo
+- favicon
+- image Open Graph
+- images dans `public/`
+- textes d’exemple
+- navigation
+- metadata
 
-- [ ] Configurer les variables d'environnement SMTP sur le serveur de production
-- [ ] Définir `MAIL_FROM` avec l'adresse d'expédition officielle
-- [ ] Vérifier le domaine `protecaudio.fr` (SPF, DKIM, DMARC) pour la délivrabilité des emails
+### 5. Garder ou retirer les fonctionnalités utiles
+Le starter contient volontairement plus que le strict minimum :
+- formulaire de contact
+- formulaire de candidature
+- routes email
+- composants réutilisables
 
-### Fonctionnel
+Tu peux les conserver ou les retirer selon les besoins du site.
 
-- [ ] Ajouter un framework de test (Vitest ou Playwright)
+## Conseils d’usage
+
+- Commencer par adapter la configuration globale avant de réécrire les pages.
+- Garder les composants et formulaires génériques tant qu’ils peuvent resservir.
+- Préférer commenter ou neutraliser certains anciens usages métier plutôt que supprimer trop tôt des mécaniques utiles.
+- Utiliser ce dépôt comme base stable pour enchaîner plusieurs refontes de sites vitrines.
+
+## TODO avant un usage production
+
+- [ ] Remplacer les valeurs placeholder dans `config/site.ts`
+- [ ] Remplacer les valeurs placeholder dans `config/contact.ts`
+- [ ] Ajouter un vrai logo et une vraie image OG dans `public/`
+- [ ] Configurer les variables SMTP
+- [ ] Vérifier les textes et metadata avant mise en ligne
+- [ ] Ajouter un framework de test si nécessaire
 
 ## Contribution
 
 - Branche principale : `main`
-- Branche de développement : `dev`
-- PR de `dev` → `main` pour les mises en production
+- Adapter la stratégie de branches selon ton workflow
