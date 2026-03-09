@@ -82,23 +82,7 @@ export function ParallaxBackground() {
                 />
             </div>
 
-            {/* pas sûr de celui-là, ça fait chargé */}
 
-            {/* <div
-                className={cn(
-                    "absolute -right-10 bottom-[6%] opacity-30 will-change-transform",
-                    "h-[360px] w-[360px] md:h-[510px] md:w-[510px]"
-                )}
-                style={{ transform: `translate3d(0, ${layer3}px, 0)` }}
-            >
-                <Image
-                    src="/background/BG4.jpg"
-                    alt=""
-                    fill
-                    sizes="(min-width: 768px) 510px, 360px"
-                    className="object-contain"
-                />
-            </div> */}
         </div>
     );
 }

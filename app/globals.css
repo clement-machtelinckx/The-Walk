@@ -44,7 +44,7 @@
 
 /* =========================================================
    Brand tokens (Light)
-   Base brand: #0b57d0
+   Base brand: vert foncé / vert clair
 ========================================================= */
 
 :root {
@@ -52,33 +52,33 @@
   --radius: 16px;
 
   /* Surface */
-  --background: #ffffff;
-  --foreground: #0a0a0a;
+  --background: #f8fcf9;
+  --foreground: #0f1f16;
 
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #0f1f16;
 
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
+  --popover-foreground: #0f1f16;
 
-  /* Brand protecaudio*/
-  --primary: #4f85c3;
+  /* Brand */
+  --primary: #2f6f4f;
 
   --primary-foreground: #ffffff;
 
-  --secondary: #f3f6fb;
+  --secondary: #eef7f1;
 
-  --secondary-foreground: #0a0a0a;
+  --secondary-foreground: #0f1f16;
 
-  --muted: #f5f7fb;
-  --muted-foreground: #5b677a;
+  --muted: #f2f8f4;
+  --muted-foreground: #5d6f63;
 
-  --accent: #eef4ff;
-  --accent-foreground: #0a0a0a;
+  --accent: #e3f1e8;
+  --accent-foreground: #0f1f16;
 
   --destructive: #dc2626;
-  --border: rgba(15, 23, 42, 0.12);
-  --input: rgba(15, 23, 42, 0.12);
+  --border: rgba(18, 52, 37, 0.12);
+  --input: rgba(18, 52, 37, 0.12);
 
   /* Focus ring = brand */
   --ring: var(--primary);
@@ -86,16 +86,16 @@
   /* =========================================================
      Custom tokens hérités (bars / pills / soft bg)
   ========================================================= */
-  --mk-bar-bg: rgba(11, 87, 208, 0.55);
-  --mk-bar-border: rgba(11, 87, 208, 0.20);
+  --mk-bar-bg: rgba(47, 111, 79, 0.55);
+  --mk-bar-border: rgba(47, 111, 79, 0.20);
   --mk-bar-fg: rgba(255, 255, 255, 0.95);
   --mk-bar-icon-bg: rgba(255, 255, 255, 0.16);
 
-  --mk-pill-border: rgba(11, 87, 208, 0.55);
-  --mk-pill-hover-bg: rgba(11, 87, 208, 0.10);
-  --mk-pill-hover-border: rgba(11, 87, 208, 0.70);
+  --mk-pill-border: rgba(47, 111, 79, 0.55);
+  --mk-pill-hover-bg: rgba(47, 111, 79, 0.10);
+  --mk-pill-hover-border: rgba(47, 111, 79, 0.70);
 
-  --mk-soft-bg: rgba(11, 87, 208, 0.06);
+  --mk-soft-bg: rgba(47, 111, 79, 0.06);
 
   /* Option : ombres comme avant */
   --mk-shadow-sm: 0 8px 18px rgba(0, 0, 0, 0.10);
@@ -103,49 +103,49 @@
 }
 
 /* =========================================================
-   Dark mode (basé sur ton ancien thème dark)
-   Primary: #5593f6
+   Dark mode
+   Primary: vert clair
 ========================================================= */
 
 .dark {
-  --background: #0b0f1a;
-  --foreground: #f8fafc;
+  --background: #0b140f;
+  --foreground: #f6fbf7;
 
-  --card: #0f172a;
-  --card-foreground: #f8fafc;
+  --card: #101b14;
+  --card-foreground: #f6fbf7;
 
-  --popover: #0f172a;
-  --popover-foreground: #f8fafc;
+  --popover: #101b14;
+  --popover-foreground: #f6fbf7;
 
-  --primary: #5593f6;
-  /* ancien dark primary */
-  --primary-foreground: #071022;
+  --primary: #74c69d;
+  /* primary dark */
+  --primary-foreground: #0b1c13;
 
   --secondary: rgba(255, 255, 255, 0.08);
-  --secondary-foreground: #f8fafc;
+  --secondary-foreground: #f6fbf7;
 
   --muted: rgba(255, 255, 255, 0.08);
-  --muted-foreground: rgba(248, 250, 252, 0.70);
+  --muted-foreground: rgba(246, 251, 247, 0.70);
 
-  --accent: rgba(85, 147, 246, 0.14);
-  --accent-foreground: #f8fafc;
+  --accent: rgba(116, 198, 157, 0.14);
+  --accent-foreground: #f6fbf7;
 
   --destructive: #ef4444;
   --border: rgba(255, 255, 255, 0.12);
   --input: rgba(255, 255, 255, 0.14);
 
-  --ring: #5593f6;
+  --ring: #74c69d;
 
-  --mk-bar-bg: rgba(85, 147, 246, 0.45);
-  --mk-bar-border: rgba(153, 190, 250, 0.22);
+  --mk-bar-bg: rgba(116, 198, 157, 0.45);
+  --mk-bar-border: rgba(167, 226, 196, 0.22);
   --mk-bar-fg: rgba(255, 255, 255, 0.95);
   --mk-bar-icon-bg: rgba(255, 255, 255, 0.14);
 
-  --mk-pill-border: rgba(85, 147, 246, 0.55);
-  --mk-pill-hover-bg: rgba(85, 147, 246, 0.14);
-  --mk-pill-hover-border: rgba(153, 190, 250, 0.55);
+  --mk-pill-border: rgba(116, 198, 157, 0.55);
+  --mk-pill-hover-bg: rgba(116, 198, 157, 0.14);
+  --mk-pill-hover-border: rgba(167, 226, 196, 0.55);
 
-  --mk-soft-bg: rgba(85, 147, 246, 0.10);
+  --mk-soft-bg: rgba(116, 198, 157, 0.10);
 }
 
 @layer base {
@@ -157,7 +157,9 @@
     @apply bg-background text-foreground;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-family: var(--font-quicksand), sans-serif;
     font-weight: 700;
   }
