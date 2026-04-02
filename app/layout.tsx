@@ -1,7 +1,6 @@
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { ParallaxBackgroundClient } from "@/components/layout/parallaxBackgroundClient";
 import { Poppins, Quicksand } from "next/font/google";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
@@ -32,35 +31,6 @@ export const metadata: Metadata = {
         siteName: siteConfig.name,
         title: siteConfig.name,
         description: siteConfig.description,
-        images: [
-            {
-                url: siteConfig.ogImage,
-                width: 1200,
-                height: 630,
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: siteConfig.name,
-        description: siteConfig.description,
-        images: [siteConfig.ogImage],
-    },
-};
-
-const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: siteConfig.name,
-    url: siteConfig.url,
-    logo: siteConfig.logo,
-    description: siteConfig.description,
-    contactPoint: {
-        "@type": "ContactPoint",
-        telephone: "+33123456789",
-        contactType: "customer service",
-        availableLanguage: "French",
-        email: siteConfig.contactEmail,
     },
 };
 
@@ -71,14 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             className={`${poppins.className} ${quicksand.variable}`}
             suppressHydrationWarning
         >
-            <head>
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-                />
-            </head>
             <body className="bg-background text-foreground flex min-h-dvh flex-col antialiased">
-                <ParallaxBackgroundClient />
                 <Header />
                 <main id="main" className="flex-1">
                     {children}

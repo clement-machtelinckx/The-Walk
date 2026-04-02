@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Container } from "./container";
 import { MenuBurger } from "./menuBurger";
-import { NavLink } from "./navLink";
-import Image from "next/image";
+import { siteConfig } from "@/config/site";
 
 export function Header() {
     return (
@@ -16,15 +14,8 @@ export function Header() {
             </a>
             <Container>
                 <div className="flex h-16 items-center justify-between">
-                    <Link href="/" className="font-semibold tracking-tight">
-                        {/* <Image
-                            src="/logo-transparent.png"
-                            alt="Protec'audio Logo"
-                            width={120}
-                            height={20}
-                            className="h-auto w-auto max-w-[220px]"
-                            priority={false}
-                        /> */}
+                    <Link href="/" className="text-xl font-semibold tracking-tight">
+                        {siteConfig.name}
                     </Link>
 
                     <nav
@@ -37,34 +28,9 @@ export function Header() {
                         >
                             Accueil
                         </Link>
-
-                        <Link
-                            href="/test"
-                            className="text-muted-foreground hover:text-foreground text-base transition-colors"
-                        >
-                            Test
-                        </Link>
-
-                        <Link
-                            href="/contact"
-                            className="text-muted-foreground hover:text-foreground text-base transition-colors"
-                        >
-                            Contact
-                        </Link>
-                        <Link
-                            href="/example"
-                            className="text-muted-foreground hover:text-foreground text-base transition-colors"
-                        >
-                            Example
-                        </Link>
                     </nav>
 
                     <div className="flex items-center gap-2">
-                        {/* Desktop CTA */}
-                        <Button asChild className="hidden rounded-full rounded-tr-md font-light uppercase tracking-wider md:inline-flex">
-                            <Link href="/contact">Contact&nbsp;&nbsp;→</Link>
-                        </Button>
-
                         {/* Mobile burger */}
                         <MenuBurger />
                     </div>

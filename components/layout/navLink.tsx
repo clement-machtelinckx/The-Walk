@@ -26,11 +26,7 @@ export function NavLink({
         <Link
             href={href}
             onClick={onClick}
-            className={cn(
-                "relative",
-                className,
-                isActive && activeClassName,
-            )}
+            className={cn("relative", className, isActive && activeClassName)}
         >
             {children}
             {isActive && (
