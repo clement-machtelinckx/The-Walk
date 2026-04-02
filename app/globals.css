@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* shadcn/tailwind.css n'est généralement pas nécessaire */
-/* @import "shadcn/tailwind.css"; */
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -34,8 +31,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
@@ -43,109 +40,72 @@
 }
 
 /* =========================================================
-   Brand tokens (Light)
-   Base brand: vert foncé / vert clair
+   Application Tokens (The-Walk)
+   Focus: Legibility, high-density, mobile-first app feel.
 ========================================================= */
 
 :root {
-  /* Radius global proche de ton ancien DS */
-  --radius: 16px;
+  /* Slightly more modern radius */
+  --radius: 12px;
 
-  /* Surface */
-  --background: #f8fcf9;
-  --foreground: #0f1f16;
+  /* Neutrals */
+  --background: #fdfdfd;
+  --foreground: #1c1c1c;
 
   --card: #ffffff;
-  --card-foreground: #0f1f16;
+  --card-foreground: #1c1c1c;
 
   --popover: #ffffff;
-  --popover-foreground: #0f1f16;
+  --popover-foreground: #1c1c1c;
 
-  /* Brand */
-  --primary: #2f6f4f;
-
+  /* Primary: Professional Forest Green */
+  --primary: #1e4d3a;
   --primary-foreground: #ffffff;
 
-  --secondary: #eef7f1;
+  /* Secondary: Soft Mint */
+  --secondary: #f0f4f2;
+  --secondary-foreground: #1e4d3a;
 
-  --secondary-foreground: #0f1f16;
+  --muted: #f5f5f5;
+  --muted-foreground: #666666;
 
-  --muted: #f2f8f4;
-  --muted-foreground: #5d6f63;
+  --accent: #eef2f0;
+  --accent-foreground: #1e4d3a;
 
-  --accent: #e3f1e8;
-  --accent-foreground: #0f1f16;
+  --destructive: #df2c2c;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
 
-  --destructive: #dc2626;
-  --border: rgba(18, 52, 37, 0.12);
-  --input: rgba(18, 52, 37, 0.12);
-
-  /* Focus ring = brand */
   --ring: var(--primary);
-
-  /* =========================================================
-     Custom tokens hérités (bars / pills / soft bg)
-  ========================================================= */
-  --mk-bar-bg: rgba(47, 111, 79, 0.55);
-  --mk-bar-border: rgba(47, 111, 79, 0.20);
-  --mk-bar-fg: rgba(255, 255, 255, 0.95);
-  --mk-bar-icon-bg: rgba(255, 255, 255, 0.16);
-
-  --mk-pill-border: rgba(47, 111, 79, 0.55);
-  --mk-pill-hover-bg: rgba(47, 111, 79, 0.10);
-  --mk-pill-hover-border: rgba(47, 111, 79, 0.70);
-
-  --mk-soft-bg: rgba(47, 111, 79, 0.06);
-
-  /* Option : ombres comme avant */
-  --mk-shadow-sm: 0 8px 18px rgba(0, 0, 0, 0.10);
-  --mk-shadow-md: 0 12px 26px rgba(0, 0, 0, 0.14);
 }
 
-/* =========================================================
-   Dark mode
-   Primary: vert clair
-========================================================= */
-
 .dark {
-  --background: #0b140f;
-  --foreground: #f6fbf7;
+  --background: #0f1211;
+  --foreground: #eef2f0;
 
-  --card: #101b14;
-  --card-foreground: #f6fbf7;
+  --card: #161a18;
+  --card-foreground: #eef2f0;
 
-  --popover: #101b14;
-  --popover-foreground: #f6fbf7;
+  --popover: #161a18;
+  --popover-foreground: #eef2f0;
 
-  --primary: #74c69d;
-  /* primary dark */
-  --primary-foreground: #0b1c13;
+  --primary: #4ade80; /* Brighter for dark mode */
+  --primary-foreground: #061d11;
 
-  --secondary: rgba(255, 255, 255, 0.08);
-  --secondary-foreground: #f6fbf7;
+  --secondary: #1e2923;
+  --secondary-foreground: #4ade80;
 
-  --muted: rgba(255, 255, 255, 0.08);
-  --muted-foreground: rgba(246, 251, 247, 0.70);
+  --muted: #212824;
+  --muted-foreground: #94a3b8;
 
-  --accent: rgba(116, 198, 157, 0.14);
-  --accent-foreground: #f6fbf7;
+  --accent: #1e2923;
+  --accent-foreground: #4ade80;
 
-  --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(255, 255, 255, 0.14);
+  --destructive: #f87171;
+  --border: #212824;
+  --input: #212824;
 
-  --ring: #74c69d;
-
-  --mk-bar-bg: rgba(116, 198, 157, 0.45);
-  --mk-bar-border: rgba(167, 226, 196, 0.22);
-  --mk-bar-fg: rgba(255, 255, 255, 0.95);
-  --mk-bar-icon-bg: rgba(255, 255, 255, 0.14);
-
-  --mk-pill-border: rgba(116, 198, 157, 0.55);
-  --mk-pill-hover-bg: rgba(116, 198, 157, 0.14);
-  --mk-pill-hover-border: rgba(167, 226, 196, 0.55);
-
-  --mk-soft-bg: rgba(116, 198, 157, 0.10);
+  --ring: var(--primary);
 }
 
 @layer base {
@@ -154,13 +114,45 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  h1,
-  h2,
-  h3 {
-    font-family: var(--font-quicksand), sans-serif;
-    font-weight: 700;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+@layer components {
+  /* UI Patterns for the App Shell */
+  
+  .app-card {
+    @apply bg-card text-card-foreground rounded-lg border shadow-sm transition-shadow hover:shadow-md;
+  }
+
+  .app-section {
+    @apply space-y-4 py-4;
+  }
+
+  .app-list {
+    @apply divide-y border-y sm:border sm:rounded-lg bg-card;
+  }
+
+  .app-list-item {
+    @apply flex items-center justify-between p-4 hover:bg-muted/50 transition-colors;
+  }
+
+  /* Status Badges */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+
+  .badge-primary { @apply bg-primary text-primary-foreground; }
+  .badge-secondary { @apply bg-secondary text-secondary-foreground; }
+  .badge-outline { @apply text-foreground border border-border; }
+
+  /* Empty States & Placeholders */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 px-4 text-center border-2 border-dashed rounded-xl border-muted bg-muted/5;
   }
 }
