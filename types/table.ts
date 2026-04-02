@@ -1,17 +1,32 @@
 export type TableRole = "gm" | "player" | "observer";
+export type InvitationStatus = "pending" | "accepted" | "declined" | "expired";
 
 export interface Table {
     id: string;
     name: string;
-    description?: string;
-    gmId: string;
-    createdAt: string;
-    updatedAt: string;
+    description: string | null;
+    owner_id: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface TableMember {
-    tableId: string;
-    userId: string;
+    id: string;
+    table_id: string;
+    user_id: string;
     role: TableRole;
-    joinedAt: string;
+    joined_at: string;
+}
+
+export interface Invitation {
+    id: string;
+    table_id: string;
+    inviter_id: string;
+    email: string;
+    role: TableRole;
+    status: InvitationStatus;
+    token: string;
+    expires_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
