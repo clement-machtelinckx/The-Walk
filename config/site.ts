@@ -1,11 +1,8 @@
-export const siteName = "Site Skeleton";
-export const domain = "site-skeleton.com";
+export const siteName = "The-Walk";
+export const domain = "the-walk.fr";
 export const url = `https://${domain}`;
-export const description =
-    "Starter Next.js réutilisable pour créer rapidement des sites vitrines modernes avec Tailwind CSS, TypeScript et une architecture propre.";
+export const description = "Application métier pour la gestio   n de sessions de jeu de rôle (JDR).";
 export const locale = "fr_FR";
-export const logo = `${url}/logo-placeholder.svg`;
-export const ogImage = `${url}/og-image-placeholder.png`;
 
 export const siteConfig = {
     name: siteName,
@@ -13,8 +10,4 @@ export const siteConfig = {
     url,
     description,
     locale,
-    logo,
-    ogImage,
-    contactEmail: "contact@example.com",
-    contactPhone: "01 23 45 67 89",
 };

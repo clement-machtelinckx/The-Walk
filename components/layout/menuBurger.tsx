@@ -11,12 +11,7 @@ import LucideIcon from "@/components/ui/icon";
 
 type NavItem = { href: string; label: string };
 
-const NAV_ITEMS: NavItem[] = [
-    { href: "/", label: "Accueil" },
-    { href: "/garantie", label: "Garanties audioprothèses" },
-    { href: "/protection", label: "Protection de votre activité" },
-    { href: "/contact", label: "Contact" },
-];
+const NAV_ITEMS: NavItem[] = [{ href: "/", label: "Accueil" }];
 
 export function MenuBurger() {
     const [open, setOpen] = React.useState(false);
@@ -39,17 +34,6 @@ export function MenuBurger() {
                 <SheetHeader className="space-y-1">
                     <SheetTitle className="flex items-center justify-between">
                         <span>Menu</span>
-                        {/* Si tu veux le bouton fermer :
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setOpen(false)}
-              aria-label="Fermer le menu"
-            >
-              <LucideIcon icon={X} className="h-5 w-5" />
-            </Button>
-            */}
                     </SheetTitle>
                 </SheetHeader>
 
@@ -69,8 +53,6 @@ export function MenuBurger() {
                     </nav>
 
                     <Separator />
-
-                    <p className="text-muted-foreground text-xs">Réponse sous 48h ouvrées.</p>
                 </div>
             </SheetContent>
         </Sheet>
