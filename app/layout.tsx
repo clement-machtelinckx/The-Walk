@@ -40,9 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             suppressHydrationWarning
         >
             <body className="bg-background text-foreground flex min-h-dvh flex-col antialiased">
-                <div className="relative z-10 flex min-h-screen flex-col">
-                    {children}
-                </div>
+                <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
             </body>
         </html>
     );

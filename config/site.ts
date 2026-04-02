@@ -10,4 +10,7 @@ export const siteConfig = {
     url,
     description,
     locale,
+    links: {
+        crawl: "https://the-crawl.fr", // Placeholder pour l'accès global à The Crawl
+    },
 };

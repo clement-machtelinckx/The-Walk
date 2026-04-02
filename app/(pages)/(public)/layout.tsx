@@ -4,30 +4,28 @@ import { siteConfig } from "@/config/site";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex flex-col min-h-screen">
-            {/* Minimal Header for public pages */}
-            <header className="border-b py-6">
-                <Container className="flex items-center justify-between">
-                    <Link href="/" className="text-xl font-bold tracking-tight">
+        <div className="flex min-h-screen flex-col">
+            {/* Very minimal public header */}
+            <header className="py-8">
+                <Container className="flex justify-center">
+                    <Link
+                        href="/"
+                        className="font-heading text-primary text-3xl font-bold tracking-tighter"
+                    >
                         {siteConfig.name}
                     </Link>
-                    <nav className="text-sm font-medium">
-                        <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
-                            Connexion
-                        </Link>
-                    </nav>
                 </Container>
             </header>
 
-            <main id="main" className="flex-1">
+            <main id="main" className="flex flex-1 flex-col justify-center">
                 {children}
             </main>
 
-            {/* Minimal Footer for public pages */}
-            <footer className="border-t py-8 mt-auto">
+            {/* Minimal footer */}
+            <footer className="py-8">
                 <Container>
-                    <p className="text-sm text-center text-muted-foreground">
-                        © {new Date().getFullYear()} {siteConfig.name}
+                    <p className="text-muted-foreground text-center text-xs tracking-widest uppercase">
+                        Hub de session JDR
                     </p>
                 </Container>
             </footer>
