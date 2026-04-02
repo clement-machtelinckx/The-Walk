@@ -1,6 +1,4 @@
 import "./globals.css";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { Poppins, Quicksand } from "next/font/google";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
@@ -42,11 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             suppressHydrationWarning
         >
             <body className="bg-background text-foreground flex min-h-dvh flex-col antialiased">
-                <Header />
-                <main id="main" className="flex-1">
+                <div className="relative z-10 flex min-h-screen flex-col">
                     {children}
-                </main>
-                <Footer />
+                </div>
             </body>
         </html>
     );
