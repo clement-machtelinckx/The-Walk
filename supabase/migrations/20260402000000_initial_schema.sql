@@ -1,179 +1,231 @@
 -- V1 Initial Schema for The-Walk
 -- Convention:
 -- auth.users = Authentification technique Supabase
--- public.profiles = Entité métier applicative représentant l'utilisateur côté The-Walk (The-Walk core user)
+-- public.profiles = Entité métier applicative représentant l'utilisateur côté The-Walk
 
 -- ENUMS
-CREATE TYPE public.table_role AS ENUM ('gm', 'player', 'observer');
-CREATE TYPE public.session_status AS ENUM ('scheduled', 'active', 'completed', 'cancelled');
-CREATE TYPE public.response_status AS ENUM ('going', 'maybe', 'declined', 'pending');
-CREATE TYPE public.presence_status AS ENUM ('present', 'absent', 'late', 'excused');
-CREATE TYPE public.invitation_status AS ENUM ('pending', 'accepted', 'declined', 'expired');
+create type public.table_role as enum ('gm', 'player', 'observer');
+create type public.session_status as enum ('scheduled', 'active', 'completed', 'cancelled');
+create type public.response_status as enum ('going', 'maybe', 'declined', 'pending');
+create type public.presence_status as enum ('present', 'absent', 'late', 'excused');
+create type public.invitation_status as enum ('pending', 'accepted', 'declined', 'expired');
 
 -- TABLES
 
 -- 1. Profiles (linked to auth.users)
-CREATE TABLE public.profiles (
-    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    display_name TEXT,
-    avatar_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+create table public.profiles (
+                                 id uuid references auth.users on delete cascade primary key,
+                                 email text unique not null,
+                                 display_name text,
+                                 avatar_url text,
+                                 created_at timestamptz default now() not null,
+                                 updated_at timestamptz default now() not null
 );
 
-COMMENT ON TABLE public.profiles IS 'Entité métier principale pour l''utilisateur applicatif. Synchronisée avec auth.users via trigger.';
+comment on table public.profiles is 'Entité métier principale pour l''utilisateur applicatif. Synchronisée avec auth.users via trigger.';
 
 -- 2. Tables (RPG tables)
-CREATE TABLE public.tables (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT,
-    owner_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+create table public.tables (
+                               id uuid default gen_random_uuid() primary key,
+                               name text not null,
+                               description text,
+                               owner_id uuid references public.profiles(id) on delete restrict not null,
+                               created_at timestamptz default now() not null,
+                               updated_at timestamptz default now() not null
 );
 
 -- 3. Table Memberships
-CREATE TABLE public.table_memberships (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    table_id UUID REFERENCES public.tables(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-    role public.table_role DEFAULT 'player' NOT NULL,
-    joined_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    UNIQUE(table_id, user_id)
+create table public.table_memberships (
+                                          id uuid default gen_random_uuid() primary key,
+                                          table_id uuid references public.tables(id) on delete cascade not null,
+                                          user_id uuid references public.profiles(id) on delete cascade not null,
+                                          role public.table_role default 'player' not null,
+                                          joined_at timestamptz default now() not null,
+                                          unique(table_id, user_id)
 );
 
 -- 4. Sessions
-CREATE TABLE public.sessions (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    table_id UUID REFERENCES public.tables(id) ON DELETE CASCADE NOT NULL,
-    title TEXT NOT NULL,
-    description TEXT,
-    status public.session_status DEFAULT 'scheduled' NOT NULL,
-    scheduled_at TIMESTAMPTZ,
-    started_at TIMESTAMPTZ,
-    ended_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+create table public.sessions (
+                                 id uuid default gen_random_uuid() primary key,
+                                 table_id uuid references public.tables(id) on delete cascade not null,
+                                 title text not null,
+                                 description text,
+                                 status public.session_status default 'scheduled' not null,
+                                 scheduled_at timestamptz,
+                                 started_at timestamptz,
+                                 ended_at timestamptz,
+                                 created_at timestamptz default now() not null,
+                                 updated_at timestamptz default now() not null
 );
 
 -- 5. Session Responses
-CREATE TABLE public.session_responses (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    session_id UUID REFERENCES public.sessions(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-    status public.response_status DEFAULT 'pending' NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    UNIQUE(session_id, user_id)
+create table public.session_responses (
+                                          id uuid default gen_random_uuid() primary key,
+                                          session_id uuid references public.sessions(id) on delete cascade not null,
+                                          user_id uuid references public.profiles(id) on delete cascade not null,
+                                          status public.response_status default 'pending' not null,
+                                          updated_at timestamptz default now() not null,
+                                          unique(session_id, user_id)
 );
 
--- 6. Invitations (By email/token link)
-CREATE TABLE public.invitations (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    table_id UUID REFERENCES public.tables(id) ON DELETE CASCADE NOT NULL,
-    inviter_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL NOT NULL,
-    email TEXT NOT NULL,
-    role public.table_role DEFAULT 'player' NOT NULL,
-    status public.invitation_status DEFAULT 'pending' NOT NULL,
-    token TEXT UNIQUE NOT NULL,
-    expires_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+-- 6. Invitations
+create table public.invitations (
+                                    id uuid default gen_random_uuid() primary key,
+                                    table_id uuid references public.tables(id) on delete cascade not null,
+                                    inviter_id uuid references public.profiles(id) on delete set null,
+                                    email text not null,
+                                    role public.table_role default 'player' not null,
+                                    status public.invitation_status default 'pending' not null,
+                                    token text unique not null,
+                                    expires_at timestamptz,
+                                    created_at timestamptz default now() not null,
+                                    updated_at timestamptz default now() not null
 );
 
--- 7. Pre-session Messages (Preparation channel)
-CREATE TABLE public.pre_session_messages (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    session_id UUID REFERENCES public.sessions(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+-- 7. Pre-session Messages
+create table public.pre_session_messages (
+                                             id uuid default gen_random_uuid() primary key,
+                                             session_id uuid references public.sessions(id) on delete cascade not null,
+                                             user_id uuid references public.profiles(id) on delete set null,
+                                             content text not null,
+                                             created_at timestamptz default now() not null
 );
 
--- 8. Live Session Messages (Live game channel)
-CREATE TABLE public.live_session_messages (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    session_id UUID REFERENCES public.sessions(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+-- 8. Live Session Messages
+create table public.live_session_messages (
+                                              id uuid default gen_random_uuid() primary key,
+                                              session_id uuid references public.sessions(id) on delete cascade not null,
+                                              user_id uuid references public.profiles(id) on delete set null,
+                                              content text not null,
+                                              created_at timestamptz default now() not null
 );
 
--- 9. Session Presence (Real-time or check-in status)
-CREATE TABLE public.session_presence (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    session_id UUID REFERENCES public.sessions(id) ON DELETE CASCADE NOT NULL,
-    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-    status public.presence_status DEFAULT 'present' NOT NULL,
-    last_seen_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    UNIQUE(session_id, user_id)
+-- 9. Session Presence
+create table public.session_presence (
+                                         id uuid default gen_random_uuid() primary key,
+                                         session_id uuid references public.sessions(id) on delete cascade not null,
+                                         user_id uuid references public.profiles(id) on delete cascade not null,
+                                         status public.presence_status default 'present' not null,
+                                         last_seen_at timestamptz default now() not null,
+                                         unique(session_id, user_id)
 );
 
 -- 10. Personal Notes
-CREATE TABLE public.personal_notes (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
-    table_id UUID REFERENCES public.tables(id) ON DELETE CASCADE,
-    session_id UUID REFERENCES public.sessions(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+create table public.personal_notes (
+                                       id uuid default gen_random_uuid() primary key,
+                                       user_id uuid references public.profiles(id) on delete cascade not null,
+                                       table_id uuid references public.tables(id) on delete cascade,
+                                       session_id uuid references public.sessions(id) on delete cascade,
+                                       content text not null,
+                                       created_at timestamptz default now() not null,
+                                       updated_at timestamptz default now() not null
 );
 
 -- 11. Group Notes
-CREATE TABLE public.group_notes (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    table_id UUID REFERENCES public.tables(id) ON DELETE CASCADE NOT NULL,
-    session_id UUID REFERENCES public.sessions(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+create table public.group_notes (
+                                    id uuid default gen_random_uuid() primary key,
+                                    table_id uuid references public.tables(id) on delete cascade not null,
+                                    session_id uuid references public.sessions(id) on delete cascade,
+                                    content text not null,
+                                    created_at timestamptz default now() not null,
+                                    updated_at timestamptz default now() not null
 );
 
 -- INDEXES
-CREATE INDEX idx_profiles_email ON public.profiles(email);
-CREATE INDEX idx_tables_owner ON public.tables(owner_id);
-CREATE INDEX idx_memberships_table ON public.table_memberships(table_id);
-CREATE INDEX idx_memberships_user ON public.table_memberships(user_id);
-CREATE INDEX idx_sessions_table ON public.sessions(table_id);
-CREATE INDEX idx_sessions_status ON public.sessions(status);
-CREATE INDEX idx_responses_session ON public.session_responses(session_id);
-CREATE INDEX idx_invitations_table ON public.invitations(table_id);
-CREATE INDEX idx_invitations_token ON public.invitations(token);
-CREATE INDEX idx_pre_messages_session ON public.pre_session_messages(session_id);
-CREATE INDEX idx_live_messages_session ON public.live_session_messages(session_id);
-CREATE INDEX idx_presence_session ON public.session_presence(session_id);
-CREATE INDEX idx_personal_notes_user ON public.personal_notes(user_id);
-CREATE INDEX idx_group_notes_table ON public.group_notes(table_id);
+create index idx_profiles_email on public.profiles(email);
+create index idx_tables_owner on public.tables(owner_id);
+create index idx_memberships_table on public.table_memberships(table_id);
+create index idx_memberships_user on public.table_memberships(user_id);
+create index idx_sessions_table on public.sessions(table_id);
+create index idx_sessions_status on public.sessions(status);
+create index idx_responses_session on public.session_responses(session_id);
+create index idx_responses_user on public.session_responses(user_id);
+create index idx_invitations_table on public.invitations(table_id);
+create index idx_invitations_token on public.invitations(token);
+create index idx_invitations_email on public.invitations(email);
+create index idx_pre_messages_session on public.pre_session_messages(session_id);
+create index idx_live_messages_session on public.live_session_messages(session_id);
+create index idx_presence_session on public.session_presence(session_id);
+create index idx_presence_user on public.session_presence(user_id);
+create index idx_personal_notes_user on public.personal_notes(user_id);
+create index idx_personal_notes_session on public.personal_notes(session_id);
+create index idx_group_notes_table on public.group_notes(table_id);
+create index idx_group_notes_session on public.group_notes(session_id);
 
 -- TRIGGER for updated_at
-CREATE OR REPLACE FUNCTION public.handle_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+create or replace function public.handle_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+    new.updated_at = now();
+return new;
+end;
+$$;
 
-CREATE TRIGGER on_profiles_update BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
-CREATE TRIGGER on_tables_update BEFORE UPDATE ON public.tables FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
-CREATE TRIGGER on_sessions_update BEFORE UPDATE ON public.sessions FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
-CREATE TRIGGER on_responses_update BEFORE UPDATE ON public.session_responses FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
-CREATE TRIGGER on_invitations_update BEFORE UPDATE ON public.invitations FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
-CREATE TRIGGER on_personal_notes_update BEFORE UPDATE ON public.personal_notes FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
-CREATE TRIGGER on_group_notes_update BEFORE UPDATE ON public.group_notes FOR EACH ROW EXECUTE PROCEDURE public.handle_updated_at();
+create trigger on_profiles_update
+    before update on public.profiles
+    for each row
+    execute procedure public.handle_updated_at();
+
+create trigger on_tables_update
+    before update on public.tables
+    for each row
+    execute procedure public.handle_updated_at();
+
+create trigger on_sessions_update
+    before update on public.sessions
+    for each row
+    execute procedure public.handle_updated_at();
+
+create trigger on_responses_update
+    before update on public.session_responses
+    for each row
+    execute procedure public.handle_updated_at();
+
+create trigger on_invitations_update
+    before update on public.invitations
+    for each row
+    execute procedure public.handle_updated_at();
+
+create trigger on_personal_notes_update
+    before update on public.personal_notes
+    for each row
+    execute procedure public.handle_updated_at();
+
+create trigger on_group_notes_update
+    before update on public.group_notes
+    for each row
+    execute procedure public.handle_updated_at();
 
 -- FUNCTION for profile creation on user signup
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO public.profiles (id, email, display_name, avatar_url)
-    VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'display_name', NEW.raw_user_meta_data->>'avatar_url');
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+insert into public.profiles (
+    id,
+    email,
+    display_name,
+    avatar_url
+)
+values (
+           new.id,
+           new.email,
+           coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)),
+           new.raw_user_meta_data->>'avatar_url'
+       );
 
--- Trigger sur auth.users (attention, nécessite les bons droits lors de l'exécution initiale)
--- DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
--- CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+
+create trigger on_auth_user_created
+    after insert on auth.users
+    for each row
+    execute procedure public.handle_new_user();
