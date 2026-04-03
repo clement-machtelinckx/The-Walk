@@ -1,0 +1,110 @@
+import { getCurrentUser } from "@/lib/auth/server";
+import {
+    InvitationService,
+    InvitationWithTable,
+} from "@/lib/services/invitations/invitation-service";
+import { PageShell } from "@/components/layout/app-shell";
+import { EmptyState } from "@/components/special/empty-state";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Mail, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { InvitationAcceptButton } from "@/components/special/invitation-accept-button";
+import { RoleBadge } from "@/components/special/role-badge";
+
+export const metadata = {
+    title: "Invitation",
+    description: "Rejoignez une table sur The-Walk.",
+};
+
+export default async function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
+    const { token } = await params;
+    const user = await getCurrentUser();
+
+    let invitation: InvitationWithTable | null = null;
+    let errorMessage: string | null = null;
+
+    try {
+        invitation = await InvitationService.getByToken(token);
+    } catch (error: unknown) {
+        errorMessage =
+            error instanceof Error
+                ? error.message
+                : "Cette invitation n'existe pas, a expiré ou a déjà été utilisée.";
+    }
+
+    if (errorMessage || !invitation) {
+        return (
+            <PageShell className="mx-auto max-w-md pt-12">
+                <EmptyState
+                    title="Invitation invalide"
+                    description={errorMessage || "Cette invitation est introuvable."}
+                    icon={AlertCircle}
+                >
+                    <Button asChild variant="outline" className="mt-4">
+                        <Link href="/">Retour à l&apos;accueil</Link>
+                    </Button>
+                </EmptyState>
+            </PageShell>
+        );
+    }
+
+    return (
+        <PageShell className="mx-auto max-w-md pt-12">
+            <Card className="border-primary/20 overflow-hidden shadow-xl">
+                <div className="bg-primary/5 border-primary/10 flex flex-col items-center border-b p-8">
+                    <div className="bg-primary/10 text-primary mb-4 rounded-full p-4">
+                        <Mail size={48} />
+                    </div>
+                    <h1 className="text-center text-2xl font-bold">Invitation à rejoindre</h1>
+                    <p className="text-primary mt-2 text-center text-3xl font-bold italic">
+                        {invitation.tables.name}
+                    </p>
+                </div>
+
+                <CardContent className="space-y-8 p-8">
+                    <div className="space-y-4 text-center">
+                        <p className="text-muted-foreground">
+                            Vous avez été invité à rejoindre cette table avec le rôle :
+                        </p>
+                        <div className="flex justify-center">
+                            <RoleBadge role={invitation.role} />
+                        </div>
+                    </div>
+
+                    {user ? (
+                        <div className="space-y-6 text-center">
+                            <div className="bg-muted/50 space-y-1 rounded-lg p-4 text-sm">
+                                <p className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
+                                    Connecté en tant que
+                                </p>
+                                <p className="font-bold">{user.email}</p>
+                            </div>
+                            <InvitationAcceptButton token={token} />
+                        </div>
+                    ) : (
+                        <div className="space-y-6 text-center">
+                            <div className="bg-muted/50 rounded-lg border border-dashed p-4 text-sm">
+                                <p className="text-muted-foreground">
+                                    Vous devez être connecté pour accepter cette invitation.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                                <Button asChild size="lg" className="w-full">
+                                    <Link href={`/login?next=/invitation/${token}`}>
+                                        Se connecter
+                                    </Link>
+                                </Button>
+                                <Button asChild variant="outline" size="lg" className="w-full">
+                                    <Link href={`/register?next=/invitation/${token}`}>
+                                        Créer un compte
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </PageShell>
+    );
+}

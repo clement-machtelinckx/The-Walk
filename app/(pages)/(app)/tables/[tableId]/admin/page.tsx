@@ -1,22 +1,36 @@
-import { requireAuth } from "@/lib/auth/server";
+import { requireAuth, requireTableRole } from "@/lib/auth/server";
+import { PageShell } from "@/components/layout/app-shell";
+import { InvitationManager } from "@/components/admin/invitation-manager";
+import { TableRepository } from "@/lib/repositories/table-repository";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
     await requireAuth();
     const { tableId } = await params;
 
+    // Ensure user is GM
+    await requireTableRole(tableId, "gm");
+
+    const table = await TableRepository.getById(tableId);
+
     return (
-        <section className="space-y-6 py-8">
-            <h1 className="text-primary/80 text-3xl font-bold tracking-tight italic">
-                Administration de la table: {tableId}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-                Gestion des joueurs, des paramètres de la table et des sessions passées.
-            </p>
-            <div className="bg-muted/50 rounded-xl border border-dashed p-12 text-center">
-                <p className="text-primary/60 text-sm font-medium tracking-widest uppercase">
-                    Outils de gestion (Master de la table)
-                </p>
+        <PageShell
+            title={`Administration : ${table.name}`}
+            description="Gérez les joueurs, les invitations et les paramètres de votre table."
+            actions={
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={`/tables/${tableId}`}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Retour à la table
+                    </Link>
+                </Button>
+            }
+        >
+            <div className="py-4">
+                <InvitationManager tableId={tableId} />
             </div>
-        </section>
+        </PageShell>
     );
 }

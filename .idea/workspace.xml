@@ -5,14 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6e736b8b-8bc2-44e1-9f0d-9444a1767adc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/mon-compte/_components/profile-content.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/mon-compte/_components/profile-content.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/tables/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/tables/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/layout/app-shell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/layout/app-shell.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/repositories/session-repository.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/repositories/session-repository.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/repositories/invitation-repository.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/repositories/invitation-repository.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +34,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "8-gérer-les-tables-et-memberships-de-base",
+    "git-widget-placeholder": "9-implémenter-la-gestion-des-invitations-de-table",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "last_opened_file_path": "//wsl.localhost/ubuntu-22.04/home/yazii/project/the-walk",
@@ -91,7 +85,7 @@
       <updated>1775136061885</updated>
       <workItem from="1775136063164" duration="11628000" />
       <workItem from="1775205721405" duration="4659000" />
-      <workItem from="1775219371849" duration="8267000" />
+      <workItem from="1775219371849" duration="9101000" />
     </task>
     <servers />
   </component>

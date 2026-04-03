@@ -3,15 +3,14 @@ import { handleDbError } from "./_shared/base";
 import { NotFoundError } from "@/lib/errors";
 import { Invitation } from "@/types/table";
 import { CreateInvitationInput } from "@/lib/validators/invitation";
+import { randomUUID } from "crypto";
 
 export const InvitationRepository = {
     async create(input: CreateInvitationInput, inviterId: string): Promise<Invitation> {
         const supabase = await getServerClient();
 
-        // Generate a random token if not provided
-        const token =
-            Math.random().toString(36).substring(2, 15) +
-            Math.random().toString(36).substring(2, 15);
+        // Generate a secure random token
+        const token = randomUUID();
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry by default
 
@@ -58,7 +57,8 @@ export const InvitationRepository = {
         const { data, error } = await supabase
             .from("invitations")
             .select("*")
-            .eq("table_id", tableId);
+            .eq("table_id", tableId)
+            .order("created_at", { ascending: false });
 
         handleDbError(error, "InvitationRepository.listByTable");
         return data || [];
