@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/layout/app-shell";
+import { requireAuth } from "@/lib/auth/server";
 
 export const metadata: Metadata = {
     title: "Mes Tables",
 };
 
-export default function TablesPage() {
+export default async function TablesPage() {
+    // Server-side guard
+    await requireAuth();
+
     return (
         <PageShell
             title="Mes Tables"

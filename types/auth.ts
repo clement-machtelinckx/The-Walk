@@ -1,15 +1,35 @@
-export type UserRole = "admin" | "user"; // App-wide roles if needed later
+import { User as SupabaseUser } from "@supabase/supabase-js";
+import { Profile } from "@/lib/repositories/profile-repository";
 
-export interface Profile {
+/**
+ * AppUser represents the combined authentication user (Supabase)
+ * and the business profile (public.profiles).
+ */
+export interface AppUser {
     id: string;
     email: string;
-    display_name: string | null;
-    avatar_url: string | null;
-    created_at: string;
-    updated_at: string;
+    profile: Profile | null;
+    supabaseUser: SupabaseUser;
 }
 
+/**
+ * AuthStatus represents the current state of authentication in the client.
+ */
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+
+/**
+ * AuthSession represents the session state exposed to the application.
+ */
 export interface AuthSession {
-    user: Profile | null;
-    expires: string;
+    user: AppUser | null;
+    status: AuthStatus;
+}
+
+/**
+ * Login response from /api/auth/login
+ */
+export interface LoginResponse {
+    success: boolean;
+    user: AppUser | null;
+    error?: string;
 }

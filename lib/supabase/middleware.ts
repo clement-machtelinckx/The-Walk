@@ -6,8 +6,6 @@ export async function updateSession(request: NextRequest) {
         request,
     });
 
-    // With Fluid compute, don't put this client in a global environment
-    // variable. Always create a new one on each request.
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -29,38 +27,36 @@ export async function updateSession(request: NextRequest) {
         },
     );
 
-    // Do not run code between createServerClient and
-    // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
+    // IMPORTANT: Avoid writing any logic between createServerClient and
+    // supabase.auth.getUser(). A simple mistake could make it very hard to debug
     // issues with users being randomly logged out.
 
-    // IMPORTANT: If you remove getClaims() and you use server-side rendering
-    // with the Supabase client, your users may be randomly logged out.
-    const { data } = await supabase.auth.getClaims();
-    const user = data?.claims;
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith("/login") &&
-        !request.nextUrl.pathname.startsWith("/auth")
-    ) {
+    const isLoginPage = request.nextUrl.pathname === "/login";
+    const isPublicPage = request.nextUrl.pathname === "/" || request.nextUrl.pathname.startsWith("/auth");
+    
+    // Check if the route is within the (app) group or other protected areas
+    // Note: We can't directly check the (app) group name in the URL, but we can check the path
+    const isProtectedRoute = 
+        request.nextUrl.pathname.startsWith("/tables") || 
+        request.nextUrl.pathname.startsWith("/mon-compte");
+
+    if (!user && isProtectedRoute) {
         // no user, potentially respond by redirecting the user to the login page
         const url = request.nextUrl.clone();
-        url.pathname = "/auth/login";
+        url.pathname = "/login";
         return NextResponse.redirect(url);
     }
 
-    // IMPORTANT: You *must* return the supabaseResponse object as it is.
-    // If you're creating a new response object with NextResponse.next() make sure to:
-    // 1. Pass the request in it, like so:
-    //    const myNewResponse = NextResponse.next({ request })
-    // 2. Copy over the cookies, like so:
-    //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-    // 3. Change the myNewResponse object to fit your needs, but avoid changing
-    //    the cookies!
-    // 4. Finally:
-    //    return myNewResponse
-    // If this is not done, you may be causing the browser and server to go out
-    // of sync and terminate the user's session prematurely!
+    if (user && isLoginPage) {
+        // User is logged in, but on the login page -> redirect to /tables
+        const url = request.nextUrl.clone();
+        url.pathname = "/tables";
+        return NextResponse.redirect(url);
+    }
 
     return supabaseResponse;
 }
