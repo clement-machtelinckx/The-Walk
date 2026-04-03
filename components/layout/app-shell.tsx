@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { Container } from "./container";
 
 interface PageShellProps {
-    title: string;
+    title?: string;
     description?: string;
     children: React.ReactNode;
     actions?: React.ReactNode;
@@ -12,15 +12,23 @@ interface PageShellProps {
 export function PageShell({ title, description, children, actions, className }: PageShellProps) {
     return (
         <div className={cn("flex flex-col gap-6", className)}>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-1">
-                    <h1 className="text-foreground text-3xl font-bold tracking-tight">{title}</h1>
-                    {description && (
-                        <p className="text-muted-foreground max-w-2xl text-base">{description}</p>
-                    )}
+            {(title || description || actions) && (
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="space-y-1">
+                        {title && (
+                            <h1 className="text-foreground text-3xl font-bold tracking-tight">
+                                {title}
+                            </h1>
+                        )}
+                        {description && (
+                            <p className="text-muted-foreground max-w-2xl text-base">
+                                {description}
+                            </p>
+                        )}
+                    </div>
+                    {actions && <div className="flex items-center gap-3">{actions}</div>}
                 </div>
-                {actions && <div className="flex items-center gap-3">{actions}</div>}
-            </div>
+            )}
 
             <div className="app-section">{children}</div>
         </div>
