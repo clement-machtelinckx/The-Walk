@@ -8,6 +8,7 @@ import { RoleBadge } from "@/components/special/role-badge";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useTableStore } from "@/store/table-store";
 
 interface MemberListProps {
     tableId: string;
@@ -18,28 +19,21 @@ interface MemberListProps {
 export function MemberList({ tableId, members, myRole }: MemberListProps) {
     const { user } = useAuth();
     const router = useRouter();
+    const { removeMember } = useTableStore();
     const [removingId, setRemovingId] = useState<string | null>(null);
 
     const handleRemoveMember = async (memberId: string) => {
         if (!confirm("Êtes-vous sûr de vouloir retirer ce membre ?")) return;
 
         setRemovingId(memberId);
-        try {
-            const res = await fetch(`/api/tables/${tableId}/members/${memberId}/remove`, {
-                method: "POST",
-            });
+        const result = await removeMember(tableId, memberId);
 
-            if (res.ok) {
-                router.refresh();
-            } else {
-                const data = await res.json();
-                alert(data.error || "Une erreur est survenue.");
-            }
-        } catch (err) {
-            alert("Erreur réseau.");
-        } finally {
-            setRemovingId(null);
+        if (result.success) {
+            router.refresh();
+        } else {
+            alert(result.error || "Une erreur est survenue.");
         }
+        setRemovingId(null);
     };
 
     return (
