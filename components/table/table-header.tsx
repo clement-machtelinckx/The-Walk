@@ -7,6 +7,7 @@ import { Settings, Calendar, Play, LogOut, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { RoleBadge } from "@/components/special/role-badge";
 import { useRouter } from "next/navigation";
+import { useTableStore } from "@/store/table-store";
 
 interface TableHeaderProps {
     tableId: string;
@@ -17,6 +18,7 @@ interface TableHeaderProps {
 
 export function TableHeader({ tableId, name, description, myRole }: TableHeaderProps) {
     const router = useRouter();
+    const { leaveTable } = useTableStore();
     const [isLeaving, setIsLeaving] = useState(false);
 
     const handleLeaveTable = async () => {
@@ -28,22 +30,13 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
         if (!confirm(confirmMessage)) return;
 
         setIsLeaving(true);
-        try {
-            const res = await fetch(`/api/tables/${tableId}/leave`, {
-                method: "POST",
-            });
+        const result = await leaveTable(tableId);
 
-            const data = await res.json();
-
-            if (res.ok) {
-                router.push("/tables");
-                router.refresh();
-            } else {
-                alert(data.error || "Une erreur est survenue.");
-            }
-        } catch (err) {
-            alert("Erreur réseau.");
-        } finally {
+        if (result.success) {
+            router.push("/tables");
+            router.refresh();
+        } else {
+            alert(result.error || "Une erreur est survenue.");
             setIsLeaving(false);
         }
     };

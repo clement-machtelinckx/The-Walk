@@ -20,10 +20,12 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTableStore } from "@/store/table-store";
 
 export function CreateTableForm() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
+    const { createTable } = useTableStore();
 
     const form = useForm<CreateTableInput>({
         resolver: zodResolver(createTableSchema),
@@ -36,25 +38,14 @@ export function CreateTableForm() {
     const onSubmit = async (data: CreateTableInput) => {
         setError(null);
 
-        try {
-            const response = await fetch("/api/tables", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
+        const result = await createTable(data);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                setError(result.error || "Une erreur est survenue lors de la création.");
-                return;
-            }
-
+        if (result.success && result.table) {
             // Redirect to the newly created table
             router.push(`/tables/${result.table.id}`);
             router.refresh();
-        } catch (err) {
-            setError("Erreur réseau ou serveur. Veuillez réessayer.");
+        } else {
+            setError(result.error || "Une erreur est survenue lors de la création.");
         }
     };
 

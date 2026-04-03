@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Session } from "@/types/session";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
 import { NextSessionEmptyState } from "./next-session-empty-state";
 import { Loader2 } from "lucide-react";
+import { useSessionStore } from "@/store/session-store";
 
 interface NextSessionContainerProps {
     tableId: string;
@@ -13,38 +14,23 @@ interface NextSessionContainerProps {
 }
 
 export function NextSessionContainer({ tableId, myRole }: NextSessionContainerProps) {
-    const [session, setSession] = useState<Session | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { nextSessions, isLoading, fetchNextSession } = useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const canManage = myRole === "gm";
 
-    const fetchNextSession = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            const res = await fetch(`/api/tables/${tableId}/sessions/next`);
-            const data = await res.json();
-            if (res.ok) {
-                setSession(data.session);
-            }
-        } catch (err) {
-            console.error("Failed to fetch next session");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [tableId]);
+    const session = nextSessions[tableId];
 
     useEffect(() => {
-        fetchNextSession();
-    }, [fetchNextSession]);
+        fetchNextSession(tableId);
+    }, [tableId, fetchNextSession]);
 
     const handleSuccess = (newSession: Session) => {
-        setSession(newSession);
         setIsEditing(false);
         setIsCreating(false);
     };
 
-    if (isLoading) {
+    if (isLoading && session === undefined) {
         return (
             <div className="flex justify-center py-20">
                 <Loader2 className="text-primary/50 h-8 w-8 animate-spin" />
@@ -52,7 +38,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         );
     }
 
-    if (isCreating || (canManage && !session && isEditing)) {
+    if (isCreating) {
         return (
             <div className="mx-auto max-w-2xl py-4">
                 <h2 className="text-primary/80 mb-6 text-2xl font-bold italic">

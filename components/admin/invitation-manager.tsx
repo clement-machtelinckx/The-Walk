@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Invitation, TableRole } from "@/types/table";
+import { useState, useEffect } from "react";
+import { TableRole } from "@/types/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,64 +16,45 @@ import { Loader2, UserPlus, Copy, Check, Clock } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useInvitationStore } from "@/store/invitation-store";
 
 interface InvitationManagerProps {
     tableId: string;
 }
 
 export function InvitationManager({ tableId }: InvitationManagerProps) {
-    const [invitations, setInvitations] = useState<Invitation[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { 
+        tableInvitations, 
+        isLoading, 
+        fetchTableInvitations, 
+        createInvitation 
+    } = useInvitationStore();
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [email, setEmail] = useState("");
     const [role, setRole] = useState<TableRole>("player");
     const [copiedToken, setCopyToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchInvitations = useCallback(async () => {
-        try {
-            const res = await fetch(`/api/tables/${tableId}/invitations`);
-            const data = await res.json();
-            if (res.ok) {
-                setInvitations(data.invitations);
-            }
-        } catch (err) {
-            console.error("Failed to fetch invitations");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [tableId]);
+    const invitations = tableInvitations[tableId] || [];
 
     useEffect(() => {
-        fetchInvitations();
-    }, [fetchInvitations]);
+        fetchTableInvitations(tableId);
+    }, [tableId, fetchTableInvitations]);
 
     const handleCreateInvitation = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
 
-        try {
-            const res = await fetch(`/api/tables/${tableId}/invitations`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, role }),
-            });
+        const result = await createInvitation(tableId, { email, role });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                setError(data.error || "Erreur lors de la création de l'invitation.");
-                return;
-            }
-
+        if (result.success) {
             setEmail("");
-            setInvitations([data.invitation, ...invitations]);
-        } catch (err) {
-            setError("Erreur réseau.");
-        } finally {
-            setIsSubmitting(false);
+        } else {
+            setError(result.error || "Erreur lors de la création de l'invitation.");
         }
+        setIsSubmitting(false);
     };
 
     const copyToClipboard = (token: string) => {
@@ -143,7 +124,7 @@ export function InvitationManager({ tableId }: InvitationManagerProps) {
                     <CardTitle className="text-lg">Invitations envoyées</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {isLoading ? (
+                    {isLoading && invitations.length === 0 ? (
                         <div className="flex justify-center py-8">
                             <Loader2 className="text-muted-foreground animate-spin" />
                         </div>

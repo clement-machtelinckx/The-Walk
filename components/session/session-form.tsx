@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Session } from "@/types/session";
+import { useSessionStore } from "@/store/session-store";
 
 interface SessionFormProps {
     tableId: string;
@@ -28,6 +29,7 @@ interface SessionFormProps {
 
 export function SessionForm({ tableId, initialData, onSuccess, onCancel }: SessionFormProps) {
     const [error, setError] = useState<string | null>(null);
+    const { createSession, updateSession } = useSessionStore();
     const isEditing = !!initialData;
 
     const form = useForm<CreateSessionInput>({
@@ -51,27 +53,14 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
             scheduled_at: data.scheduled_at ? new Date(data.scheduled_at).toISOString() : null,
         };
 
-        try {
-            const url = isEditing
-                ? `/api/sessions/${initialData.id}`
-                : `/api/tables/${tableId}/sessions`;
+        const result = isEditing
+            ? await updateSession(initialData.id, payload)
+            : await createSession(tableId, payload);
 
-            const response = await fetch(url, {
-                method: isEditing ? "PATCH" : "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                setError(result.error || "Une erreur est survenue.");
-                return;
-            }
-
+        if (result.success && result.session) {
             onSuccess(result.session);
-        } catch (err) {
-            setError("Erreur réseau ou serveur.");
+        } else {
+            setError(result.error || "Une erreur est survenue.");
         }
     };
 

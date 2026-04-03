@@ -1,37 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { InvitationWithTable } from "@/lib/services/invitations/invitation-service";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail, ArrowRight } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
 import Link from "next/link";
+import { useInvitationStore } from "@/store/invitation-store";
 
 export function PendingInvitationsList() {
-    const [invitations, setInvitations] = useState<InvitationWithTable[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    const fetchInvitations = async () => {
-        try {
-            const res = await fetch("/api/invitations");
-            const data = await res.json();
-            if (res.ok) {
-                setInvitations(data.invitations);
-            } else {
-                setError(data.error || "Erreur lors de la récupération des invitations");
-            }
-        } catch (err) {
-            setError("Erreur réseau");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    const { pendingInvitations, isLoading, error, fetchPendingInvitations } = useInvitationStore();
 
     useEffect(() => {
-        fetchInvitations();
-    }, []);
+        fetchPendingInvitations();
+    }, [fetchPendingInvitations]);
 
     if (isLoading) {
         return (
@@ -42,12 +24,10 @@ export function PendingInvitationsList() {
     }
 
     if (error) {
-        return (
-            <div className="bg-destructive/10 text-destructive rounded-lg p-4 text-sm">{error}</div>
-        );
+        return <div className="bg-destructive/10 text-destructive rounded-lg p-4 text-sm">{error}</div>;
     }
 
-    if (invitations.length === 0) {
+    if (pendingInvitations.length === 0) {
         return null; // Don't show anything if no invitations
     }
 
@@ -56,13 +36,13 @@ export function PendingInvitationsList() {
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                     <Mail size={18} className="text-primary" />
-                    Invitations en attente ({invitations.length})
+                    Invitations en attente ({pendingInvitations.length})
                 </CardTitle>
                 <CardDescription>On vous a invité à rejoindre ces tables de jeu.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
-                    {invitations.map((invitation) => (
+                    {pendingInvitations.map((invitation) => (
                         <div
                             key={invitation.id}
                             className="bg-card flex flex-col justify-between gap-4 rounded-lg border p-4 shadow-sm sm:flex-row sm:items-center"
