@@ -35,8 +35,8 @@ export interface PaginatedResult<T> {
 /**
  * Apply pagination to a Supabase query.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyPagination(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     query: any,
     params: PaginationParams,
     defaultSort: string = "created_at",

@@ -2,6 +2,7 @@ import "./globals.css";
 import { Poppins, Quicksand } from "next/font/google";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -40,7 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             suppressHydrationWarning
         >
             <body className="bg-background text-foreground flex min-h-dvh flex-col antialiased">
-                <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
+                <AuthProvider>
+                    <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
+                </AuthProvider>
             </body>
         </html>
     );
