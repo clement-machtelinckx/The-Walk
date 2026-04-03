@@ -1,8 +1,11 @@
+import { requireAuth } from "@/lib/auth/server";
+
 export default async function TableLiveSessionPage({
     params,
 }: {
     params: Promise<{ tableId: string; sessionId: string }>;
 }) {
+    await requireAuth();
     const { tableId, sessionId } = await params;
 
     return (

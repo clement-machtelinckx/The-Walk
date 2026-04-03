@@ -1,113 +1,52 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { AppUser, AuthSession, AuthStatus } from "@/types/auth";
+import React, { createContext, useContext, useEffect } from "react";
+import { AuthSession } from "@/types/auth";
 import { useRouter } from "next/navigation";
+import { useAuthStore, AuthState } from "@/store/auth-store";
 
 interface AuthContextType extends AuthSession {
-    login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
-    register: (
-        email: string,
-        pass: string,
-        confirmPass: string,
-        displayName?: string,
-    ) => Promise<{ success: boolean; error?: string; message?: string }>;
+    login: AuthState["login"];
+    register: AuthState["register"];
     logout: () => Promise<void>;
     refresh: () => Promise<void>;
+    changePassword: AuthState["changePassword"];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * AuthProvider acts as a bridge between the initial server state/refresh
+ * and the Zustand store. It keeps the same API as before for compatibility.
+ */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<AppUser | null>(null);
-    const [status, setStatus] = useState<AuthStatus>("loading");
+    const store = useAuthStore();
     const router = useRouter();
 
-    const fetchMe = useCallback(async () => {
-        try {
-            const res = await fetch("/api/me");
-            const data = await res.json();
-            setUser(data.user);
-            setStatus(data.status);
-        } catch (error) {
-            console.error("Failed to fetch auth state:", error);
-            setStatus("unauthenticated");
-        }
+    useEffect(() => {
+        // Initial hydration
+        store.refreshUser();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        fetchMe();
-    }, [fetchMe]);
-
-    const login = async (email: string, pass: string) => {
-        try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                body: JSON.stringify({ email, password: pass }),
-                headers: { "Content-Type": "application/json" },
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                setUser(data.user);
-                setStatus("authenticated");
-                return { success: true };
-            } else {
-                return { success: false, error: data.error };
-            }
-        } catch (error) {
-            return { success: false, error: "Erreur réseau" };
-        }
-    };
-
-    const register = async (
-        email: string,
-        pass: string,
-        confirmPass: string,
-        displayName?: string,
-    ) => {
-        try {
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                body: JSON.stringify({
-                    email,
-                    password: pass,
-                    confirmPassword: confirmPass,
-                    displayName,
-                }),
-                headers: { "Content-Type": "application/json" },
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                if (data.user) {
-                    setUser(data.user);
-                    setStatus("authenticated");
-                }
-                return { success: true, message: data.message };
-            } else {
-                return { success: false, error: data.error };
-            }
-        } catch (error) {
-            return { success: false, error: "Erreur réseau" };
-        }
-    };
-
     const logout = async () => {
-        try {
-            await fetch("/api/auth/logout", { method: "POST" });
-            setUser(null);
-            setStatus("unauthenticated");
-            router.push("/login");
-            router.refresh();
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
+        await store.logout();
+        router.push("/login");
+        router.refresh();
     };
 
     return (
-        <AuthContext.Provider value={{ user, status, login, register, logout, refresh: fetchMe }}>
+        <AuthContext.Provider
+            value={{
+                user: store.user,
+                status: store.status,
+                login: store.login,
+                register: store.register,
+                logout,
+                refresh: store.refreshUser,
+                changePassword: store.changePassword,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

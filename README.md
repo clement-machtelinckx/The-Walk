@@ -24,6 +24,30 @@ Le projet utilise **Supabase Auth** pour la gestion des sessions.
 - `components/auth/auth-provider.tsx` : État auth côté client (React Context).
 - `app/api/auth/` : Route handlers pour le bridge login/register/logout.
 
+## Debug Auth & Local Dev
+
+### Concepts Auth
+- **auth.users** : Comptes d'authentification gérés par Supabase (Email, Password, Metadata).
+- **public.profiles** : Profils applicatifs The-Walk liés à `auth.users` par leur `id`.
+- Un trigger SQL (`on_auth_user_created`) crée automatiquement un profil dans `public.profiles` lors de chaque inscription.
+
+### Environnement local vs Cloud
+- L'application utilise les variables `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- Pour pointer sur le local : assurez-vous que `npx supabase start` est lancé.
+- Pour récupérer les variables locales : `npx supabase status -o env`.
+
+### Vérification après Inscription (Register)
+Si un utilisateur ne peut pas se connecter après inscription, vérifiez dans l'interface Supabase (ou via SQL) :
+1. Que l'utilisateur existe dans la table `auth.users`.
+2. Qu'une ligne correspondante (même ID) existe dans `public.profiles`.
+3. Si le profil manque, vérifiez les logs de fonctions/triggers dans Supabase.
+
+### Commandes utiles (Supabase CLI)
+```bash
+npx supabase db reset      # Réinitialise la DB locale et applique les migrations (V1)
+npx supabase status        # Affiche l'état des services et les URLs
+```
+
 ## Installation
 
 1. Cloner le repo
