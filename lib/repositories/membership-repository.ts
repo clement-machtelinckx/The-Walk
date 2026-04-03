@@ -48,4 +48,16 @@ export const MembershipRepository = {
 
         handleDbError(error, "MembershipRepository.remove");
     },
+
+    async countGmsByTable(tableId: string): Promise<number> {
+        const supabase = await getServerClient();
+        const { count, error } = await supabase
+            .from("table_memberships")
+            .select("*", { count: "exact", head: true })
+            .eq("table_id", tableId)
+            .eq("role", "gm");
+
+        handleDbError(error, "MembershipRepository.countGmsByTable");
+        return count || 0;
+    },
 };
