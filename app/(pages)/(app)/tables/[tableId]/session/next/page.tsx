@@ -1,26 +1,37 @@
 import { requireAuth } from "@/lib/auth/server";
+import { MembershipService } from "@/lib/services/memberships/membership-service";
+import { TableRepository } from "@/lib/repositories/table-repository";
+import { PageShell } from "@/components/layout/app-shell";
+import { NextSessionContainer } from "@/components/session/next-session-container";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-export default async function TableNextSessionPage({
+export default async function NextSessionPage({
     params,
 }: {
     params: Promise<{ tableId: string }>;
 }) {
-    await requireAuth();
+    const user = await requireAuth();
     const { tableId } = await params;
 
+    const membership = await MembershipService.requireMembership(user.id, tableId);
+    const table = await TableRepository.getById(tableId);
+
     return (
-        <section className="space-y-6 py-8">
-            <h1 className="text-primary/80 text-3xl font-bold tracking-tight italic">
-                Prochaine Session - Table: {tableId}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-                Organisation de la prochaine rencontre, date, lieu et notes de préparation.
-            </p>
-            <div className="bg-muted/50 rounded-xl border border-dashed p-12 text-center">
-                <p className="text-primary/60 text-sm font-medium tracking-widest uppercase">
-                    Sondages / Préparation
-                </p>
-            </div>
-        </section>
+        <PageShell
+            title={`Prochaine Session : ${table.name}`}
+            description="Informations et planification de votre prochaine rencontre."
+            actions={
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={`/tables/${tableId}`}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Retour à la table
+                    </Link>
+                </Button>
+            }
+        >
+            <NextSessionContainer tableId={tableId} myRole={membership.role} />
+        </PageShell>
     );
 }

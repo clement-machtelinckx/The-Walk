@@ -8,6 +8,7 @@ export const createSessionSchema = z.object({
     title: z.string().min(1, "Le titre est requis"),
     description: z.string().nullable().optional(),
     scheduled_at: z.string().datetime().nullable().optional(),
+    status: sessionStatusSchema.default("scheduled").optional(),
 });
 
 export const updateSessionSchema = z.object({
