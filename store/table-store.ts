@@ -6,9 +6,14 @@ interface TableState {
     isLoading: boolean;
     error: string | null;
 
-    createTable: (payload: CreateTableInput) => Promise<{ success: boolean; table?: Table; error?: string }>;
+    createTable: (
+        payload: CreateTableInput,
+    ) => Promise<{ success: boolean; table?: Table; error?: string }>;
     leaveTable: (tableId: string) => Promise<{ success: boolean; error?: string }>;
-    removeMember: (tableId: string, memberId: string) => Promise<{ success: boolean; error?: string }>;
+    removeMember: (
+        tableId: string,
+        memberId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useTableStore = create<TableState>((set) => ({

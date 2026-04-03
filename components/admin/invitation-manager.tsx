@@ -23,13 +23,9 @@ interface InvitationManagerProps {
 }
 
 export function InvitationManager({ tableId }: InvitationManagerProps) {
-    const { 
-        tableInvitations, 
-        isLoading, 
-        fetchTableInvitations, 
-        createInvitation 
-    } = useInvitationStore();
-    
+    const { tableInvitations, isLoading, fetchTableInvitations, createInvitation } =
+        useInvitationStore();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [email, setEmail] = useState("");
     const [role, setRole] = useState<TableRole>("player");

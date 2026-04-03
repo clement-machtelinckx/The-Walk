@@ -8,8 +8,14 @@ interface SessionState {
     error: string | null;
 
     fetchNextSession: (tableId: string) => Promise<void>;
-    createSession: (tableId: string, payload: CreateSessionInput) => Promise<{ success: boolean; session?: Session; error?: string }>;
-    updateSession: (sessionId: string, payload: UpdateSessionInput) => Promise<{ success: boolean; session?: Session; error?: string }>;
+    createSession: (
+        tableId: string,
+        payload: CreateSessionInput,
+    ) => Promise<{ success: boolean; session?: Session; error?: string }>;
+    updateSession: (
+        sessionId: string,
+        payload: UpdateSessionInput,
+    ) => Promise<{ success: boolean; session?: Session; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -31,7 +37,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoading: false,
                 }));
             } else {
-                set({ error: data.error || "Erreur lors de la récupération de la session", isLoading: false });
+                set({
+                    error: data.error || "Erreur lors de la récupération de la session",
+                    isLoading: false,
+                });
             }
         } catch (err) {
             set({ error: "Erreur réseau", isLoading: false });
@@ -58,7 +67,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 }));
                 return { success: true, session: data.session };
             } else {
-                return { success: false, error: data.error || "Erreur lors de la création de la session" };
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de la création de la session",
+                };
             }
         } catch (err) {
             return { success: false, error: "Erreur réseau" };
@@ -88,7 +100,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 }
                 return { success: true, session: updatedSession };
             } else {
-                return { success: false, error: data.error || "Erreur lors de la modification de la session" };
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de la modification de la session",
+                };
             }
         } catch (err) {
             return { success: false, error: "Erreur réseau" };

@@ -24,7 +24,9 @@ export function PendingInvitationsList() {
     }
 
     if (error) {
-        return <div className="bg-destructive/10 text-destructive rounded-lg p-4 text-sm">{error}</div>;
+        return (
+            <div className="bg-destructive/10 text-destructive rounded-lg p-4 text-sm">{error}</div>
+        );
     }
 
     if (pendingInvitations.length === 0) {

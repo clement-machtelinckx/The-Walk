@@ -11,7 +11,10 @@ interface InvitationState {
 
     fetchPendingInvitations: () => Promise<void>;
     fetchTableInvitations: (tableId: string) => Promise<void>;
-    createInvitation: (tableId: string, payload: Omit<CreateInvitationInput, 'table_id'>) => Promise<{ success: boolean; invitation?: Invitation; error?: string }>;
+    createInvitation: (
+        tableId: string,
+        payload: Omit<CreateInvitationInput, "table_id">,
+    ) => Promise<{ success: boolean; invitation?: Invitation; error?: string }>;
 }
 
 export const useInvitationStore = create<InvitationState>((set, get) => ({
@@ -28,7 +31,10 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
             if (res.ok) {
                 set({ pendingInvitations: data.invitations, isLoading: false });
             } else {
-                set({ error: data.error || "Erreur lors de la récupération des invitations", isLoading: false });
+                set({
+                    error: data.error || "Erreur lors de la récupération des invitations",
+                    isLoading: false,
+                });
             }
         } catch (err) {
             set({ error: "Erreur réseau", isLoading: false });
@@ -49,14 +55,18 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                     isLoading: false,
                 }));
             } else {
-                set({ error: data.error || "Erreur lors de la récupération des invitations de la table", isLoading: false });
+                set({
+                    error:
+                        data.error || "Erreur lors de la récupération des invitations de la table",
+                    isLoading: false,
+                });
             }
         } catch (err) {
             set({ error: "Erreur réseau", isLoading: false });
         }
     },
 
-    createInvitation: async (tableId: string, payload: Omit<CreateInvitationInput, 'table_id'>) => {
+    createInvitation: async (tableId: string, payload: Omit<CreateInvitationInput, "table_id">) => {
         set({ error: null });
         try {
             const res = await fetch(`/api/tables/${tableId}/invitations`, {
@@ -78,7 +88,10 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                 }));
                 return { success: true, invitation: data.invitation };
             } else {
-                return { success: false, error: data.error || "Erreur lors de la création de l'invitation" };
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de la création de l'invitation",
+                };
             }
         } catch (err) {
             return { success: false, error: "Erreur réseau" };
