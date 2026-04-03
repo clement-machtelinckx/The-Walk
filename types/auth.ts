@@ -1,14 +1,15 @@
-export type UserRole = "admin" | "user" | "gm";
+export type UserRole = "admin" | "user"; // App-wide roles if needed later
 
-export interface User {
+export interface Profile {
     id: string;
     email: string;
-    role: UserRole;
-    name?: string;
-    avatarUrl?: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface AuthSession {
-    user: User | null;
+    user: Profile | null;
     expires: string;
 }

@@ -1,20 +1,40 @@
-export type SessionStatus = "scheduled" | "live" | "completed" | "cancelled";
+export type SessionStatus = "scheduled" | "active" | "completed" | "cancelled";
+export type ResponseStatus = "going" | "maybe" | "declined" | "pending";
+export type PresenceStatus = "present" | "absent" | "late" | "excused";
 
 export interface Session {
     id: string;
-    tableId: string;
+    table_id: string;
     title: string;
+    description: string | null;
     status: SessionStatus;
-    scheduledAt: string;
-    startedAt?: string;
-    endedAt?: string;
-    notes?: string;
+    scheduled_at: string | null;
+    started_at: string | null;
+    ended_at: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
-export interface SessionEvent {
+export interface SessionResponse {
     id: string;
-    sessionId: string;
-    type: string;
-    payload: Record<string, unknown>;
-    createdAt: string;
+    session_id: string;
+    user_id: string;
+    status: ResponseStatus;
+    updated_at: string;
+}
+
+export interface SessionPresence {
+    id: string;
+    session_id: string;
+    user_id: string;
+    status: PresenceStatus;
+    last_seen_at: string;
+}
+
+export interface SessionMessage {
+    id: string;
+    session_id: string;
+    user_id: string | null;
+    content: string;
+    created_at: string;
 }

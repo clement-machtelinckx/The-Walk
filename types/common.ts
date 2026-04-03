@@ -14,6 +14,6 @@ export type EntityId = string;
 
 export interface TimestampedEntity {
     id: EntityId;
-    createdAt: string;
-    updatedAt: string;
+    created_at: string;
+    updated_at: string;
 }
