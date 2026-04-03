@@ -1,6 +1,6 @@
-# CLAUDE.md
+# GEMINI.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Gemini CLI when working with code in this repository.
 
 ## Project
 
@@ -34,10 +34,19 @@ npm run lint     # ESLint (Next.js core web vitals + TypeScript)
 
 ## Conventions
 
-- Language: French (copy, labels).
-- Icons: `lucide-react`.
-- Styling: TailwindCSS 4 with CSS variables in `app/globals.css`.
-- Components use `cn()` from `lib/utils` for conditional class merging.
+- **Language:** French (copy, labels, comments if relevant).
+- **Icons:** `lucide-react`.
+- **Styling:** TailwindCSS 4 with CSS variables in `app/globals.css`.
+- **UI First:** Use primitives from `components/ui/` (shadcn/ui) in priority.
+- **Component Pattern:** Logic in `lib/`, shared UI in `components/ui/`, business logic UI in `components/special/` or `components/[feature]/`.
+- **Conditional Classes:** Use `cn()` from `lib/utils`.
+
+## UI & Contribution Rules
+
+1. **Primitive First:** Before creating a new visual element, check if a `components/ui/` component exists (Card, Button, Badge, etc.).
+2. **Business Extraction:** Extract business patterns into `components/special/` (e.g., `RoleBadge`, `EmptyState`) to avoid duplication.
+3. **Tailwind Hygiene:** Avoid long lists of repeated utility classes in page components; use shared components instead.
+4. **Mobile First:** Ensure all interfaces are usable on mobile devices first.
 
 ## Development Workflow
 

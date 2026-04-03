@@ -48,6 +48,16 @@ npx supabase db reset      # Réinitialise la DB locale et applique les migratio
 npx supabase status        # Affiche l'état des services et les URLs
 ```
 
+## Conventions UI & Contribution
+
+Le projet suit une approche **Shadcn-First** pour garantir une cohérence visuelle et une maintenabilité optimale.
+
+### Principes Clés
+- **Priorité aux Primitives** : Toujours vérifier si un composant existe dans `components/ui/` (Card, Button, Badge, Input, etc.) avant de coder un élément visuel manuellement.
+- **Composants Spéciaux** : Les patterns visuels métier récurrents sont extraits dans `components/special/` (ex: `RoleBadge`, `EmptyState`).
+- **Mobile First** : L'interface est conçue pour être utilisée sur mobile en priorité.
+- **Style Centralisé** : Les variables de thème et les tokens sont définis dans `app/globals.css`.
+
 ## Installation
 
 1. Cloner le repo

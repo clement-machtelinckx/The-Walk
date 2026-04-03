@@ -71,6 +71,24 @@ export const SessionRepository = {
         };
     },
 
+    async getNextSession(tableId: string): Promise<Session | null> {
+        const supabase = await getServerClient();
+        const now = new Date().toISOString();
+
+        const { data, error } = await supabase
+            .from("sessions")
+            .select("*")
+            .eq("table_id", tableId)
+            .eq("status", "scheduled")
+            .gte("scheduled_at", now)
+            .order("scheduled_at", { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+        handleDbError(error, "SessionRepository.getNextSession");
+        return data;
+    },
+
     // Session Responses
     async upsertResponse(
         sessionId: string,
