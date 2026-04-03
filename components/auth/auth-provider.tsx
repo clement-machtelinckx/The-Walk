@@ -1,11 +1,17 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { AppUser, AuthSession, AuthStatus } from "@/types/auth";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType extends AuthSession {
     login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+    register: (
+        email: string,
+        pass: string,
+        confirmPass: string,
+        displayName?: string,
+    ) => Promise<{ success: boolean; error?: string; message?: string }>;
     logout: () => Promise<void>;
     refresh: () => Promise<void>;
 }
@@ -17,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<AuthStatus>("loading");
     const router = useRouter();
 
-    const fetchMe = async () => {
+    const fetchMe = useCallback(async () => {
         try {
             const res = await fetch("/api/me");
             const data = await res.json();
@@ -27,11 +33,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error("Failed to fetch auth state:", error);
             setStatus("unauthenticated");
         }
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchMe();
-    }, []);
+    }, [fetchMe]);
 
     const login = async (email: string, pass: string) => {
         try {
@@ -41,11 +48,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 headers: { "Content-Type": "application/json" },
             });
             const data = await res.json();
-            
+
             if (data.success) {
                 setUser(data.user);
                 setStatus("authenticated");
                 return { success: true };
+            } else {
+                return { success: false, error: data.error };
+            }
+        } catch (error) {
+            return { success: false, error: "Erreur réseau" };
+        }
+    };
+
+    const register = async (
+        email: string,
+        pass: string,
+        confirmPass: string,
+        displayName?: string,
+    ) => {
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    email,
+                    password: pass,
+                    confirmPassword: confirmPass,
+                    displayName,
+                }),
+                headers: { "Content-Type": "application/json" },
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                if (data.user) {
+                    setUser(data.user);
+                    setStatus("authenticated");
+                }
+                return { success: true, message: data.message };
             } else {
                 return { success: false, error: data.error };
             }
@@ -67,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, status, login, logout, refresh: fetchMe }}>
+        <AuthContext.Provider value={{ user, status, login, register, logout, refresh: fetchMe }}>
             {children}
         </AuthContext.Provider>
     );

@@ -7,13 +7,13 @@ import { AppUser } from "@/types/auth";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        
+
         // 1. Validate input
         const result = loginSchema.safeParse(body);
         if (!result.success) {
             return NextResponse.json(
                 { success: false, error: "Email ou mot de passe invalide" },
-                { status: 400 }
+                { status: 400 },
             );
         }
 
@@ -21,7 +21,10 @@ export async function POST(request: Request) {
         const supabase = await createClient();
 
         // 2. Authenticate with Supabase
-        const { data: { user: supabaseUser }, error } = await supabase.auth.signInWithPassword({
+        const {
+            data: { user: supabaseUser },
+            error,
+        } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
         if (error || !supabaseUser) {
             return NextResponse.json(
                 { success: false, error: "Identifiants invalides" },
-                { status: 401 }
+                { status: 401 },
             );
         }
 
@@ -53,12 +56,11 @@ export async function POST(request: Request) {
             success: true,
             user: appUser,
         });
-
     } catch (error) {
         console.error("Login error:", error);
         return NextResponse.json(
             { success: false, error: "Une erreur est survenue lors de la connexion" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }

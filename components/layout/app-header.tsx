@@ -28,7 +28,10 @@ export function AppHeader() {
 
                     <div className="flex items-center gap-4">
                         {user ? (
-                            <Link href="/mon-compte" className="bg-muted/50 hover:bg-muted/80 flex items-center gap-2 rounded-full border py-1.5 pr-2 pl-3 transition-colors">
+                            <Link
+                                href="/mon-compte"
+                                className="bg-muted/50 hover:bg-muted/80 flex items-center gap-2 rounded-full border py-1.5 pr-2 pl-3 transition-colors"
+                            >
                                 <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
                                     {user.profile?.display_name || "Joueur"}
                                 </span>

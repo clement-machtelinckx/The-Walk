@@ -7,6 +7,7 @@ export const NoteRepository = {
     async create(input: CreateNoteInput, userId: string) {
         const supabase = await getServerClient();
         const table = input.is_group ? "group_notes" : "personal_notes";
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const payload: any = {
             content: input.content,
             table_id: input.table_id,

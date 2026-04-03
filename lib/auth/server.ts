@@ -12,10 +12,13 @@ import { redirect } from "next/navigation";
  */
 export async function getCurrentUser(): Promise<AppUser | null> {
     const supabase = await getServerClient();
-    
+
     // Get auth user from Supabase session
-    const { data: { user: supabaseUser }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+        data: { user: supabaseUser },
+        error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !supabaseUser) {
         return null;
     }
@@ -64,7 +67,7 @@ export async function hasTableRole(tableId: string, role?: TableRole): Promise<b
     if (!membership) return false;
 
     if (role && membership.role !== role) return false;
-    
+
     return true;
 }
 

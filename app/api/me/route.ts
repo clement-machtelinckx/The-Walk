@@ -14,7 +14,7 @@ export async function GET() {
         console.error("API /api/me error:", error);
         return NextResponse.json(
             { error: "Internal server error", user: null, status: "unauthenticated" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
