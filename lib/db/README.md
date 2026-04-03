@@ -25,11 +25,11 @@ Le projet utilise une séparation nette entre l'authentification et les données
 Les entités principales sont :
 - `profiles` : Profils utilisateurs (The-Walk core user).
 - `tables` : Tables de jeu.
-- `table_memberships` : Liens entre utilisateurs et tables (GM, Joueur, Observateur).
-- `sessions` : Sessions de jeu (Planifiées, Actives, Terminées, Annulées).
-- `session_responses` : Présences et réponses aux sessions (Going, Maybe, Declined, Pending).
-- `session_presence` : Statut de présence métier (Present, Absent, Late, Excused).
-- `invitations` : Système d'invitation par lien (token) ou email.
+- `table_memberships` : Liens entre utilisateurs et tables (`gm`, `player`, `observer`).
+- `sessions` : Sessions de jeu (`scheduled`, `active`, `completed`, `cancelled`).
+- `session_responses` : Présences et réponses aux sessions (`going`, `maybe`, `declined`, `pending`).
+- `session_presence` : Statut de présence métier (`present`, `absent`, `late`, `excused`).
+- `invitations` : Système d'invitation par lien (token) ou email (`pending`, `accepted`, `declined`, `expired`).
 - `pre_session_messages` : Canal de préparation.
 - `live_session_messages` : Canal de jeu en direct.
 - `notes` : Notes personnelles et de groupe.
