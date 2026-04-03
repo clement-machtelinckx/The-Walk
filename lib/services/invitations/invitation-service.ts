@@ -112,4 +112,11 @@ export const InvitationService = {
 
         return await InvitationRepository.listByTable(tableId);
     },
+
+    /**
+     * List all pending invitations for a specific user based on their email.
+     */
+    async listPendingForUser(email: string): Promise<InvitationWithTable[]> {
+        return await InvitationRepository.listPendingByEmail(email);
+    },
 };

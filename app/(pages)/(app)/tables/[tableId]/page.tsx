@@ -57,12 +57,12 @@ export default async function TableDetailPage({
                     </div>
 
                     <div className="space-y-6">
-                        <MemberList members={members} />
+                        <MemberList tableId={tableId} members={members} myRole={details.myRole} />
 
                         {/* Quick Stats / Info Placeholder */}
                         <Card className="bg-card/50 space-y-3 p-4 text-sm">
                             <div className="flex justify-between border-b pb-2">
-                                <span className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
+                                <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
                                     Date de création
                                 </span>
                                 <span className="text-xs font-medium">
@@ -70,7 +70,7 @@ export default async function TableDetailPage({
                                 </span>
                             </div>
                             <div className="flex justify-between border-b pb-2">
-                                <span className="text-muted-foreground text-[10px] font-medium tracking-widest uppercase">
+                                <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
                                     Identifiant Table
                                 </span>
                                 <span className="bg-muted ml-2 truncate rounded px-1 font-mono text-[10px]">

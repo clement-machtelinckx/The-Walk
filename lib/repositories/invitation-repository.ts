@@ -1,9 +1,13 @@
 import { getServerClient } from "@/lib/db";
 import { handleDbError } from "./_shared/base";
 import { NotFoundError } from "@/lib/errors";
-import { Invitation } from "@/types/table";
+import { Invitation, Table } from "@/types/table";
 import { CreateInvitationInput } from "@/lib/validators/invitation";
 import { randomUUID } from "crypto";
+
+export interface InvitationWithTableInfo extends Invitation {
+    tables: Pick<Table, "name" | "description">;
+}
 
 export const InvitationRepository = {
     async create(input: CreateInvitationInput, inviterId: string): Promise<Invitation> {
@@ -62,5 +66,25 @@ export const InvitationRepository = {
 
         handleDbError(error, "InvitationRepository.listByTable");
         return data || [];
+    },
+
+    /**
+     * List pending and non-expired invitations for a specific email.
+     * Includes table information.
+     */
+    async listPendingByEmail(email: string): Promise<InvitationWithTableInfo[]> {
+        const supabase = await getServerClient();
+        const now = new Date().toISOString();
+
+        const { data, error } = await supabase
+            .from("invitations")
+            .select("*, tables(name, description)")
+            .eq("email", email)
+            .eq("status", "pending")
+            .gt("expires_at", now)
+            .order("created_at", { ascending: false });
+
+        handleDbError(error, "InvitationRepository.listPendingByEmail");
+        return (data as unknown as InvitationWithTableInfo[]) || [];
     },
 };

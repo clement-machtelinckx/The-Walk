@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Loader2, CheckCircle2, AlertCircle, LogOut } from "lucide-react";
+import { PendingInvitationsList } from "@/components/invitation/pending-invitations-list";
 
 interface ProfileContentProps {
     user: AppUser;
@@ -76,6 +77,9 @@ export function ProfileContent({ user: serverUser }: ProfileContentProps) {
                     <p className="text-muted-foreground font-medium">{user.email}</p>
                 </CardContent>
             </Card>
+
+            {/* Pending Invitations */}
+            <PendingInvitationsList />
 
             {/* Account Settings */}
             <div className="app-list">

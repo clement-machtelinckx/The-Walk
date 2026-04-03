@@ -1,13 +1,47 @@
+"use client";
+
+import { useState } from "react";
 import { TableMemberDTO } from "@/lib/services/memberships/membership-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { Users, UserMinus, Loader2 } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
+import { useAuth } from "@/components/auth/auth-provider";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface MemberListProps {
+    tableId: string;
     members: TableMemberDTO[];
+    myRole: string;
 }
 
-export function MemberList({ members }: MemberListProps) {
+export function MemberList({ tableId, members, myRole }: MemberListProps) {
+    const { user } = useAuth();
+    const router = useRouter();
+    const [removingId, setRemovingId] = useState<string | null>(null);
+
+    const handleRemoveMember = async (memberId: string) => {
+        if (!confirm("Êtes-vous sûr de vouloir retirer ce membre ?")) return;
+
+        setRemovingId(memberId);
+        try {
+            const res = await fetch(`/api/tables/${tableId}/members/${memberId}/remove`, {
+                method: "POST",
+            });
+
+            if (res.ok) {
+                router.refresh();
+            } else {
+                const data = await res.json();
+                alert(data.error || "Une erreur est survenue.");
+            }
+        } catch (err) {
+            alert("Erreur réseau.");
+        } finally {
+            setRemovingId(null);
+        }
+    };
+
     return (
         <Card className="bg-card/50 h-full">
             <CardHeader className="pb-3">
@@ -23,25 +57,46 @@ export function MemberList({ members }: MemberListProps) {
                             ? member.profile.display_name.substring(0, 2).toUpperCase()
                             : member.profile.email.substring(0, 2).toUpperCase();
 
+                        const isMe = user?.id === member.userId;
+                        const canBeRemoved = myRole === "gm" && !isMe && member.role !== "gm";
+
                         return (
                             <div
                                 key={member.userId}
                                 className="hover:bg-muted/50 flex items-center justify-between gap-3 rounded-lg p-2 transition-colors"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-primary/10 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold">
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <div className="bg-primary/10 text-primary border-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold">
                                         {initials}
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-sm leading-none font-medium">
+                                    <div className="flex min-w-0 flex-col">
+                                        <span className="truncate text-sm leading-none font-medium">
                                             {member.profile.display_name || "Utilisateur"}
+                                            {isMe && " (Vous)"}
                                         </span>
-                                        <span className="text-muted-foreground line-clamp-1 text-xs">
+                                        <span className="text-muted-foreground line-clamp-1 text-[10px]">
                                             {member.profile.email}
                                         </span>
                                     </div>
                                 </div>
-                                <RoleBadge role={member.role} size="sm" showIcon={false} />
+                                <div className="flex items-center gap-2">
+                                    <RoleBadge role={member.role} size="sm" showIcon={false} />
+                                    {canBeRemoved && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-muted-foreground hover:text-destructive h-7 w-7"
+                                            onClick={() => handleRemoveMember(member.userId)}
+                                            disabled={removingId === member.userId}
+                                        >
+                                            {removingId === member.userId ? (
+                                                <Loader2 size={14} className="animate-spin" />
+                                            ) : (
+                                                <UserMinus size={14} />
+                                            )}
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         );
                     })}
