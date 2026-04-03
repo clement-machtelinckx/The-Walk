@@ -34,24 +34,20 @@ export async function updateSession(request: NextRequest) {
 
     const path = request.nextUrl.pathname;
 
-    // Define route patterns
-    const isAuthPage = path === "/login" || path === "/register";
-    const isPublicPage = path === "/" || path.startsWith("/auth") || isAuthPage;
-
-    // Explicitly protected areas
+    // Route types
+    const isAuthRoute = path === "/login" || path === "/register";
     const isProtectedRoute = path.startsWith("/tables") || path.startsWith("/mon-compte");
 
-    // Redirect unauthenticated users from protected routes to /login
+    // 1. Redirect unauthenticated users from protected routes to /login
     if (!user && isProtectedRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
-        // Optional: add next parameter for redirect after login
         url.searchParams.set("next", path);
         return NextResponse.redirect(url);
     }
 
-    // Redirect authenticated users from auth pages to /tables
-    if (user && isAuthPage) {
+    // 2. Redirect authenticated users from auth routes (login/register) to /tables
+    if (user && isAuthRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/tables";
         return NextResponse.redirect(url);

@@ -1,4 +1,7 @@
+import { requireAuth } from "@/lib/auth/server";
+
 export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
+    await requireAuth();
     const { tableId } = await params;
 
     return (
