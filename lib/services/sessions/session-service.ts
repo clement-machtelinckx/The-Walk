@@ -1,8 +1,14 @@
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
+import { PresenceService } from "@/lib/services/presence/presence-service";
 import { CreateSessionInput, UpdateSessionInput } from "@/lib/validators/session";
-import { Session } from "@/types/session";
+import { Session, PresenceSummary } from "@/types/session";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
+
+export interface SessionHistoryItem {
+    session: Session;
+    presenceSummary: PresenceSummary | null;
+}
 
 export const SessionService = {
     /**
@@ -123,5 +129,30 @@ export const SessionService = {
     async getActiveSession(userId: string, tableId: string): Promise<Session | null> {
         await MembershipService.requireMembership(userId, tableId);
         return await SessionRepository.getActiveSessionByTable(tableId);
+    },
+
+    /**
+     * Get history of completed sessions for a table.
+     */
+    async getSessionHistory(userId: string, tableId: string): Promise<SessionHistoryItem[]> {
+        await MembershipService.requireMembership(userId, tableId);
+        const sessions = await SessionRepository.getCompletedSessions(tableId);
+
+        const history = await Promise.all(
+            sessions.map(async (session) => {
+                let presenceSummary: PresenceSummary | null = null;
+                try {
+                    presenceSummary = await PresenceService.getPresenceSummary(userId, session.id);
+                } catch (e) {
+                    console.error(`Failed to fetch presence summary for session ${session.id}`, e);
+                }
+                return {
+                    session,
+                    presenceSummary,
+                };
+            }),
+        );
+
+        return history;
     },
 };

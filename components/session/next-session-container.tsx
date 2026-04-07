@@ -208,39 +208,10 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
                 <ResponseBlock sessionId={session!.id} />
             </div>
 
-            {/* 3. The Crawl - External Tool */}
-            <div className="mx-auto w-full max-w-3xl">
-                <Button
-                    variant="outline"
-                    className="border-primary/20 hover:border-primary/40 hover:bg-primary/5 group h-14 w-full border-2 transition-all"
-                    asChild
-                >
-                    <a href={siteConfig.links.crawl} target="_blank" rel="noopener noreferrer">
-                        <div className="flex items-center justify-center gap-3">
-                            <div className="bg-primary/10 group-hover:bg-primary/20 rounded-lg p-2 transition-colors">
-                                <ExternalLink className="text-primary h-5 w-5" />
-                            </div>
-                            <div className="text-left">
-                                <p className="text-sm leading-none font-bold tracking-tight uppercase">
-                                    Ouvrir The Crawl
-                                </p>
-                                <p className="text-muted-foreground text-[10px]">
-                                    Interface de jeu interactive
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                </Button>
-            </div>
-
-            {/* 4. Insights & Preparation */}
-            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-5">
-                <div className="lg:col-span-2">
-                    <ResponseSummary sessionId={session!.id} />
-                </div>
-                <div className="lg:col-span-3">
-                    <PrechatBlock sessionId={session!.id} />
-                </div>
+            {/* 3. Insights & Preparation */}
+            <div className="mx-auto w-full max-w-3xl space-y-8">
+                <ResponseSummary sessionId={session!.id} />
+                <PrechatBlock sessionId={session!.id} />
             </div>
         </div>
     );

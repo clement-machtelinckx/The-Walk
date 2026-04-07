@@ -5,8 +5,8 @@ import { PageShell } from "@/components/layout/app-shell";
 import { TableHeader } from "@/components/table/table-header";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionSummary } from "@/components/table/next-session-summary";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity } from "lucide-react";
+import { SessionHistory } from "@/components/table/session-history";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatShortDate } from "@/lib/utils/date";
 
 export async function generateMetadata({ params }: { params: Promise<{ tableId: string }> }) {
@@ -39,33 +39,21 @@ export default async function TableDetailPage({
 
                 <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
                     <div className="space-y-6 md:col-span-2">
-                        {/* Summary / Main Feed Placeholder */}
+                        {/* Summary / Main Feed */}
                         <NextSessionSummary 
                             tableId={tableId} 
                             session={details.nextSession} 
                             activeSession={details.activeSession}
                         />
 
-                        <Card className="bg-card/50">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                                    <Activity size={18} className="text-primary" />
-                                    Activité récente
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                                <p className="text-muted-foreground text-sm italic">
-                                    Bientôt disponible : le flux d&apos;activité de votre table.
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <SessionHistory tableId={tableId} />
                     </div>
 
                     <div className="space-y-6">
                         <MemberList tableId={tableId} members={members} myRole={details.myRole} />
 
-                        {/* Quick Stats / Info Placeholder */}
-                        <Card className="bg-card/50 space-y-3 p-4 text-sm">
+                        {/* Quick Stats / Info */}
+                        <Card className="bg-card/50 space-y-3 p-4 text-sm shadow-sm">
                             <div className="flex justify-between border-b pb-2">
                                 <span className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
                                     Date de création
