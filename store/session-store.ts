@@ -1,9 +1,14 @@
 import { create } from "zustand";
-import { Session } from "@/types/session";
-import { CreateSessionInput, UpdateSessionInput } from "@/lib/validators/session";
+import { Session, SessionResponsesSummary } from "@/types/session";
+import {
+    CreateSessionInput,
+    UpdateSessionInput,
+    SessionResponseInput,
+} from "@/lib/validators/session";
 
 interface SessionState {
     nextSessions: Record<string, Session | null>;
+    responses: Record<string, SessionResponsesSummary | null>;
     isLoading: boolean;
     error: string | null;
 
@@ -16,10 +21,17 @@ interface SessionState {
         sessionId: string,
         payload: UpdateSessionInput,
     ) => Promise<{ success: boolean; session?: Session; error?: string }>;
+
+    fetchSessionResponses: (sessionId: string) => Promise<void>;
+    respondToSession: (
+        sessionId: string,
+        payload: SessionResponseInput,
+    ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
     nextSessions: {},
+    responses: {},
     isLoading: false,
     error: null,
 
@@ -103,6 +115,54 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 return {
                     success: false,
                     error: data.error || "Erreur lors de la modification de la session",
+                };
+            }
+        } catch (err) {
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchSessionResponses: async (sessionId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/responses`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    responses: {
+                        ...state.responses,
+                        [sessionId]: data,
+                    },
+                    isLoading: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération des réponses",
+                    isLoading: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoading: false });
+        }
+    },
+
+    respondToSession: async (sessionId: string, payload: SessionResponseInput) => {
+        set({ error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/respond`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Re-fetch responses to ensure summary is up to date
+                await get().fetchSessionResponses(sessionId);
+                return { success: true };
+            } else {
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de l'enregistrement de la réponse",
                 };
             }
         } catch (err) {

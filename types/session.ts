@@ -23,6 +23,30 @@ export interface SessionResponse {
     updated_at: string;
 }
 
+export interface SessionResponseWithProfile extends SessionResponse {
+    profiles: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    };
+}
+
+export interface SessionResponsesSummary {
+    responses: SessionResponseWithProfile[];
+    summary: {
+        going: number;
+        maybe: number;
+        declined: number;
+        pending: number;
+        total: number;
+    };
+    non_responders: Array<{
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    }>;
+}
+
 export interface SessionPresence {
     id: string;
     session_id: string;
