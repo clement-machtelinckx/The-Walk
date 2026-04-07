@@ -37,7 +37,7 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
     };
 
     return (
-        <Card className="bg-card/50 h-full">
+        <Card className="bg-card/50">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg font-bold">
                     <Users size={18} className="text-primary" />
