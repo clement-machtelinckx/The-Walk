@@ -11,12 +11,14 @@ export interface TableSummaryDTO {
     description: string | null;
     myRole: TableRole;
     nextSession: Session | null;
+    activeSession: Session | null;
 }
 
 export interface TableDetailsDTO {
     table: Table;
     myRole: TableRole;
     nextSession: Session | null;
+    activeSession: Session | null;
 }
 
 export const TableService = {
@@ -30,6 +32,7 @@ export const TableService = {
             paginatedTables.data.map(async (table) => {
                 const membership = await MembershipService.getMembership(userId, table.id);
                 const nextSession = await SessionRepository.getNextSession(table.id);
+                const activeSession = await SessionRepository.getActiveSessionByTable(table.id);
 
                 return {
                     id: table.id,
@@ -37,6 +40,7 @@ export const TableService = {
                     description: table.description,
                     myRole: membership?.role || "player", // Fallback, though user should be member
                     nextSession,
+                    activeSession,
                 };
             }),
         );
@@ -52,11 +56,13 @@ export const TableService = {
         const membership = await MembershipService.requireMembership(userId, tableId);
         const table = await TableRepository.getById(tableId);
         const nextSession = await SessionRepository.getNextSession(tableId);
+        const activeSession = await SessionRepository.getActiveSessionByTable(tableId);
 
         return {
             table,
             myRole: membership.role,
             nextSession,
+            activeSession,
         };
     },
 

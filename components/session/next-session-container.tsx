@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
 import { NextSessionEmptyState } from "./next-session-empty-state";
@@ -10,6 +11,8 @@ import { PrechatBlock } from "./prechat-block";
 import { Loader2, Settings, Play, ExternalLink } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 
@@ -19,17 +22,29 @@ interface NextSessionContainerProps {
 }
 
 export function NextSessionContainer({ tableId, myRole }: NextSessionContainerProps) {
-    const { nextSessions, isLoadingSession, fetchNextSession, fetchSessionResponses } =
-        useSessionStore();
+    const router = useRouter();
+    const {
+        nextSessions,
+        activeSessions,
+        isLoadingSession,
+        isLoadingActiveSession,
+        fetchNextSession,
+        fetchActiveSession,
+        fetchSessionResponses,
+        startSession,
+        isStartingSession,
+    } = useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const canManage = myRole === "gm";
 
     const session = nextSessions[tableId];
+    const activeSession = activeSessions[tableId];
 
     useEffect(() => {
         fetchNextSession(tableId);
-    }, [tableId, fetchNextSession]);
+        fetchActiveSession(tableId);
+    }, [tableId, fetchNextSession, fetchActiveSession]);
 
     useEffect(() => {
         if (session?.id) {
@@ -42,7 +57,21 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         setIsCreating(false);
     };
 
-    if (isLoadingSession && session === undefined) {
+    const handleStartSession = async () => {
+        if (!session?.id) return;
+        if (!confirm("Voulez-vous vraiment démarrer cette session ?")) return;
+
+        const result = await startSession(session.id);
+        if (result.success && result.session) {
+            router.push(`/tables/${tableId}/session/live/${result.session.id}`);
+        }
+    };
+
+    if (
+        (isLoadingSession || isLoadingActiveSession) &&
+        session === undefined &&
+        activeSession === undefined
+    ) {
         return (
             <div className="flex justify-center py-20">
                 <Loader2 className="text-primary/50 h-8 w-8 animate-spin" />
@@ -81,8 +110,60 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         );
     }
 
-    if (!session) {
+    if (!session && !activeSession) {
         return <NextSessionEmptyState canCreate={canManage} onCreate={() => setIsCreating(true)} />;
+    }
+
+    // Si une session est déjà active, on affiche un HUB live prioritaire
+    if (activeSession) {
+        return (
+            <div className="mx-auto max-w-3xl space-y-8 px-4 py-10">
+                <div className="space-y-4 text-center">
+                    <Badge className="animate-pulse bg-green-600 px-4 py-1 text-sm hover:bg-green-600">
+                        Session en cours
+                    </Badge>
+                    <h1 className="text-3xl font-extrabold tracking-tight">
+                        {activeSession.title}
+                    </h1>
+                    <p className="text-muted-foreground">
+                        La session a démarré ! Rejoignez les autres joueurs sur le hub live.
+                    </p>
+                </div>
+
+                <Card className="overflow-hidden border-2 border-green-600/20 shadow-lg">
+                    <CardContent className="flex flex-col items-center gap-6 p-8">
+                        <div className="rounded-full bg-green-100 p-4">
+                            <Play className="h-12 w-12 fill-current text-green-600" />
+                        </div>
+                        <Button
+                            size="lg"
+                            className="h-16 w-full bg-green-600 text-xl shadow-lg hover:bg-green-700"
+                            asChild
+                        >
+                            <Link href={`/tables/${tableId}/session/live/${activeSession.id}`}>
+                                Rejoindre le Live
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                <div className="border-t pt-10">
+                    <p className="text-muted-foreground mb-4 text-center text-sm">
+                        Besoin d&apos;autre chose ?
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/tables/${tableId}`}>Retour à la table</Link>
+                        </Button>
+                        {canManage && (
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={`/tables/${tableId}/admin`}>Admin table</Link>
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -90,7 +171,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
             {/* 1. Header & Primary Actions */}
             <div className="mx-auto w-full max-w-3xl space-y-6">
                 <SessionCard
-                    session={session}
+                    session={session!}
                     canEdit={canManage}
                     onEdit={() => setIsEditing(true)}
                 />
@@ -107,13 +188,16 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
                         <Button
                             variant="default"
                             size="sm"
-                            asChild
+                            onClick={handleStartSession}
+                            disabled={isStartingSession}
                             className="border-0 bg-green-600 text-white shadow-sm hover:bg-green-700"
                         >
-                            <Link href={`/tables/${tableId}/session/live`}>
+                            {isStartingSession ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
                                 <Play className="mr-2 h-4 w-4 fill-current" />
-                                Démarrer la session live
-                            </Link>
+                            )}
+                            Démarrer la session live
                         </Button>
                     </div>
                 )}
@@ -121,7 +205,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
 
             {/* 2. User RSVP (Personal) */}
             <div className="mx-auto w-full max-w-3xl">
-                <ResponseBlock sessionId={session.id} />
+                <ResponseBlock sessionId={session!.id} />
             </div>
 
             {/* 3. The Crawl - External Tool */}
@@ -152,10 +236,10 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
             {/* 4. Insights & Preparation */}
             <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-5">
                 <div className="lg:col-span-2">
-                    <ResponseSummary sessionId={session.id} />
+                    <ResponseSummary sessionId={session!.id} />
                 </div>
                 <div className="lg:col-span-3">
-                    <PrechatBlock sessionId={session.id} />
+                    <PrechatBlock sessionId={session!.id} />
                 </div>
             </div>
         </div>

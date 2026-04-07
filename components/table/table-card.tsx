@@ -8,7 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Calendar, ArrowRight } from "lucide-react";
+import { Calendar, ArrowRight, Play } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
 import { formatFullDate } from "@/lib/utils/date";
 
@@ -32,7 +32,20 @@ export function TableCard({ table }: TableCardProps) {
             </CardHeader>
 
             <CardContent className="flex-grow">
-                {table.nextSession ? (
+                {table.activeSession ? (
+                    <div className="space-y-2 rounded-lg border border-green-600/20 bg-green-50 p-3">
+                        <div className="flex items-center justify-between gap-1.5 text-xs font-bold tracking-wider text-green-700 uppercase">
+                            <div className="flex items-center gap-1.5">
+                                <Play size={12} className="fill-current" />
+                                SESSION EN COURS
+                            </div>
+                            <div className="h-2 w-2 animate-pulse rounded-full bg-green-600" />
+                        </div>
+                        <div className="line-clamp-1 text-sm font-extrabold text-green-900">
+                            {table.activeSession.title}
+                        </div>
+                    </div>
+                ) : table.nextSession ? (
                     <div className="bg-muted/50 border-border/50 space-y-2 rounded-lg border p-3">
                         <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase">
                             <Calendar size={12} />

@@ -89,6 +89,20 @@ export const SessionRepository = {
         return data;
     },
 
+    async getActiveSessionByTable(tableId: string): Promise<Session | null> {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("sessions")
+            .select("*")
+            .eq("table_id", tableId)
+            .eq("status", "active")
+            .limit(1)
+            .maybeSingle();
+
+        handleDbError(error, "SessionRepository.getActiveSessionByTable");
+        return data;
+    },
+
     // Session Responses
     async upsertResponse(
         sessionId: string,
@@ -99,8 +113,13 @@ export const SessionRepository = {
         const { data, error } = await supabase
             .from("session_responses")
             .upsert(
-                { session_id: sessionId, user_id: userId, status: input.status, updated_at: new Date().toISOString() },
-                { onConflict: "session_id,user_id" }
+                {
+                    session_id: sessionId,
+                    user_id: userId,
+                    status: input.status,
+                    updated_at: new Date().toISOString(),
+                },
+                { onConflict: "session_id,user_id" },
             )
             .select()
             .single();

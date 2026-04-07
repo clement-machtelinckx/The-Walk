@@ -8,16 +8,21 @@ import {
 
 interface SessionState {
     nextSessions: Record<string, Session | null>;
+    activeSessions: Record<string, Session | null>;
     responses: Record<string, SessionResponsesSummary | null>;
     prechats: Record<string, SessionPrechatData | null>;
     isLoadingSession: boolean;
+    isLoadingActiveSession: boolean;
     isLoadingResponses: boolean;
     isLoadingPrechat: boolean;
     isResponding: boolean;
     isSendingMessage: boolean;
+    isStartingSession: boolean;
+    isEndingSession: boolean;
     error: string | null;
 
     fetchNextSession: (tableId: string) => Promise<void>;
+    fetchActiveSession: (tableId: string) => Promise<void>;
     createSession: (
         tableId: string,
         payload: CreateSessionInput,
@@ -38,17 +43,28 @@ interface SessionState {
         sessionId: string,
         content: string,
     ) => Promise<{ success: boolean; error?: string }>;
+
+    startSession: (
+        sessionId: string,
+    ) => Promise<{ success: boolean; session?: Session; error?: string }>;
+    endSession: (
+        sessionId: string,
+    ) => Promise<{ success: boolean; session?: Session; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
     nextSessions: {},
+    activeSessions: {},
     responses: {},
     prechats: {},
     isLoadingSession: false,
+    isLoadingActiveSession: false,
     isLoadingResponses: false,
     isLoadingPrechat: false,
     isResponding: false,
     isSendingMessage: false,
+    isStartingSession: false,
+    isEndingSession: false,
     error: null,
 
     fetchNextSession: async (tableId: string) => {
@@ -236,6 +252,92 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ isSendingMessage: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchActiveSession: async (tableId: string) => {
+        set({ isLoadingActiveSession: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}/sessions/active`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    activeSessions: {
+                        ...state.activeSessions,
+                        [tableId]: data.session,
+                    },
+                    isLoadingActiveSession: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération de la session active",
+                    isLoadingActiveSession: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingActiveSession: false });
+        }
+    },
+
+    startSession: async (sessionId: string) => {
+        set({ isStartingSession: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/start`, {
+                method: "POST",
+            });
+            const data = await res.json();
+            if (res.ok) {
+                const session = data.session;
+                // Mettre à jour l'état local
+                set((state) => ({
+                    activeSessions: {
+                        ...state.activeSessions,
+                        [session.table_id]: session,
+                    },
+                    nextSessions: {
+                        ...state.nextSessions,
+                        [session.table_id]: null, // Elle n'est plus "next" car elle est active
+                    },
+                    isStartingSession: false,
+                }));
+                return { success: true, session };
+            } else {
+                set({ isStartingSession: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch (err) {
+            set({ isStartingSession: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    endSession: async (sessionId: string) => {
+        set({ isEndingSession: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/end`, {
+                method: "POST",
+            });
+            const data = await res.json();
+            if (res.ok) {
+                const session = data.session;
+                // Mettre à jour l'état local
+                set((state) => ({
+                    activeSessions: {
+                        ...state.activeSessions,
+                        [session.table_id]: null,
+                    },
+                    isEndingSession: false,
+                }));
+                // Rafraîchir la prochaine session pour cette table
+                await get().fetchNextSession(session.table_id);
+                return { success: true, session };
+            } else {
+                set({ isEndingSession: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch (err) {
+            set({ isEndingSession: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },
