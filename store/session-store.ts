@@ -3,6 +3,7 @@ import {
     Session,
     SessionResponsesSummary,
     SessionPrechatData,
+    SessionLiveChatData,
     RollCallMember,
     PresenceSummary,
 } from "@/types/session";
@@ -24,6 +25,7 @@ interface SessionState {
     activeSessions: Record<string, Session | null>;
     responses: Record<string, SessionResponsesSummary | null>;
     prechats: Record<string, SessionPrechatData | null>;
+    livechats: Record<string, SessionLiveChatData | null>;
     presenceData: Record<string, PresenceStateData | null>;
 
     // Loading states
@@ -31,9 +33,11 @@ interface SessionState {
     isLoadingActiveSession: boolean;
     isLoadingResponses: boolean;
     isLoadingPrechat: boolean;
+    isLoadingLivechat: boolean;
     isLoadingPresence: boolean;
     isResponding: boolean;
     isSendingMessage: boolean;
+    isSendingLiveMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
     isSavingPresence: boolean;
@@ -63,6 +67,12 @@ interface SessionState {
         content: string,
     ) => Promise<{ success: boolean; error?: string }>;
 
+    fetchLivechatMessages: (sessionId: string, page?: number) => Promise<void>;
+    sendLivechatMessage: (
+        sessionId: string,
+        content: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+
     startSession: (
         sessionId: string,
     ) => Promise<{ success: boolean; session?: Session; error?: string }>;
@@ -83,14 +93,17 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     activeSessions: {},
     responses: {},
     prechats: {},
+    livechats: {},
     presenceData: {},
     isLoadingSession: false,
     isLoadingActiveSession: false,
     isLoadingResponses: false,
     isLoadingPrechat: false,
+    isLoadingLivechat: false,
     isLoadingPresence: false,
     isResponding: false,
     isSendingMessage: false,
+    isSendingLiveMessage: false,
     isStartingSession: false,
     isEndingSession: false,
     isSavingPresence: false,
@@ -277,6 +290,56 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ isSendingMessage: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchLivechatMessages: async (sessionId: string, page = 1) => {
+        set({ isLoadingLivechat: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/livechat?page=${page}`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    livechats: {
+                        ...state.livechats,
+                        [sessionId]: data,
+                    },
+                    isLoadingLivechat: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération des messages",
+                    isLoadingLivechat: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingLivechat: false });
+        }
+    },
+
+    sendLivechatMessage: async (sessionId: string, content: string) => {
+        set({ isSendingLiveMessage: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/livechat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                await get().fetchLivechatMessages(sessionId);
+                set({ isSendingLiveMessage: false });
+                return { success: true };
+            } else {
+                set({ isSendingLiveMessage: false, error: data.error });
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de l'envoi du message",
+                };
+            }
+        } catch (err) {
+            set({ isSendingLiveMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

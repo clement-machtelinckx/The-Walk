@@ -98,3 +98,11 @@ export interface SessionPrechatData {
     limit: number;
     totalPages: number;
 }
+
+export interface SessionLiveChatData {
+    data: SessionMessage[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
