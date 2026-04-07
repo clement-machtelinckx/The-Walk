@@ -1,38 +1,32 @@
 import { requireAuth } from "@/lib/auth/server";
+import { SessionService } from "@/lib/services/sessions/session-service";
+import { MembershipService } from "@/lib/services/memberships/membership-service";
+import { redirect } from "next/navigation";
+import { LiveSessionHub } from "@/components/session/live-session-hub";
+import { PageShell } from "@/components/layout/app-shell";
 
 export default async function TableLiveSessionPage({
     params,
 }: {
     params: Promise<{ tableId: string; sessionId: string }>;
 }) {
-    await requireAuth();
+    const user = await requireAuth();
     const { tableId, sessionId } = await params;
 
+    // 1. Vérifier la session
+    const session = await SessionService.getSessionById(user.id, sessionId);
+
+    // 2. Vérifier si elle est active. Si non, on redirige.
+    if (session.status !== "active") {
+        redirect(`/tables/${tableId}`);
+    }
+
+    // 3. Récupérer le rôle
+    const membership = await MembershipService.requireMembership(user.id, tableId);
+
     return (
-        <section className="space-y-6 py-8">
-            <h1 className="text-primary/80 text-3xl font-bold tracking-tight italic">
-                Session LIVE - Table: {tableId}
-            </h1>
-            <p className="text-muted-foreground text-lg">
-                Identifiant de la session : {sessionId}. Outils de suivi en temps réel.
-            </p>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <div className="bg-muted/50 rounded-xl border border-dashed p-6 text-center lg:col-span-2">
-                    <p className="text-primary/60 text-sm font-medium tracking-widest uppercase">
-                        Notes de session
-                    </p>
-                </div>
-                <div className="bg-muted/50 rounded-xl border border-dashed p-6 text-center">
-                    <p className="text-primary/60 text-sm font-medium tracking-widest uppercase">
-                        Suivi Combat
-                    </p>
-                </div>
-                <div className="bg-muted/50 rounded-xl border border-dashed p-6 text-center">
-                    <p className="text-primary/60 text-sm font-medium tracking-widest uppercase">
-                        Lancer de dés
-                    </p>
-                </div>
-            </div>
-        </section>
+        <PageShell>
+            <LiveSessionHub session={session} tableId={tableId} myRole={membership.role} />
+        </PageShell>
     );
 }
