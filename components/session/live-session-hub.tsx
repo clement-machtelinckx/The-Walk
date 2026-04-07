@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
 import { PresenceBlock } from "./presence-block";
 import { LivechatBlock } from "./livechat-block";
+import { PersonalNoteBlock } from "./notes/personal-note-block";
+import { GroupNoteBlock } from "./notes/group-note-block";
 
 interface LiveSessionHubProps {
     session: Session;
@@ -81,52 +83,63 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="bg-card/50 lg:col-span-2">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-sm font-bold">
-                            <FileText size={16} className="text-primary" />
-                            NOTES DE SESSION
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-muted-foreground text-sm italic">
-                            {session.description || "Aucune description fournie."}
-                        </p>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+                {/* Outils secondaires */}
+                <div className="space-y-6 lg:col-span-1">
+                    <Card className="bg-card/50 border-dashed">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                                <Sword size={12} className="text-primary" />
+                                SUIVI COMBAT
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex justify-center py-4">
+                            <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase opacity-50">
+                                Bientôt disponible
+                            </p>
+                        </CardContent>
+                    </Card>
 
-                <Card className="bg-card/50 border-dashed">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-sm font-bold">
-                            <Sword size={16} className="text-primary" />
-                            SUIVI COMBAT
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex justify-center py-6">
-                        <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                            Bientôt disponible
-                        </p>
-                    </CardContent>
-                </Card>
+                    <Card className="bg-card/50 border-dashed">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+                                <Dice5 size={12} className="text-primary" />
+                                LANCER DE DÉS
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex justify-center py-4">
+                            <p className="text-muted-foreground text-[8px] font-bold tracking-widest uppercase opacity-50">
+                                Bientôt disponible
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                <Card className="bg-card/50 border-dashed">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-sm font-bold">
-                            <Dice5 size={16} className="text-primary" />
-                            LANCER DE DÉS
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex justify-center py-6">
-                        <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                            Bientôt disponible
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
+                {/* Zone centrale : Notes et Chat */}
+                <div className="space-y-6 lg:col-span-3">
+                    <Card className="bg-card/50">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center gap-2 text-sm font-bold">
+                                <FileText size={16} className="text-primary" />
+                                RÉSUMÉ DE SESSION
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm italic">
+                                {session.description || "Aucune description fournie."}
+                            </p>
+                        </CardContent>
+                    </Card>
 
-            <div className="mx-auto max-w-4xl">
-                <LivechatBlock sessionId={session.id} />
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <PersonalNoteBlock sessionId={session.id} />
+                        <GroupNoteBlock sessionId={session.id} isGM={isGM} />
+                    </div>
+
+                    <div className="pt-4">
+                        <LivechatBlock sessionId={session.id} />
+                    </div>
+                </div>
             </div>
         </div>
     );
