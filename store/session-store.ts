@@ -7,6 +7,7 @@ import {
     RollCallMember,
     PresenceSummary,
 } from "@/types/session";
+import { PersonalNote, GroupNote } from "@/types/note";
 import {
     CreateSessionInput,
     UpdateSessionInput,
@@ -27,6 +28,8 @@ interface SessionState {
     prechats: Record<string, SessionPrechatData | null>;
     livechats: Record<string, SessionLiveChatData | null>;
     presenceData: Record<string, PresenceStateData | null>;
+    personalNotes: Record<string, PersonalNote | null>;
+    groupNotes: Record<string, GroupNote | null>;
 
     // Loading states
     isLoadingSession: boolean;
@@ -35,12 +38,16 @@ interface SessionState {
     isLoadingPrechat: boolean;
     isLoadingLivechat: boolean;
     isLoadingPresence: boolean;
+    isLoadingPersonalNote: boolean;
+    isLoadingGroupNote: boolean;
     isResponding: boolean;
     isSendingMessage: boolean;
     isSendingLiveMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
     isSavingPresence: boolean;
+    isSavingPersonalNote: boolean;
+    isSavingGroupNote: boolean;
     error: string | null;
 
     // Actions
@@ -85,6 +92,18 @@ interface SessionState {
         sessionId: string,
         payload: RollCallInput,
     ) => Promise<{ success: boolean; error?: string }>;
+
+    fetchPersonalNote: (sessionId: string) => Promise<void>;
+    savePersonalNote: (
+        sessionId: string,
+        content: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+
+    fetchGroupNote: (sessionId: string) => Promise<void>;
+    saveGroupNote: (
+        sessionId: string,
+        content: string,
+    ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -95,18 +114,24 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     prechats: {},
     livechats: {},
     presenceData: {},
+    personalNotes: {},
+    groupNotes: {},
     isLoadingSession: false,
     isLoadingActiveSession: false,
     isLoadingResponses: false,
     isLoadingPrechat: false,
     isLoadingLivechat: false,
     isLoadingPresence: false,
+    isLoadingPersonalNote: false,
+    isLoadingGroupNote: false,
     isResponding: false,
     isSendingMessage: false,
     isSendingLiveMessage: false,
     isStartingSession: false,
     isEndingSession: false,
     isSavingPresence: false,
+    isSavingPersonalNote: false,
+    isSavingGroupNote: false,
     error: null,
 
     // Actions
@@ -473,6 +498,110 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ isSavingPresence: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchPersonalNote: async (sessionId: string) => {
+        set({ isLoadingPersonalNote: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/notes/personal`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    personalNotes: {
+                        ...state.personalNotes,
+                        [sessionId]: data.note,
+                    },
+                    isLoadingPersonalNote: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération de votre note",
+                    isLoadingPersonalNote: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingPersonalNote: false });
+        }
+    },
+
+    savePersonalNote: async (sessionId: string, content: string) => {
+        set({ isSavingPersonalNote: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/notes/personal`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    personalNotes: {
+                        ...state.personalNotes,
+                        [sessionId]: data.note,
+                    },
+                    isSavingPersonalNote: false,
+                }));
+                return { success: true };
+            } else {
+                set({ isSavingPersonalNote: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch (err) {
+            set({ isSavingPersonalNote: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchGroupNote: async (sessionId: string) => {
+        set({ isLoadingGroupNote: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/notes/group`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    groupNotes: {
+                        ...state.groupNotes,
+                        [sessionId]: data.note,
+                    },
+                    isLoadingGroupNote: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération de la note de groupe",
+                    isLoadingGroupNote: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingGroupNote: false });
+        }
+    },
+
+    saveGroupNote: async (sessionId: string, content: string) => {
+        set({ isSavingGroupNote: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/notes/group`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    groupNotes: {
+                        ...state.groupNotes,
+                        [sessionId]: data.note,
+                    },
+                    isSavingGroupNote: false,
+                }));
+                return { success: true };
+            } else {
+                set({ isSavingGroupNote: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch (err) {
+            set({ isSavingGroupNote: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

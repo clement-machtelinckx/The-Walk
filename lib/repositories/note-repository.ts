@@ -85,4 +85,72 @@ export const NoteRepository = {
         handleDbError(error, "NoteRepository.listGroup");
         return data || [];
     },
+
+    /**
+     * Gère la note personnelle unique pour une table donnée.
+     */
+    async getPersonalByTable(userId: string, tableId: string) {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("personal_notes")
+            .select("*")
+            .eq("user_id", userId)
+            .eq("table_id", tableId)
+            .maybeSingle();
+
+        handleDbError(error, "NoteRepository.getPersonalByTable");
+        return data;
+    },
+
+    async upsertPersonal(userId: string, tableId: string, content: string) {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("personal_notes")
+            .upsert(
+                {
+                    user_id: userId,
+                    table_id: tableId,
+                    content,
+                },
+                { onConflict: "user_id,table_id" },
+            )
+            .select()
+            .single();
+
+        handleDbError(error, "NoteRepository.upsertPersonal");
+        return data;
+    },
+
+    /**
+     * Gère la note de groupe unique pour une table donnée.
+     */
+    async getGroupByTable(tableId: string) {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("group_notes")
+            .select("*")
+            .eq("table_id", tableId)
+            .maybeSingle();
+
+        handleDbError(error, "NoteRepository.getGroupByTable");
+        return data;
+    },
+
+    async upsertGroup(tableId: string, content: string) {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("group_notes")
+            .upsert(
+                {
+                    table_id: tableId,
+                    content,
+                },
+                { onConflict: "table_id" },
+            )
+            .select()
+            .single();
+
+        handleDbError(error, "NoteRepository.upsertGroup");
+        return data;
+    },
 };

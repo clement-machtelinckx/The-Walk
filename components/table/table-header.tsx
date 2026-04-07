@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TableRole } from "@/types/table";
 import { Button } from "@/components/ui/button";
 import { Settings, Calendar, Play, LogOut, Loader2 } from "lucide-react";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { RoleBadge } from "@/components/special/role-badge";
 import { useRouter } from "next/navigation";
 import { useTableStore } from "@/store/table-store";
+import { useSessionStore } from "@/store/session-store";
 
 interface TableHeaderProps {
     tableId: string;
@@ -19,7 +20,23 @@ interface TableHeaderProps {
 export function TableHeader({ tableId, name, description, myRole }: TableHeaderProps) {
     const router = useRouter();
     const { leaveTable } = useTableStore();
+    const {
+        activeSessions,
+        nextSessions,
+        fetchActiveSession,
+        fetchNextSession,
+        startSession,
+        isStartingSession,
+    } = useSessionStore();
     const [isLeaving, setIsLeaving] = useState(false);
+
+    const activeSession = activeSessions[tableId];
+    const nextSession = nextSessions[tableId];
+
+    useEffect(() => {
+        fetchActiveSession(tableId);
+        fetchNextSession(tableId);
+    }, [tableId, fetchActiveSession, fetchNextSession]);
 
     const handleLeaveTable = async () => {
         const confirmMessage =
@@ -38,6 +55,16 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
         } else {
             alert(result.error || "Une erreur est survenue.");
             setIsLeaving(false);
+        }
+    };
+
+    const handleStartLive = async () => {
+        if (!nextSession?.id) return;
+        if (!confirm("Voulez-vous démarrer cette session et rejoindre le Live ?")) return;
+
+        const res = await startSession(nextSession.id);
+        if (res.success && res.session) {
+            router.push(`/tables/${tableId}/session/live/${res.session.id}`);
         }
     };
 
@@ -71,12 +98,32 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                             Sessions
                         </Link>
                     </Button>
-                    <Button size="sm" asChild>
-                        <Link href={`/tables/${tableId}/session/live/latest`}>
-                            <Play className="mr-2 h-4 w-4 fill-current" />
-                            LIVE
-                        </Link>
-                    </Button>
+
+                    {/* Bouton LIVE dynamique */}
+                    {activeSession ? (
+                        <Button size="sm" asChild className="bg-green-600 hover:bg-green-700">
+                            <Link href={`/tables/${tableId}/session/live/${activeSession.id}`}>
+                                <Play className="mr-2 h-4 w-4 fill-current" />
+                                LIVE
+                            </Link>
+                        </Button>
+                    ) : myRole === "gm" && nextSession ? (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-green-600 text-green-600 hover:bg-green-50"
+                            onClick={handleStartLive}
+                            disabled={isStartingSession}
+                        >
+                            {isStartingSession ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Play className="mr-2 h-4 w-4 fill-current" />
+                            )}
+                            LANCER LIVE
+                        </Button>
+                    ) : null}
+
                     <Button
                         variant="ghost"
                         size="sm"
