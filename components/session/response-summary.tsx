@@ -5,10 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, HelpCircle, Clock, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SessionResponseWithProfile, ResponseStatus } from "@/types/session";
+import { ResponseStatus } from "@/types/session";
 
 interface ResponseSummaryProps {
     sessionId: string;
+}
+
+interface PersonDisplay {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
 }
 
 export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
@@ -17,7 +23,7 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
 
     if (!data) return null;
 
-    const { summary, responses: allResponses, non_responders } = data;
+    const { summary, responses: activeResponses, non_responders } = data;
 
     const groups: {
         status: ResponseStatus | "pending";
@@ -25,7 +31,7 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
         count: number;
         icon: LucideIcon;
         color: string;
-        people: (Partial<SessionResponseWithProfile> & { profiles: any })[];
+        people: PersonDisplay[];
     }[] = [
         {
             status: "going",
@@ -33,7 +39,7 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
             count: summary.going,
             icon: Check,
             color: "text-green-600",
-            people: allResponses.filter((r) => r.status === "going"),
+            people: activeResponses.filter((r) => r.status === "going").map((r) => r.profiles),
         },
         {
             status: "maybe",
@@ -41,7 +47,7 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
             count: summary.maybe,
             icon: HelpCircle,
             color: "text-amber-600",
-            people: allResponses.filter((r) => r.status === "maybe"),
+            people: activeResponses.filter((r) => r.status === "maybe").map((r) => r.profiles),
         },
         {
             status: "declined",
@@ -49,7 +55,7 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
             count: summary.declined,
             icon: X,
             color: "text-red-600",
-            people: allResponses.filter((r) => r.status === "declined"),
+            people: activeResponses.filter((r) => r.status === "declined").map((r) => r.profiles),
         },
         {
             status: "pending",
@@ -57,7 +63,11 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
             count: summary.pending,
             icon: Clock,
             color: "text-slate-400",
-            people: non_responders.map((nr) => ({ profiles: nr })),
+            people: non_responders.map((nr) => ({
+                id: nr.id,
+                display_name: nr.display_name,
+                avatar_url: nr.avatar_url,
+            })),
         },
     ];
 
@@ -69,7 +79,6 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                {/* Stats cards */}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     {groups.map((group) => (
                         <div
@@ -86,7 +95,6 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
                     ))}
                 </div>
 
-                {/* Detailed lists */}
                 <div className="space-y-4">
                     {groups.map(
                         (group) =>
@@ -100,14 +108,13 @@ export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
                                         </span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {group.people.map((p, idx) => (
+                                        {group.people.map((person) => (
                                             <Badge
-                                                key={p.profiles?.id || idx}
-
+                                                key={person.id}
                                                 variant="secondary"
                                                 className="border-slate-200 bg-white px-3 py-1 font-normal"
                                             >
-                                                {p.profiles?.display_name || "Anonyme"}
+                                                {person.display_name || "Anonyme"}
                                             </Badge>
                                         ))}
                                     </div>

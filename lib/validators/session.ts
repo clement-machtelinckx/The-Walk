@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const sessionStatusSchema = z.enum(["scheduled", "active", "completed", "cancelled"]);
 export const responseStatusSchema = z.enum(["going", "maybe", "declined", "pending"]);
+export const userResponseStatusSchema = z.enum(["going", "maybe", "declined"]);
 
 export const createSessionSchema = z.object({
     table_id: z.string().uuid("ID de table invalide"),
@@ -21,9 +22,10 @@ export const updateSessionSchema = z.object({
 });
 
 export const sessionResponseSchema = z.object({
-    status: responseStatusSchema,
+    status: userResponseStatusSchema,
 });
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
 export type UpdateSessionInput = z.infer<typeof updateSessionSchema>;
 export type SessionResponseInput = z.infer<typeof sessionResponseSchema>;
+export type UserResponseStatus = z.infer<typeof userResponseStatusSchema>;

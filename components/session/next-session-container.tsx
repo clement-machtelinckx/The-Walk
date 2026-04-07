@@ -16,7 +16,7 @@ interface NextSessionContainerProps {
 }
 
 export function NextSessionContainer({ tableId, myRole }: NextSessionContainerProps) {
-    const { nextSessions, isLoading, fetchNextSession, fetchSessionResponses } = useSessionStore();
+    const { nextSessions, isLoadingSession, fetchNextSession, fetchSessionResponses } = useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const canManage = myRole === "gm";
@@ -33,12 +33,12 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         }
     }, [session?.id, fetchSessionResponses]);
 
-    const handleSuccess = (newSession: Session) => {
+    const handleSuccess = () => {
         setIsEditing(false);
         setIsCreating(false);
     };
 
-    if (isLoading && session === undefined) {
+    if (isLoadingSession && session === undefined) {
         return (
             <div className="flex justify-center py-20">
                 <Loader2 className="text-primary/50 h-8 w-8 animate-spin" />

@@ -1,37 +1,34 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/server";
+import { requireAuth } from "@/lib/auth/server";
 import { ResponseService } from "@/lib/services/responses/response-service";
 import { sessionResponseSchema } from "@/lib/validators/session";
+import { AppError } from "@/lib/errors";
+import { z } from "zod";
 
 export async function POST(
     request: Request,
     { params }: { params: Promise<{ sessionId: string }> },
 ) {
     try {
-        const user = await getCurrentUser();
-        if (!user) {
-            return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-        }
-
+        const user = await requireAuth();
         const { sessionId } = await params;
         const body = await request.json();
 
-        const validated = sessionResponseSchema.safeParse(body);
-        if (!validated.success) {
+        const validated = sessionResponseSchema.parse(body);
+        const response = await ResponseService.respondToSession(user.id, sessionId, validated);
+
+        return NextResponse.json({ response });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return NextResponse.json({ error: error.message }, { status: error.status });
+        }
+        if (error instanceof z.ZodError) {
             return NextResponse.json(
-                { error: "Données invalides", details: validated.error.format() },
+                { error: "Données invalides", details: error.format() },
                 { status: 400 },
             );
         }
-
-        const response = await ResponseService.respondToSession(user.id, sessionId, validated.data);
-
-        return NextResponse.json({ response });
-    } catch (error: unknown) {
         console.error("[SESSION_RESPOND_POST]", error);
-        const err = error as any;
-        const status = err.name === "NotFoundError" ? 404 : err.name === "ForbiddenError" ? 403 : 500;
-        return NextResponse.json({ error: err.message || "Erreur interne" }, { status });
+        return NextResponse.json({ error: "Une erreur interne est survenue" }, { status: 500 });
     }
-
 }

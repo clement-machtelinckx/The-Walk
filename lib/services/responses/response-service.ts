@@ -5,7 +5,6 @@ import { SessionResponseInput } from "@/lib/validators/session";
 import {
     SessionResponse,
     SessionResponsesSummary,
-    SessionResponseWithProfile,
 } from "@/types/session";
 
 export const ResponseService = {
@@ -37,45 +36,30 @@ export const ResponseService = {
      * Récupérer les réponses et le récapitulatif d'une session.
      */
     async getSessionResponses(userId: string, sessionId: string): Promise<SessionResponsesSummary> {
-        // 1. Récupérer la session
         const session = await SessionRepository.getById(sessionId);
         if (!session) throw new NotFoundError("Session", sessionId);
 
-        // 2. Vérifier que l'utilisateur est membre de la table
         const membership = await MembershipRepository.getByUserAndTable(userId, session.table_id);
         if (!membership) {
             throw new ForbiddenError("Seuls les membres de la table peuvent voir les réponses.");
         }
 
-        // 3. Récupérer toutes les réponses avec profils
-        // Note: Repository.listResponses needs casting or explicit return type
-        const responses = (await SessionRepository.listResponses(
-            sessionId,
-        )) as SessionResponseWithProfile[];
-
-        // 4. Récupérer tous les membres de la table pour trouver les non-répondants
+        const allResponses = await SessionRepository.listResponses(sessionId);
         const allMembers = await MembershipRepository.listByTable(session.table_id);
 
-        // 5. Calculer le résumé
+        // Filtrer les réponses actives (non-pending)
+        const activeResponses = allResponses.filter((r) => r.status !== "pending");
+        const respondedUserIds = new Set(activeResponses.map((r) => r.user_id));
+
         const summary = {
-            going: 0,
-            maybe: 0,
-            declined: 0,
-            pending: 0,
+            going: activeResponses.filter((r) => r.status === "going").length,
+            maybe: activeResponses.filter((r) => r.status === "maybe").length,
+            declined: activeResponses.filter((r) => r.status === "declined").length,
+            pending: 0, // Sera calculé ci-dessous
             total: allMembers.length,
         };
 
-        const respondedUserIds = new Set(responses.map((r) => r.user_id));
-
-        responses.forEach((r) => {
-            if (r.status in summary) {
-                summary[r.status as keyof typeof summary]++;
-            }
-        });
-
-        // 6. Identifier les non-répondants (membres qui n'ont pas de réponse ou réponse "pending")
-        // En base, on peut avoir "pending" ou pas de ligne du tout.
-        // On considère ici les membres sans ligne comme "pending" implicite.
+        // Les non-répondants sont les membres sans réponse active
         const non_responders = allMembers
             .filter((m) => !respondedUserIds.has(m.user_id))
             .map((m) => ({
@@ -84,22 +68,12 @@ export const ResponseService = {
                 avatar_url: m.profiles.avatar_url,
             }));
 
-        // Ajouter aussi ceux qui ont explicitement mis "pending" si ça arrive
-        const explicitPending = responses
-            .filter((r) => r.status === "pending")
-            .map((r) => ({
-                id: r.profiles.id,
-                display_name: r.profiles.display_name,
-                avatar_url: r.profiles.avatar_url,
-            }));
-
-        const finalNonResponders = [...non_responders, ...explicitPending];
-        summary.pending = finalNonResponders.length;
+        summary.pending = non_responders.length;
 
         return {
-            responses,
+            responses: activeResponses,
             summary,
-            non_responders: finalNonResponders,
+            non_responders,
         };
     },
 };

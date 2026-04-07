@@ -9,7 +9,9 @@ import {
 interface SessionState {
     nextSessions: Record<string, Session | null>;
     responses: Record<string, SessionResponsesSummary | null>;
-    isLoading: boolean;
+    isLoadingSession: boolean;
+    isLoadingResponses: boolean;
+    isResponding: boolean;
     error: string | null;
 
     fetchNextSession: (tableId: string) => Promise<void>;
@@ -32,11 +34,13 @@ interface SessionState {
 export const useSessionStore = create<SessionState>((set, get) => ({
     nextSessions: {},
     responses: {},
-    isLoading: false,
+    isLoadingSession: false,
+    isLoadingResponses: false,
+    isResponding: false,
     error: null,
 
     fetchNextSession: async (tableId: string) => {
-        set({ isLoading: true, error: null });
+        set({ isLoadingSession: true, error: null });
         try {
             const res = await fetch(`/api/tables/${tableId}/sessions/next`);
             const data = await res.json();
@@ -46,16 +50,16 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                         ...state.nextSessions,
                         [tableId]: data.session,
                     },
-                    isLoading: false,
+                    isLoadingSession: false,
                 }));
             } else {
                 set({
                     error: data.error || "Erreur lors de la récupération de la session",
-                    isLoading: false,
+                    isLoadingSession: false,
                 });
             }
         } catch (err) {
-            set({ error: "Erreur réseau", isLoading: false });
+            set({ error: "Erreur réseau", isLoadingSession: false });
         }
     },
 
@@ -123,7 +127,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     },
 
     fetchSessionResponses: async (sessionId: string) => {
-        set({ isLoading: true, error: null });
+        set({ isLoadingResponses: true, error: null });
         try {
             const res = await fetch(`/api/sessions/${sessionId}/responses`);
             const data = await res.json();
@@ -133,21 +137,21 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                         ...state.responses,
                         [sessionId]: data,
                     },
-                    isLoading: false,
+                    isLoadingResponses: false,
                 }));
             } else {
                 set({
                     error: data.error || "Erreur lors de la récupération des réponses",
-                    isLoading: false,
+                    isLoadingResponses: false,
                 });
             }
         } catch (err) {
-            set({ error: "Erreur réseau", isLoading: false });
+            set({ error: "Erreur réseau", isLoadingResponses: false });
         }
     },
 
     respondToSession: async (sessionId: string, payload: SessionResponseInput) => {
-        set({ error: null });
+        set({ isResponding: true, error: null });
         try {
             const res = await fetch(`/api/sessions/${sessionId}/respond`, {
                 method: "POST",
@@ -158,14 +162,17 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             if (res.ok) {
                 // Re-fetch responses to ensure summary is up to date
                 await get().fetchSessionResponses(sessionId);
+                set({ isResponding: false });
                 return { success: true };
             } else {
+                set({ isResponding: false, error: data.error });
                 return {
                     success: false,
                     error: data.error || "Erreur lors de l'enregistrement de la réponse",
                 };
             }
         } catch (err) {
+            set({ isResponding: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

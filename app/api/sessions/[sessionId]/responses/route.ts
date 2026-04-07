@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/server";
+import { requireAuth } from "@/lib/auth/server";
 import { ResponseService } from "@/lib/services/responses/response-service";
+import { AppError } from "@/lib/errors";
 
 export async function GET(
     _request: Request,
     { params }: { params: Promise<{ sessionId: string }> },
 ) {
     try {
-        const user = await getCurrentUser();
-        if (!user) {
-            return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-        }
-
+        const user = await requireAuth();
         const { sessionId } = await params;
         const data = await ResponseService.getSessionResponses(user.id, sessionId);
 
         return NextResponse.json(data);
-    } catch (error: unknown) {
+    } catch (error) {
+        if (error instanceof AppError) {
+            return NextResponse.json({ error: error.message }, { status: error.status });
+        }
         console.error("[SESSION_RESPONSES_GET]", error);
-        const err = error as any;
-        const status = err.name === "NotFoundError" ? 404 : err.name === "ForbiddenError" ? 403 : 500;
-        return NextResponse.json({ error: err.message || "Erreur interne" }, { status });
+        return NextResponse.json({ error: "Une erreur interne est survenue" }, { status: 500 });
     }
-
 }

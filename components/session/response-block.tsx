@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { useSessionStore } from "@/store/session-store";
 import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, X, HelpCircle, Loader2, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ResponseStatus } from "@/types/session";
+import { UserResponseStatus } from "@/lib/validators/session";
 
 interface ResponseBlockProps {
     sessionId: string;
@@ -15,26 +14,19 @@ interface ResponseBlockProps {
 
 export function ResponseBlock({ sessionId }: ResponseBlockProps) {
     const { user } = useAuthStore();
-    const { responses, respondToSession } = useSessionStore();
-    const [localIsLoading, setLocalIsLoading] = useState(false);
+    const { responses, respondToSession, isResponding } = useSessionStore();
 
     const summary = responses[sessionId];
     const myResponse = summary?.responses.find((r) => r.user_id === user?.id);
     const currentStatus = myResponse?.status || "pending";
 
-    const handleRespond = async (status: ResponseStatus) => {
-        if (status === currentStatus || localIsLoading) return;
-
-        setLocalIsLoading(true);
-        try {
-            await respondToSession(sessionId, { status });
-        } finally {
-            setLocalIsLoading(false);
-        }
+    const handleRespond = async (status: UserResponseStatus) => {
+        if (status === currentStatus || isResponding) return;
+        await respondToSession(sessionId, { status });
     };
 
     const options: {
-        status: ResponseStatus;
+        status: UserResponseStatus;
         label: string;
         icon: LucideIcon;
         color: string;
@@ -73,6 +65,7 @@ export function ResponseBlock({ sessionId }: ResponseBlockProps) {
                     {options.map((option) => {
                         const Icon = option.icon;
                         const isActive = currentStatus === option.status;
+                        const isThisLoading = isResponding && isActive;
 
                         return (
                             <Button
@@ -83,9 +76,9 @@ export function ResponseBlock({ sessionId }: ResponseBlockProps) {
                                     isActive ? option.activeColor : option.color,
                                 )}
                                 onClick={() => handleRespond(option.status)}
-                                disabled={localIsLoading}
+                                disabled={isResponding}
                             >
-                                {localIsLoading && isActive ? (
+                                {isThisLoading ? (
                                     <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
                                     <Icon className="h-5 w-5" />
