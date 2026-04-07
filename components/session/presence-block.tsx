@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSessionStore } from "@/store/session-store";
 import {
     Dialog,
@@ -46,11 +46,13 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
         }
     };
 
-    useEffect(() => {
-        if (rollCall.length > 0 && localPresences.length === 0) {
-            setLocalPresences(rollCall);
-        }
-    }, [rollCall, localPresences.length]);
+    // Synchroniser localPresences avec rollCall quand les données arrivent
+    const [lastFetchedSessionId, setLastFetchedSessionId] = useState<string | null>(null);
+
+    if (rollCall.length > 0 && lastFetchedSessionId !== sessionId) {
+        setLocalPresences(rollCall);
+        setLastFetchedSessionId(sessionId);
+    }
 
     const handleStatusChange = (userId: string, status: PresenceStatus) => {
         setLocalPresences((prev) => prev.map((p) => (p.user_id === userId ? { ...p, status } : p)));

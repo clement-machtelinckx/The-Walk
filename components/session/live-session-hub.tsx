@@ -5,11 +5,12 @@ import { Session } from "@/types/session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Loader2, MessageSquare, Sword, Dice5, FileText } from "lucide-react";
+import { LogOut, Loader2, Sword, Dice5, FileText } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
 import { PresenceBlock } from "./presence-block";
+import { LivechatBlock } from "./livechat-block";
 
 interface LiveSessionHubProps {
     session: Session;
@@ -124,13 +125,8 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                 </Card>
             </div>
 
-            <div className="bg-muted/30 rounded-xl border p-10 text-center">
-                <MessageSquare className="text-muted-foreground mx-auto mb-4 h-10 w-10" />
-                <h3 className="text-lg font-bold">Chat Live</h3>
-                <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-                    Le chat en temps réel sera implémenté dans le prochain ticket. Utilisez le
-                    pré-chat pour le moment.
-                </p>
+            <div className="mx-auto max-w-4xl">
+                <LivechatBlock sessionId={session.id} />
             </div>
         </div>
     );
