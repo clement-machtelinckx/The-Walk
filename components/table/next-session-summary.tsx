@@ -14,7 +14,7 @@ interface NextSessionSummaryProps {
 export function NextSessionSummary({ tableId, session }: NextSessionSummaryProps) {
     if (!session) {
         return (
-            <Card className="bg-card/50 h-full border-dashed">
+            <Card className="bg-card/50 border-dashed">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg font-bold">
                         <Calendar size={18} className="text-muted-foreground" />
@@ -39,7 +39,7 @@ export function NextSessionSummary({ tableId, session }: NextSessionSummaryProps
     }
 
     return (
-        <Card className="border-primary/20 bg-card/50 h-full">
+        <Card className="border-primary/20 bg-card/50">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg font-bold">
                     <Calendar size={18} className="text-primary" />

@@ -37,7 +37,7 @@ export default async function TableDetailPage({
                     myRole={details.myRole}
                 />
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
                     <div className="space-y-6 md:col-span-2">
                         {/* Summary / Main Feed Placeholder */}
                         <NextSessionSummary tableId={tableId} session={details.nextSession} />
