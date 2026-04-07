@@ -11,6 +11,7 @@ export const siteConfig = {
     description,
     locale,
     links: {
-        crawl: "https://the-crawl.vercel.app/", // Placeholder pour l'accès global à The Crawl
+        crawl: process.env.THE_CRAWL_URL || "https://the-crawl.vercel.app/",
     },
+
 };

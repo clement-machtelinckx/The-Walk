@@ -16,7 +16,12 @@ export default async function TableLiveSessionPage({
     // 1. Vérifier la session
     const session = await SessionService.getSessionById(user.id, sessionId);
 
-    // 2. Vérifier si elle est active. Si non, on redirige.
+    // 2. Vérifier la cohérence de la table (sécurité URL)
+    if (session.table_id !== tableId) {
+        redirect(`/tables/${tableId}`);
+    }
+
+    // 3. Vérifier si elle est active. Si non, on redirige.
     if (session.status !== "active") {
         redirect(`/tables/${tableId}`);
     }
