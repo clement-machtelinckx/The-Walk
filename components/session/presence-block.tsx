@@ -29,7 +29,6 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
         savePresence,
         isLoadingPresence,
         isSavingPresence,
-        error: storeError,
     } = useSessionStore();
     const [isOpen, setIsOpen] = useState(false);
     const [localPresences, setLocalPresences] = useState<RollCallMember[]>([]);
@@ -39,18 +38,19 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
     const rollCall = data?.rollCall || [];
     const summary = data?.summary;
 
-    useEffect(() => {
-        if (isOpen) {
+    const handleOpenChange = (open: boolean) => {
+        setIsOpen(open);
+        if (open) {
             setLocalError(null);
             fetchPresence(sessionId);
         }
-    }, [isOpen, sessionId, fetchPresence]);
+    };
 
     useEffect(() => {
-        if (rollCall.length > 0) {
+        if (rollCall.length > 0 && localPresences.length === 0) {
             setLocalPresences(rollCall);
         }
-    }, [rollCall]);
+    }, [rollCall, localPresences.length]);
 
     const handleStatusChange = (userId: string, status: PresenceStatus) => {
         setLocalPresences((prev) => prev.map((p) => (p.user_id === userId ? { ...p, status } : p)));
@@ -96,7 +96,7 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="border-primary/20 gap-2">
                     <Users size={16} />
