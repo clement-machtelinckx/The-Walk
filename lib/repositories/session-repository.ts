@@ -103,6 +103,19 @@ export const SessionRepository = {
         return data;
     },
 
+    async getCompletedSessions(tableId: string): Promise<Session[]> {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("sessions")
+            .select("*")
+            .eq("table_id", tableId)
+            .eq("status", "completed")
+            .order("ended_at", { ascending: false });
+
+        handleDbError(error, "SessionRepository.getCompletedSessions");
+        return data || [];
+    },
+
     // Session Responses
     async upsertResponse(
         sessionId: string,

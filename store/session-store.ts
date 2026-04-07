@@ -20,10 +20,16 @@ interface PresenceStateData {
     summary: PresenceSummary;
 }
 
+export interface SessionHistoryItem {
+    session: Session;
+    presenceSummary: PresenceSummary | null;
+}
+
 interface SessionState {
     // Data
     nextSessions: Record<string, Session | null>;
     activeSessions: Record<string, Session | null>;
+    sessionHistories: Record<string, SessionHistoryItem[]>;
     responses: Record<string, SessionResponsesSummary | null>;
     prechats: Record<string, SessionPrechatData | null>;
     livechats: Record<string, SessionLiveChatData | null>;
@@ -34,6 +40,7 @@ interface SessionState {
     // Loading states
     isLoadingSession: boolean;
     isLoadingActiveSession: boolean;
+    isLoadingHistory: boolean;
     isLoadingResponses: boolean;
     isLoadingPrechat: boolean;
     isLoadingLivechat: boolean;
@@ -53,6 +60,7 @@ interface SessionState {
     // Actions
     fetchNextSession: (tableId: string) => Promise<void>;
     fetchActiveSession: (tableId: string) => Promise<void>;
+    fetchSessionHistory: (tableId: string) => Promise<void>;
     createSession: (
         tableId: string,
         payload: CreateSessionInput,
@@ -110,6 +118,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     // Initial State
     nextSessions: {},
     activeSessions: {},
+    sessionHistories: {},
     responses: {},
     prechats: {},
     livechats: {},
@@ -118,6 +127,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     groupNotes: {},
     isLoadingSession: false,
     isLoadingActiveSession: false,
+    isLoadingHistory: false,
     isLoadingResponses: false,
     isLoadingPrechat: false,
     isLoadingLivechat: false,
@@ -156,6 +166,54 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ error: "Erreur réseau", isLoadingSession: false });
+        }
+    },
+
+    fetchActiveSession: async (tableId: string) => {
+        set({ isLoadingActiveSession: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}/sessions/active`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    activeSessions: {
+                        ...state.activeSessions,
+                        [tableId]: data.session,
+                    },
+                    isLoadingActiveSession: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération de la session active",
+                    isLoadingActiveSession: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingActiveSession: false });
+        }
+    },
+
+    fetchSessionHistory: async (tableId: string) => {
+        set({ isLoadingHistory: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}/sessions/history`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    sessionHistories: {
+                        ...state.sessionHistories,
+                        [tableId]: data.history,
+                    },
+                    isLoadingHistory: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération de l'historique",
+                    isLoadingHistory: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingHistory: false });
         }
     },
 
@@ -369,30 +427,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         }
     },
 
-    fetchActiveSession: async (tableId: string) => {
-        set({ isLoadingActiveSession: true, error: null });
-        try {
-            const res = await fetch(`/api/tables/${tableId}/sessions/active`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    activeSessions: {
-                        ...state.activeSessions,
-                        [tableId]: data.session,
-                    },
-                    isLoadingActiveSession: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération de la session active",
-                    isLoadingActiveSession: false,
-                });
-            }
-        } catch (err) {
-            set({ error: "Erreur réseau", isLoadingActiveSession: false });
-        }
-    },
-
     startSession: async (sessionId: string) => {
         set({ isStartingSession: true, error: null });
         try {
@@ -441,6 +475,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isEndingSession: false,
                 }));
                 await get().fetchNextSession(session.table_id);
+                await get().fetchSessionHistory(session.table_id);
                 return { success: true, session };
             } else {
                 set({ isEndingSession: false, error: data.error });

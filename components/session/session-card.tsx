@@ -51,7 +51,7 @@ export function SessionCard({ session, canEdit, onEdit }: SessionCardProps) {
                     <div className="space-y-2">
                         <div className="text-primary flex items-center gap-2 text-sm font-bold italic">
                             <FileText size={16} />
-                            Notes de session
+                            Description
                         </div>
                         <div className="bg-background border-primary/5 text-muted-foreground rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
                             {session.description}
