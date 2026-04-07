@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Session } from "@/types/session";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
 import { NextSessionEmptyState } from "./next-session-empty-state";
 import { ResponseBlock } from "./response-block";
 import { ResponseSummary } from "./response-summary";
+import { PrechatBlock } from "./prechat-block";
 import { Loader2 } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 
@@ -16,7 +16,8 @@ interface NextSessionContainerProps {
 }
 
 export function NextSessionContainer({ tableId, myRole }: NextSessionContainerProps) {
-    const { nextSessions, isLoadingSession, fetchNextSession, fetchSessionResponses } = useSessionStore();
+    const { nextSessions, isLoadingSession, fetchNextSession, fetchSessionResponses } =
+        useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const canManage = myRole === "gm";
@@ -82,12 +83,26 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
     }
 
     return (
-        <div className="mx-auto max-w-3xl space-y-6 py-4">
-            <SessionCard session={session} canEdit={canManage} onEdit={() => setIsEditing(true)} />
-            
-            <div className="grid grid-cols-1 gap-6">
+        <div className="mx-auto max-w-5xl space-y-6 px-4 py-4">
+            <div className="mx-auto w-full max-w-3xl">
+                <SessionCard
+                    session={session}
+                    canEdit={canManage}
+                    onEdit={() => setIsEditing(true)}
+                />
+            </div>
+
+            <div className="mx-auto w-full max-w-3xl">
                 <ResponseBlock sessionId={session.id} />
-                <ResponseSummary sessionId={session.id} />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                <div className="lg:col-span-2">
+                    <ResponseSummary sessionId={session.id} />
+                </div>
+                <div className="lg:col-span-3">
+                    <PrechatBlock sessionId={session.id} />
+                </div>
             </div>
         </div>
     );

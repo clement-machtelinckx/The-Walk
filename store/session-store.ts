@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Session, SessionResponsesSummary } from "@/types/session";
+import { Session, SessionResponsesSummary, SessionPrechatData } from "@/types/session";
 import {
     CreateSessionInput,
     UpdateSessionInput,
@@ -9,9 +9,12 @@ import {
 interface SessionState {
     nextSessions: Record<string, Session | null>;
     responses: Record<string, SessionResponsesSummary | null>;
+    prechats: Record<string, SessionPrechatData | null>;
     isLoadingSession: boolean;
     isLoadingResponses: boolean;
+    isLoadingPrechat: boolean;
     isResponding: boolean;
+    isSendingMessage: boolean;
     error: string | null;
 
     fetchNextSession: (tableId: string) => Promise<void>;
@@ -29,14 +32,23 @@ interface SessionState {
         sessionId: string,
         payload: SessionResponseInput,
     ) => Promise<{ success: boolean; error?: string }>;
+
+    fetchPrechatMessages: (sessionId: string, page?: number) => Promise<void>;
+    sendPrechatMessage: (
+        sessionId: string,
+        content: string,
+    ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
     nextSessions: {},
     responses: {},
+    prechats: {},
     isLoadingSession: false,
     isLoadingResponses: false,
+    isLoadingPrechat: false,
     isResponding: false,
+    isSendingMessage: false,
     error: null,
 
     fetchNextSession: async (tableId: string) => {
@@ -173,6 +185,57 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ isResponding: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchPrechatMessages: async (sessionId: string, page = 1) => {
+        set({ isLoadingPrechat: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/prechat?page=${page}`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    prechats: {
+                        ...state.prechats,
+                        [sessionId]: data,
+                    },
+                    isLoadingPrechat: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération des messages",
+                    isLoadingPrechat: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingPrechat: false });
+        }
+    },
+
+    sendPrechatMessage: async (sessionId: string, content: string) => {
+        set({ isSendingMessage: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/prechat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // On rafraîchit les messages immédiatement
+                await get().fetchPrechatMessages(sessionId);
+                set({ isSendingMessage: false });
+                return { success: true };
+            } else {
+                set({ isSendingMessage: false, error: data.error });
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de l'envoi du message",
+                };
+            }
+        } catch (err) {
+            set({ isSendingMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },
