@@ -98,7 +98,10 @@ export const SessionRepository = {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_responses")
-            .upsert({ session_id: sessionId, user_id: userId, status: input.status })
+            .upsert(
+                { session_id: sessionId, user_id: userId, status: input.status, updated_at: new Date().toISOString() },
+                { onConflict: "session_id,user_id" }
+            )
             .select()
             .single();
 

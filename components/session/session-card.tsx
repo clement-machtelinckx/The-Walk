@@ -1,10 +1,9 @@
 import { Session } from "@/types/session";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Edit, FileText } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Calendar, Edit, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatFullDate } from "@/lib/utils/date";
 
 interface SessionCardProps {
     session: Session;
@@ -36,40 +35,15 @@ export function SessionCard({ session, canEdit, onEdit }: SessionCardProps) {
             </CardHeader>
 
             <CardContent className="space-y-6 pt-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="bg-muted/50 flex items-center gap-3 rounded-lg border p-3">
-                        <div className="bg-primary/10 text-primary rounded-full p-2">
-                            <Calendar size={20} />
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                                Date
-                            </p>
-                            <p className="font-bold">
-                                {session.scheduled_at
-                                    ? format(new Date(session.scheduled_at), "eeee d MMMM", {
-                                          locale: fr,
-                                      })
-                                    : "Non fixée"}
-                            </p>
-                        </div>
+                <div className="bg-muted/50 flex items-center gap-4 rounded-lg border p-4">
+                    <div className="bg-primary/10 text-primary rounded-full p-2">
+                        <Calendar size={24} />
                     </div>
-                    <div className="bg-muted/50 flex items-center gap-3 rounded-lg border p-3">
-                        <div className="bg-primary/10 text-primary rounded-full p-2">
-                            <Clock size={20} />
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                                Heure
-                            </p>
-                            <p className="font-bold">
-                                {session.scheduled_at
-                                    ? format(new Date(session.scheduled_at), "HH:mm", {
-                                          locale: fr,
-                                      })
-                                    : "Non fixée"}
-                            </p>
-                        </div>
+                    <div>
+                        <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                            Date et Heure
+                        </p>
+                        <p className="text-lg font-bold">{formatFullDate(session.scheduled_at)}</p>
                     </div>
                 </div>
 

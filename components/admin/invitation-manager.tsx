@@ -14,9 +14,8 @@ import {
 } from "@/components/ui/select";
 import { Loader2, UserPlus, Copy, Check, Clock } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { useInvitationStore } from "@/store/invitation-store";
+import { formatShortDate } from "@/lib/utils/date";
 
 interface InvitationManagerProps {
     tableId: string;
@@ -145,12 +144,7 @@ export function InvitationManager({ tableId }: InvitationManagerProps) {
                                         <div className="text-muted-foreground flex items-center gap-3 text-xs">
                                             <span className="flex items-center gap-1">
                                                 <Clock size={12} />
-                                                Expire le{" "}
-                                                {format(
-                                                    new Date(invitation.expires_at!),
-                                                    "dd/MM/yyyy",
-                                                    { locale: fr },
-                                                )}
+                                                Expire le {formatShortDate(invitation.expires_at)}
                                             </span>
                                             <span
                                                 className={`font-medium capitalize ${

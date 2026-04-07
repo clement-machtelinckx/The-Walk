@@ -7,6 +7,7 @@ import { MemberList } from "@/components/table/member-list";
 import { NextSessionSummary } from "@/components/table/next-session-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity } from "lucide-react";
+import { formatShortDate } from "@/lib/utils/date";
 
 export async function generateMetadata({ params }: { params: Promise<{ tableId: string }> }) {
     const { tableId } = await params;
@@ -66,7 +67,7 @@ export default async function TableDetailPage({
                                     Date de création
                                 </span>
                                 <span className="text-xs font-medium">
-                                    {new Date(details.table.created_at).toLocaleDateString()}
+                                    {formatShortDate(details.table.created_at)}
                                 </span>
                             </div>
                             <div className="flex justify-between border-b pb-2">
