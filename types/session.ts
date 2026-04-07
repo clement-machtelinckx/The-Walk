@@ -1,6 +1,6 @@
 export type SessionStatus = "scheduled" | "active" | "completed" | "cancelled";
 export type ResponseStatus = "going" | "maybe" | "declined" | "pending";
-export type PresenceStatus = "present" | "absent" | "late" | "excused";
+export type PresenceStatus = "present" | "absent" | "late";
 
 export interface Session {
     id: string;
@@ -53,6 +53,29 @@ export interface SessionPresence {
     user_id: string;
     status: PresenceStatus;
     last_seen_at: string;
+}
+
+export interface SessionPresenceWithProfile extends SessionPresence {
+    profiles: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    };
+}
+
+export interface PresenceSummary {
+    present: number;
+    late: number;
+    absent: number;
+    total: number;
+}
+
+export interface RollCallMember {
+    user_id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    status: PresenceStatus;
+    rsvp_status?: ResponseStatus;
 }
 
 export interface SessionMessage {

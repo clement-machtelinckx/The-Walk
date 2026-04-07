@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Session } from "@/types/session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { LogOut, Loader2, MessageSquare, Sword, Dice5, FileText } from "lucide-r
 import { useSessionStore } from "@/store/session-store";
 import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
+import { PresenceBlock } from "./presence-block";
 
 interface LiveSessionHubProps {
     session: Session;
@@ -17,8 +19,12 @@ interface LiveSessionHubProps {
 
 export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps) {
     const router = useRouter();
-    const { endSession, isEndingSession } = useSessionStore();
+    const { endSession, isEndingSession, fetchPresence } = useSessionStore();
     const isGM = myRole === "gm";
+
+    useEffect(() => {
+        fetchPresence(session.id);
+    }, [session.id, fetchPresence]);
 
     const handleEndSession = async () => {
         if (
@@ -48,6 +54,7 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <PresenceBlock sessionId={session.id} isGM={isGM} />
                     <Button
                         variant="outline"
                         size="sm"
