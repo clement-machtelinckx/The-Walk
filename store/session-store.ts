@@ -1,26 +1,45 @@
 import { create } from "zustand";
-import { Session, SessionResponsesSummary, SessionPrechatData } from "@/types/session";
+import {
+    Session,
+    SessionResponsesSummary,
+    SessionPrechatData,
+    RollCallMember,
+    PresenceSummary,
+} from "@/types/session";
 import {
     CreateSessionInput,
     UpdateSessionInput,
     SessionResponseInput,
 } from "@/lib/validators/session";
+import { RollCallInput } from "@/lib/validators/presence";
+
+interface PresenceStateData {
+    rollCall: RollCallMember[];
+    summary: PresenceSummary;
+}
 
 interface SessionState {
+    // Data
     nextSessions: Record<string, Session | null>;
     activeSessions: Record<string, Session | null>;
     responses: Record<string, SessionResponsesSummary | null>;
     prechats: Record<string, SessionPrechatData | null>;
+    presenceData: Record<string, PresenceStateData | null>;
+
+    // Loading states
     isLoadingSession: boolean;
     isLoadingActiveSession: boolean;
     isLoadingResponses: boolean;
     isLoadingPrechat: boolean;
+    isLoadingPresence: boolean;
     isResponding: boolean;
     isSendingMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
+    isSavingPresence: boolean;
     error: string | null;
 
+    // Actions
     fetchNextSession: (tableId: string) => Promise<void>;
     fetchActiveSession: (tableId: string) => Promise<void>;
     createSession: (
@@ -50,23 +69,34 @@ interface SessionState {
     endSession: (
         sessionId: string,
     ) => Promise<{ success: boolean; session?: Session; error?: string }>;
+
+    fetchPresence: (sessionId: string) => Promise<void>;
+    savePresence: (
+        sessionId: string,
+        payload: RollCallInput,
+    ) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
+    // Initial State
     nextSessions: {},
     activeSessions: {},
     responses: {},
     prechats: {},
+    presenceData: {},
     isLoadingSession: false,
     isLoadingActiveSession: false,
     isLoadingResponses: false,
     isLoadingPrechat: false,
+    isLoadingPresence: false,
     isResponding: false,
     isSendingMessage: false,
     isStartingSession: false,
     isEndingSession: false,
+    isSavingPresence: false,
     error: null,
 
+    // Actions
     fetchNextSession: async (tableId: string) => {
         set({ isLoadingSession: true, error: null });
         try {
@@ -101,12 +131,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             });
             const data = await res.json();
             if (res.ok) {
-                // Optionally update nextSession if it's the new next session
-                // For simplicity, we just clear it to force a re-fetch or let the component handle it
                 set((state) => ({
                     nextSessions: {
                         ...state.nextSessions,
-                        [tableId]: data.session, // Overwrite with new session
+                        [tableId]: data.session,
                     },
                 }));
                 return { success: true, session: data.session };
@@ -132,7 +160,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             const data = await res.json();
             if (res.ok) {
                 const updatedSession = data.session;
-                // If it was stored as a next session, update it
                 const tableId = updatedSession.table_id;
                 if (get().nextSessions[tableId]?.id === sessionId) {
                     set((state) => ({
@@ -188,7 +215,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             });
             const data = await res.json();
             if (res.ok) {
-                // Re-fetch responses to ensure summary is up to date
                 await get().fetchSessionResponses(sessionId);
                 set({ isResponding: false });
                 return { success: true };
@@ -239,7 +265,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             });
             const data = await res.json();
             if (res.ok) {
-                // On rafraîchit les messages immédiatement
                 await get().fetchPrechatMessages(sessionId);
                 set({ isSendingMessage: false });
                 return { success: true };
@@ -289,7 +314,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             const data = await res.json();
             if (res.ok) {
                 const session = data.session;
-                // Mettre à jour l'état local
                 set((state) => ({
                     activeSessions: {
                         ...state.activeSessions,
@@ -297,7 +321,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     },
                     nextSessions: {
                         ...state.nextSessions,
-                        [session.table_id]: null, // Elle n'est plus "next" car elle est active
+                        [session.table_id]: null,
                     },
                     isStartingSession: false,
                 }));
@@ -321,7 +345,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             const data = await res.json();
             if (res.ok) {
                 const session = data.session;
-                // Mettre à jour l'état local
                 set((state) => ({
                     activeSessions: {
                         ...state.activeSessions,
@@ -329,7 +352,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     },
                     isEndingSession: false,
                 }));
-                // Rafraîchir la prochaine session pour cette table
                 await get().fetchNextSession(session.table_id);
                 return { success: true, session };
             } else {
@@ -338,6 +360,56 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ isEndingSession: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchPresence: async (sessionId: string) => {
+        set({ isLoadingPresence: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/presence`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    presenceData: {
+                        ...state.presenceData,
+                        [sessionId]: data,
+                    },
+                    isLoadingPresence: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération de la présence",
+                    isLoadingPresence: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingPresence: false });
+        }
+    },
+
+    savePresence: async (sessionId: string, payload: RollCallInput) => {
+        set({ isSavingPresence: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/presence`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                await get().fetchPresence(sessionId);
+                set({ isSavingPresence: false });
+                return { success: true };
+            } else {
+                set({ isSavingPresence: false, error: data.error });
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de l'enregistrement de l'appel",
+                };
+            }
+        } catch (err) {
+            set({ isSavingPresence: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },
