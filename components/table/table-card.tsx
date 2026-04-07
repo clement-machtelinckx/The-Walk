@@ -9,9 +9,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Calendar, ArrowRight } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { RoleBadge } from "@/components/special/role-badge";
+import { formatFullDate } from "@/lib/utils/date";
 
 interface TableCardProps {
     table: TableSummaryDTO;
@@ -44,11 +43,7 @@ export function TableCard({ table }: TableCardProps) {
                         </div>
                         {table.nextSession.scheduled_at && (
                             <div className="text-muted-foreground text-xs">
-                                {format(
-                                    new Date(table.nextSession.scheduled_at),
-                                    "eeee d MMMM 'à' HH:mm",
-                                    { locale: fr },
-                                )}
+                                {formatFullDate(table.nextSession.scheduled_at)}
                             </div>
                         )}
                     </div>

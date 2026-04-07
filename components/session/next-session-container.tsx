@@ -5,6 +5,8 @@ import { Session } from "@/types/session";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
 import { NextSessionEmptyState } from "./next-session-empty-state";
+import { ResponseBlock } from "./response-block";
+import { ResponseSummary } from "./response-summary";
 import { Loader2 } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 
@@ -14,7 +16,7 @@ interface NextSessionContainerProps {
 }
 
 export function NextSessionContainer({ tableId, myRole }: NextSessionContainerProps) {
-    const { nextSessions, isLoading, fetchNextSession } = useSessionStore();
+    const { nextSessions, isLoadingSession, fetchNextSession, fetchSessionResponses } = useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const canManage = myRole === "gm";
@@ -25,12 +27,18 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         fetchNextSession(tableId);
     }, [tableId, fetchNextSession]);
 
-    const handleSuccess = (newSession: Session) => {
+    useEffect(() => {
+        if (session?.id) {
+            fetchSessionResponses(session.id);
+        }
+    }, [session?.id, fetchSessionResponses]);
+
+    const handleSuccess = () => {
         setIsEditing(false);
         setIsCreating(false);
     };
 
-    if (isLoading && session === undefined) {
+    if (isLoadingSession && session === undefined) {
         return (
             <div className="flex justify-center py-20">
                 <Loader2 className="text-primary/50 h-8 w-8 animate-spin" />
@@ -74,8 +82,13 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
     }
 
     return (
-        <div className="mx-auto max-w-3xl py-4">
+        <div className="mx-auto max-w-3xl space-y-6 py-4">
             <SessionCard session={session} canEdit={canManage} onEdit={() => setIsEditing(true)} />
+            
+            <div className="grid grid-cols-1 gap-6">
+                <ResponseBlock sessionId={session.id} />
+                <ResponseSummary sessionId={session.id} />
+            </div>
         </div>
     );
 }

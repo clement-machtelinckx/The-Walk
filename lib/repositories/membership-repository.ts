@@ -1,6 +1,6 @@
 import { getServerClient } from "@/lib/db";
 import { handleDbError } from "./_shared/base";
-import { TableMember, TableRole } from "@/types/table";
+import { TableMember, TableRole, TableMemberWithProfile } from "@/types/table";
 
 export const MembershipRepository = {
     async getByUserAndTable(userId: string, tableId: string): Promise<TableMember | null> {
@@ -16,15 +16,15 @@ export const MembershipRepository = {
         return data;
     },
 
-    async listByTable(tableId: string): Promise<TableMember[]> {
+    async listByTable(tableId: string): Promise<TableMemberWithProfile[]> {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("table_memberships")
-            .select("*, profiles!inner(*)")
+            .select("*, profiles!inner(id, display_name, avatar_url)")
             .eq("table_id", tableId);
 
         handleDbError(error, "MembershipRepository.listByTable");
-        return data || [];
+        return (data as TableMemberWithProfile[]) || [];
     },
 
     async updateRole(tableId: string, userId: string, role: TableRole): Promise<void> {

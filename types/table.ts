@@ -18,6 +18,14 @@ export interface TableMember {
     joined_at: string;
 }
 
+export interface TableMemberWithProfile extends TableMember {
+    profiles: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    };
+}
+
 export interface Invitation {
     id: string;
     table_id: string;

@@ -19,6 +19,7 @@ import {
 import { Loader2, AlertCircle } from "lucide-react";
 import { Session } from "@/types/session";
 import { useSessionStore } from "@/store/session-store";
+import { formatForInput, inputToISO } from "@/lib/utils/date";
 
 interface SessionFormProps {
     tableId: string;
@@ -38,9 +39,7 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
             table_id: tableId,
             title: initialData?.title || "",
             description: initialData?.description || "",
-            scheduled_at: initialData?.scheduled_at
-                ? new Date(initialData.scheduled_at).toISOString().slice(0, 16)
-                : "",
+            scheduled_at: formatForInput(initialData?.scheduled_at),
         },
     });
 
@@ -50,7 +49,7 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
         // Convert local datetime-local string to ISO string for API
         const payload = {
             ...data,
-            scheduled_at: data.scheduled_at ? new Date(data.scheduled_at).toISOString() : null,
+            scheduled_at: inputToISO(data.scheduled_at),
         };
 
         const result = isEditing

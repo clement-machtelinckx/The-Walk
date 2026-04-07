@@ -1,11 +1,10 @@
 import { Session } from "@/types/session";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { EmptyState } from "@/components/special/empty-state";
+import { formatFullDate } from "@/lib/utils/date";
 
 interface NextSessionSummaryProps {
     tableId: string;
@@ -60,20 +59,8 @@ export function NextSessionSummary({ tableId, session }: NextSessionSummaryProps
                 <div className="grid grid-cols-1 gap-3 pt-2">
                     <div className="flex items-center gap-2 text-sm">
                         <Calendar size={16} className="text-primary" />
-                        <span className="font-medium">
-                            {session.scheduled_at
-                                ? format(new Date(session.scheduled_at), "eeee d MMMM", {
-                                      locale: fr,
-                                  })
-                                : "Date non fixée"}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                        <Clock size={16} className="text-primary" />
-                        <span className="font-medium">
-                            {session.scheduled_at
-                                ? format(new Date(session.scheduled_at), "HH:mm", { locale: fr })
-                                : "Heure non fixée"}
+                        <span className="text-primary/80 font-bold">
+                            {formatFullDate(session.scheduled_at)}
                         </span>
                     </div>
                 </div>

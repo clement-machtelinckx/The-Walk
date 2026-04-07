@@ -1,7 +1,7 @@
 import { getServerClient } from "@/lib/db";
 import { handleDbError, applyPagination, PaginationParams, PaginatedResult } from "./_shared/base";
 import { NotFoundError } from "@/lib/errors";
-import { Session, SessionResponse } from "@/types/session";
+import { Session, SessionResponse, SessionResponseWithProfile } from "@/types/session";
 import {
     CreateSessionInput,
     UpdateSessionInput,
@@ -98,7 +98,10 @@ export const SessionRepository = {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_responses")
-            .upsert({ session_id: sessionId, user_id: userId, status: input.status })
+            .upsert(
+                { session_id: sessionId, user_id: userId, status: input.status, updated_at: new Date().toISOString() },
+                { onConflict: "session_id,user_id" }
+            )
             .select()
             .single();
 
@@ -106,14 +109,14 @@ export const SessionRepository = {
         return data;
     },
 
-    async listResponses(sessionId: string): Promise<SessionResponse[]> {
+    async listResponses(sessionId: string): Promise<SessionResponseWithProfile[]> {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_responses")
-            .select("*, profiles!inner(*)")
+            .select("*, profiles!inner(id, display_name, avatar_url)")
             .eq("session_id", sessionId);
 
         handleDbError(error, "SessionRepository.listResponses");
-        return data || [];
+        return (data as SessionResponseWithProfile[]) || [];
     },
 };
