@@ -23,10 +23,17 @@ interface PresenceBlockProps {
 }
 
 export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
-    const { presenceData, fetchPresence, savePresence, isLoadingPresence, isSavingPresence } =
-        useSessionStore();
+    const {
+        presenceData,
+        fetchPresence,
+        savePresence,
+        isLoadingPresence,
+        isSavingPresence,
+        error: storeError,
+    } = useSessionStore();
     const [isOpen, setIsOpen] = useState(false);
     const [localPresences, setLocalPresences] = useState<RollCallMember[]>([]);
+    const [localError, setLocalError] = useState<string | null>(null);
 
     const data = presenceData[sessionId];
     const rollCall = data?.rollCall || [];
@@ -34,6 +41,7 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
 
     useEffect(() => {
         if (isOpen) {
+            setLocalError(null);
             fetchPresence(sessionId);
         }
     }, [isOpen, sessionId, fetchPresence]);
@@ -49,6 +57,7 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
     };
 
     const handleSave = async () => {
+        setLocalError(null);
         const payload = {
             presences: localPresences.map((p) => ({
                 user_id: p.user_id,
@@ -58,6 +67,8 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
         const res = await savePresence(sessionId, payload);
         if (res.success) {
             setIsOpen(false);
+        } else {
+            setLocalError(res.error || "Une erreur est survenue lors de l'enregistrement.");
         }
     };
 
@@ -106,6 +117,12 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
                 </DialogHeader>
 
                 <div className="flex-grow space-y-6 overflow-y-auto px-6 py-2">
+                    {localError && (
+                        <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md border border-destructive/20 p-3 text-xs font-medium">
+                            <AlertCircle size={14} />
+                            {localError}
+                        </div>
+                    )}
                     {isLoadingPresence && localPresences.length === 0 ? (
                         <div className="flex justify-center py-10">
                             <Loader2 className="text-primary/50 h-6 w-6 animate-spin" />

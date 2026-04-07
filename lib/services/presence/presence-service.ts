@@ -1,7 +1,7 @@
 import { PresenceRepository } from "@/lib/repositories/presence-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
-import { ForbiddenError, NotFoundError } from "@/lib/errors";
+import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { RollCallInput } from "@/lib/validators/presence";
 import { RollCallMember, PresenceSummary, PresenceStatus } from "@/types/session";
 
@@ -56,11 +56,15 @@ export const PresenceService = {
 
     /**
      * Enregistre l'appel pour une session.
-     * MJ uniquement.
+     * MJ uniquement et session active uniquement.
      */
     async saveRollCall(userId: string, sessionId: string, input: RollCallInput): Promise<void> {
         const session = await SessionRepository.getById(sessionId);
         if (!session) throw new NotFoundError("Session", sessionId);
+
+        if (session.status !== "active") {
+            throw new ValidationError("L'appel ne peut être fait que lors d'une session active.");
+        }
 
         const membership = await MembershipRepository.getByUserAndTable(userId, session.table_id);
         if (!membership || membership.role !== "gm") {
