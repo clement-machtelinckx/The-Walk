@@ -61,4 +61,17 @@ export interface SessionMessage {
     user_id: string | null;
     content: string;
     created_at: string;
+    profiles?: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    };
+}
+
+export interface SessionPrechatData {
+    data: SessionMessage[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
 }
