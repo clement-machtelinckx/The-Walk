@@ -10,6 +10,7 @@ import Link from "next/link";
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionAdminBlock } from "@/components/admin/next-session-admin-block";
+import { InvitationMessagePanel } from "@/components/admin/invitation-message-panel";
 
 export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
     await requireAuth();
@@ -75,7 +76,10 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
                                 <UserPlus size={20} className="text-primary" />
                                 Invitations
                             </h2>
-                            <InvitationManager tableId={tableId} />
+                            <div className="space-y-6">
+                                <InvitationManager tableId={tableId} />
+                                <InvitationMessagePanel tableId={tableId} tableName={table.name} />
+                            </div>
                         </section>
                     </div>
                 </div>

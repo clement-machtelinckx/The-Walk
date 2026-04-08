@@ -26,16 +26,16 @@ export default function HomePage() {
                         href="/login"
                         className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-12 items-center justify-center rounded-full px-8 text-lg font-bold transition-colors"
                     >
-                        Accéder à l&apos;application
+                        Se connecter
                     </Link>
                     <Link
-                        href={siteConfig.links.crawl}
-                        target="_blank"
+                        href="/register"
                         className="border-border text-foreground hover:bg-muted flex h-12 items-center justify-center rounded-full border px-8 text-lg font-semibold transition-colors"
                     >
-                        Consulter The Crawl
+                        Créer un compte
                     </Link>
                 </div>
+
 
                 <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
                     {[
