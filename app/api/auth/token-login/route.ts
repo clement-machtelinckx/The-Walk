@@ -3,9 +3,19 @@ import { LoginTokenRepository } from "@/lib/repositories/login-token-repository"
 import { tokenLoginSchema } from "@/lib/validators/auth";
 import { NextResponse } from "next/server";
 import { AppError, UnauthorizedError, DatabaseError } from "@/lib/errors";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
     try {
+        // 0. Rate limiting
+        const { ok } = rateLimit(req, { limit: 10, windowMs: 60 * 1000 }); // 10 attempts per minute
+        if (!ok) {
+            return NextResponse.json(
+                { error: "Trop de tentatives. Veuillez réessayer plus tard." },
+                { status: 429 },
+            );
+        }
+
         const body = await req.json();
         const validatedData = tokenLoginSchema.parse(body);
 

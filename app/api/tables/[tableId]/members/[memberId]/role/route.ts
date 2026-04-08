@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/server";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { TableRole } from "@/types/table";
-import { ForbiddenError, ValidationError } from "@/lib/errors";
+import { ForbiddenError, ValidationError, AppError } from "@/lib/errors";
 
 export async function PATCH(
     req: Request,
@@ -24,23 +24,11 @@ export async function PATCH(
         await MembershipService.updateMemberRole(user.id, tableId, memberId, role);
 
         return NextResponse.json({ success: true });
-    } catch (error: unknown) {
+    } catch (error) {
+        if (error instanceof AppError) {
+            return NextResponse.json({ error: error.message }, { status: error.status });
+        }
         console.error("[API_MEMBERS_ROLE_PATCH]", error);
-
-        if (error instanceof ForbiddenError) {
-            return NextResponse.json({ error: error.message }, { status: 403 });
-        }
-
-        if (error instanceof ValidationError) {
-            return NextResponse.json({ error: error.message }, { status: 400 });
-        }
-
-        const errorMessage = error instanceof Error ? error.message : "Erreur interne";
-        const status =
-            error && typeof error === "object" && "status" in error
-                ? (error.status as number)
-                : 500;
-
-        return NextResponse.json({ error: errorMessage }, { status });
+        return NextResponse.json({ error: "Une erreur interne est survenue" }, { status: 500 });
     }
 }
