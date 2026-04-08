@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6e736b8b-8bc2-44e1-9f0d-9444a1767adc" name="Changes" comment="" />
+    <list default="true" id="6e736b8b-8bc2-44e1-9f0d-9444a1767adc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/table/member-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/table/member-list.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/memberships/membership-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/memberships/membership-service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/table-store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store/table-store.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,7 +37,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "10-créer-le-domaine-session-prochaine-session-création-édition",
+    "git-widget-placeholder": "19-ticket-19-construire-le-panneau-adminmj-de-table",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "last_opened_file_path": "//wsl.localhost/ubuntu-22.04/home/yazii/project/the-walk",
@@ -83,6 +89,7 @@
       <workItem from="1775136063164" duration="11628000" />
       <workItem from="1775205721405" duration="4659000" />
       <workItem from="1775219371849" duration="12719000" />
+      <workItem from="1775637878197" duration="2743000" />
     </task>
     <servers />
   </component>
