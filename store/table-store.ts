@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { CreateTableInput } from "@/lib/validators/table";
-import { Table } from "@/types/table";
+import { Table, TableRole } from "@/types/table";
 
 interface TableState {
     isLoading: boolean;
@@ -13,6 +13,11 @@ interface TableState {
     removeMember: (
         tableId: string,
         memberId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    updateMemberRole: (
+        tableId: string,
+        memberId: string,
+        role: TableRole,
     ) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -67,6 +72,28 @@ export const useTableStore = create<TableState>((set) => ({
         try {
             const res = await fetch(`/api/tables/${tableId}/members/${memberId}/remove`, {
                 method: "POST",
+            });
+            const data = await res.json();
+            if (res.ok) {
+                set({ isLoading: false });
+                return { success: true };
+            } else {
+                set({ isLoading: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch (err) {
+            set({ isLoading: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    updateMemberRole: async (tableId: string, memberId: string, role: TableRole) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}/members/${memberId}/role`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role }),
             });
             const data = await res.json();
             if (res.ok) {

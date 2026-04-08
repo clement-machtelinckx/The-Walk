@@ -7,8 +7,16 @@ import { Users, UserMinus, Loader2 } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useTableStore } from "@/store/table-store";
+import { TableRole } from "@/types/table";
 
 interface MemberListProps {
     tableId: string;
@@ -19,8 +27,9 @@ interface MemberListProps {
 export function MemberList({ tableId, members, myRole }: MemberListProps) {
     const { user } = useAuth();
     const router = useRouter();
-    const { removeMember } = useTableStore();
+    const { removeMember, updateMemberRole } = useTableStore();
     const [removingId, setRemovingId] = useState<string | null>(null);
+    const [updatingId, setUpdatingId] = useState<string | null>(null);
 
     const handleRemoveMember = async (memberId: string) => {
         if (!confirm("Êtes-vous sûr de vouloir retirer ce membre ?")) return;
@@ -34,6 +43,18 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
             alert(result.error || "Une erreur est survenue.");
         }
         setRemovingId(null);
+    };
+
+    const handleUpdateRole = async (memberId: string, role: TableRole) => {
+        setUpdatingId(memberId);
+        const result = await updateMemberRole(tableId, memberId, role);
+
+        if (result.success) {
+            router.refresh();
+        } else {
+            alert(result.error || "Une erreur est survenue.");
+        }
+        setUpdatingId(null);
     };
 
     return (
@@ -52,7 +73,8 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
                             : member.profile.email.substring(0, 2).toUpperCase();
 
                         const isMe = user?.id === member.userId;
-                        const canBeRemoved = myRole === "gm" && !isMe && member.role !== "gm";
+                        const canBeManaged = myRole === "gm" && !isMe;
+                        const canBeRemoved = canBeManaged && member.role !== "gm";
 
                         return (
                             <div
@@ -74,7 +96,38 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <RoleBadge role={member.role} size="sm" showIcon={false} />
+                                    {canBeManaged ? (
+                                        <div className="flex items-center gap-1">
+                                            {updatingId === member.userId ? (
+                                                <Loader2 size={14} className="animate-spin" />
+                                            ) : (
+                                                <Select
+                                                    value={member.role}
+                                                    onValueChange={(v) =>
+                                                        handleUpdateRole(
+                                                            member.userId,
+                                                            v as TableRole,
+                                                        )
+                                                    }
+                                                    disabled={updatingId === member.userId}
+                                                >
+                                                    <SelectTrigger className="h-7 border-none bg-transparent px-2 text-xs hover:bg-black/5 dark:hover:bg-white/5">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="player">Joueur</SelectItem>
+                                                        <SelectItem value="observer">
+                                                            Observateur
+                                                        </SelectItem>
+                                                        <SelectItem value="gm">MJ</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <RoleBadge role={member.role} size="sm" showIcon={false} />
+                                    )}
+
                                     {canBeRemoved && (
                                         <Button
                                             variant="ghost"

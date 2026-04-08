@@ -107,4 +107,44 @@ export const MembershipService = {
         // 4. Remove
         await MembershipRepository.remove(tableId, targetId);
     },
+
+    /**
+     * Allow a GM to update a member's role.
+     */
+    async updateMemberRole(
+        actorId: string,
+        tableId: string,
+        targetId: string,
+        newRole: TableRole,
+    ): Promise<void> {
+        // 1. Check actor permissions
+        const actorMembership = await this.requireMembership(actorId, tableId);
+        if (actorMembership.role !== "gm") {
+            throw new ForbiddenError("Seul un Maître du Jeu peut modifier les rôles.");
+        }
+
+        // 2. Check target membership
+        const targetMembership = await MembershipRepository.getByUserAndTable(targetId, tableId);
+        if (!targetMembership) {
+            throw new ValidationError("L'utilisateur cible n'est plus membre de cette table.");
+        }
+
+        // 3. Security rules
+        if (targetId === actorId) {
+            throw new ValidationError("Vous ne pouvez pas modifier votre propre rôle.");
+        }
+
+        if (targetMembership.role === "gm") {
+            // Check if there are other GMs
+            const gmCount = await MembershipRepository.countGmsByTable(tableId);
+            if (gmCount <= 1 && newRole !== "gm") {
+                throw new ValidationError(
+                    "Vous ne pouvez pas rétrograder le dernier Maître du Jeu.",
+                );
+            }
+        }
+
+        // 4. Update
+        await MembershipRepository.updateRole(tableId, targetId, newRole);
+    },
 };
