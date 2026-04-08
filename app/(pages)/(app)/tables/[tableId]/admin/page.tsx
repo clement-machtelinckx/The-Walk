@@ -5,12 +5,12 @@ import { TableRepository } from "@/lib/repositories/table-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, UserPlus, Calendar } from "lucide-react";
+import { ArrowLeft, Users, UserPlus, Calendar, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionAdminBlock } from "@/components/admin/next-session-admin-block";
-import { InvitationMessagePanel } from "@/components/admin/invitation-message-panel";
+import { GroupInvitationPanel } from "@/components/admin/group-invitation-panel";
 
 export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
     await requireAuth();
@@ -74,12 +74,17 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
                         <section id="invitations">
                             <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
                                 <UserPlus size={20} className="text-primary" />
-                                Invitations
+                                Invitations ciblées (par email)
                             </h2>
-                            <div className="space-y-6">
-                                <InvitationManager tableId={tableId} />
-                                <InvitationMessagePanel tableId={tableId} tableName={table.name} />
-                            </div>
+                            <InvitationManager tableId={tableId} />
+                        </section>
+
+                        <section id="group-invitations">
+                            <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
+                                <LinkIcon size={20} className="text-primary" />
+                                Invitations de groupe (Lien public)
+                            </h2>
+                            <GroupInvitationPanel tableId={tableId} tableName={table.name} />
                         </section>
                     </div>
                 </div>
