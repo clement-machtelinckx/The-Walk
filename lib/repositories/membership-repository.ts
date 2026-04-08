@@ -38,6 +38,18 @@ export const MembershipRepository = {
         handleDbError(error, "MembershipRepository.updateRole");
     },
 
+    async create(tableId: string, userId: string, role: TableRole): Promise<TableMember> {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("table_memberships")
+            .insert({ table_id: tableId, user_id: userId, role })
+            .select()
+            .single();
+
+        handleDbError(error, "MembershipRepository.create");
+        return data;
+    },
+
     async remove(tableId: string, userId: string): Promise<void> {
         const supabase = await getServerClient();
         const { error } = await supabase

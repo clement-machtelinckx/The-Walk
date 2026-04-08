@@ -6,12 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="6e736b8b-8bc2-44e1-9f0d-9444a1767adc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(pages)/(public)/invitation/[token]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(public)/invitation/[token]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/admin/invitation-message-panel.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/repositories/membership-repository.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/repositories/membership-repository.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/invitations/group-invitation-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/invitations/group-invitation-service.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/services/invitations/invitation-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/invitations/invitation-service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/store/invitation-store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store/invitation-store.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/table.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/table.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +88,7 @@
       <workItem from="1775136063164" duration="11628000" />
       <workItem from="1775205721405" duration="4659000" />
       <workItem from="1775219371849" duration="12719000" />
-      <workItem from="1775637878197" duration="6910000" />
+      <workItem from="1775637878197" duration="8090000" />
     </task>
     <servers />
   </component>

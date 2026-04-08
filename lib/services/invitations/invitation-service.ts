@@ -97,15 +97,7 @@ export const InvitationService = {
         }
 
         // 4. Create membership
-        const { error: memberError } = await supabase.from("table_memberships").insert({
-            table_id: invitation.table_id,
-            user_id: userId,
-            role: invitation.role,
-        });
-
-        if (memberError) {
-            throw new AppError("Erreur lors de la création de l'adhésion.", "DATABASE_ERROR", 500);
-        }
+        await MembershipRepository.create(invitation.table_id, userId, invitation.role);
 
         // 5. Mark invitation as accepted
         await InvitationRepository.updateStatus(invitation.id, "accepted");

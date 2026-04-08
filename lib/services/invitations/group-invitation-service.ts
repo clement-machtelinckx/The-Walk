@@ -89,16 +89,7 @@ export const GroupInvitationService = {
         }
 
         // 3. Create membership
-        const supabase = await (await import("@/lib/db")).getServerClient();
-        const { error: memberError } = await supabase.from("table_memberships").insert({
-            table_id: invitation.table_id,
-            user_id: userId,
-            role: invitation.role,
-        });
-
-        if (memberError) {
-            throw new AppError("Erreur lors de la création de l'adhésion.", "DATABASE_ERROR", 500);
-        }
+        await MembershipRepository.create(invitation.table_id, userId, invitation.role);
 
         return { tableId: invitation.table_id };
     },
