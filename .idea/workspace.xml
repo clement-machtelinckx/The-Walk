@@ -6,10 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="6e736b8b-8bc2-44e1-9f0d-9444a1767adc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(pages)/(app)/tables/[tableId]/admin/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/table/member-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/table/member-list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/memberships/membership-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/memberships/membership-service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/store/table-store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store/table-store.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/repositories/membership-repository.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/repositories/membership-repository.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/invitations/group-invitation-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/invitations/group-invitation-service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/invitations/invitation-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/invitations/invitation-service.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +36,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "19-ticket-19-construire-le-panneau-adminmj-de-table",
+    "git-widget-placeholder": "20-ticket-20-générer-les-messages-de-convocation-et-les-liens-administrat…ables",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "last_opened_file_path": "//wsl.localhost/ubuntu-22.04/home/yazii/project/the-walk",
@@ -89,7 +88,7 @@
       <workItem from="1775136063164" duration="11628000" />
       <workItem from="1775205721405" duration="4659000" />
       <workItem from="1775219371849" duration="12719000" />
-      <workItem from="1775637878197" duration="2743000" />
+      <workItem from="1775637878197" duration="8090000" />
     </task>
     <servers />
   </component>

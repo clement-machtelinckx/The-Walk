@@ -72,7 +72,21 @@ export const InvitationService = {
             throw new ValidationError("Cette invitation a expiré.");
         }
 
-        // 2. Check if already member
+        // 2. TARGETED INVITATION HARDENING: Check email match
+        const supabase = await (await import("@/lib/db")).getServerClient();
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !userData.user) {
+            throw new ForbiddenError("Vous devez être connecté pour accepter une invitation.");
+        }
+
+        if (invitation.email && invitation.email.toLowerCase() !== userData.user.email?.toLowerCase()) {
+            throw new ValidationError(
+                `Cette invitation est destinée à ${invitation.email}. Vous êtes connecté avec ${userData.user.email}.`,
+            );
+        }
+
+        // 3. Check if already member
         const existingMembership = await MembershipRepository.getByUserAndTable(
             userId,
             invitation.table_id,
@@ -82,19 +96,10 @@ export const InvitationService = {
             return { tableId: invitation.table_id };
         }
 
-        // 3. Create membership
-        const supabase = await (await import("@/lib/db")).getServerClient();
-        const { error: memberError } = await supabase.from("table_memberships").insert({
-            table_id: invitation.table_id,
-            user_id: userId,
-            role: invitation.role,
-        });
+        // 4. Create membership
+        await MembershipRepository.create(invitation.table_id, userId, invitation.role);
 
-        if (memberError) {
-            throw new AppError("Erreur lors de la création de l'adhésion.", "DATABASE_ERROR", 500);
-        }
-
-        // 4. Mark invitation as accepted
+        // 5. Mark invitation as accepted
         await InvitationRepository.updateStatus(invitation.id, "accepted");
 
         return { tableId: invitation.table_id };

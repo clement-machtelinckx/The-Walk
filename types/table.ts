@@ -38,3 +38,13 @@ export interface Invitation {
     created_at: string;
     updated_at: string;
 }
+
+export interface GroupInvitation {
+    id: string;
+    table_id: string;
+    role: TableRole;
+    token: string;
+    created_at: string;
+    expires_at: string;
+    created_by: string;
+}
