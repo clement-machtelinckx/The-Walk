@@ -52,7 +52,7 @@ export function LivechatBlock({ sessionId }: LivechatBlockProps) {
     };
 
     return (
-        <Card className="border-primary/20 flex h-[600px] w-full flex-col shadow-sm">
+        <Card className="border-primary/20 flex h-[500px] w-full flex-col shadow-sm md:h-[600px]">
             <CardHeader className="bg-primary/5 border-b pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg font-bold tracking-tight uppercase">
                     <MessageSquare size={18} className="text-primary" />

@@ -16,7 +16,7 @@ export function AppHeader() {
     return (
         <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
             <Container>
-                <div className="flex h-16 items-center justify-between">
+                <div className="flex h-14 items-center justify-between md:h-16">
                     <div className="flex items-center gap-6">
                         <Link href="/" className="font-heading text-xl font-bold tracking-tight">
                             {siteConfig.name}
