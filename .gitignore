@@ -44,3 +44,17 @@ next-env.d.ts
 # page de test dev
 app/test/
 app/test-color/
+
+# JetBrains / IntelliJ / WebStorm
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Vim
+*.swp
+*.swo
+
+# local OS/editor junk
+Thumbs.db
