@@ -18,7 +18,7 @@ export class AppError extends Error {
  */
 export class NotFoundError extends AppError {
     constructor(resource: string, id?: string) {
-        const message = id ? `${resource} with id ${id} not found` : `${resource} not found`;
+        const message = id ? `${resource} avec l'id ${id} introuvable` : `${resource} introuvable`;
         super(message, "NOT_FOUND", 404);
         this.name = "NotFoundError";
     }
@@ -38,7 +38,7 @@ export class ValidationError extends AppError {
  * Error for permission/access issues.
  */
 export class ForbiddenError extends AppError {
-    constructor(message: string = "Access denied") {
+    constructor(message: string = "Accès refusé") {
         super(message, "FORBIDDEN", 403);
         this.name = "ForbiddenError";
     }
@@ -48,7 +48,7 @@ export class ForbiddenError extends AppError {
  * Error for authentication issues.
  */
 export class UnauthorizedError extends AppError {
-    constructor(message: string = "Unauthorized") {
+    constructor(message: string = "Non authentifié") {
         super(message, "UNAUTHORIZED", 401);
         this.name = "UnauthorizedError";
     }

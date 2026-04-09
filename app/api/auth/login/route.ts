@@ -2,10 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validators/auth";
 import { NextResponse } from "next/server";
 import { ProfileRepository } from "@/lib/repositories/profile-repository";
-import { AppUser } from "@/types/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
     try {
+        // 0. Rate limiting
+        const { ok } = rateLimit(request, { limit: 10, windowMs: 60 * 1000 }); // 10 attempts per minute
+        if (!ok) {
+            return NextResponse.json(
+                { success: false, error: "Trop de tentatives. Veuillez réessayer plus tard." },
+                { status: 429 },
+            );
+        }
+
         const body = await request.json();
 
         // 1. Validate input
@@ -45,11 +54,10 @@ export async function POST(request: Request) {
             // Profile might not be created yet if trigger failed or sync issue
         }
 
-        const appUser: AppUser = {
+        const appUser = {
             id: supabaseUser.id,
             email: supabaseUser.email!,
             profile,
-            supabaseUser,
         };
 
         return NextResponse.json({

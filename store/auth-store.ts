@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { AppUser, AuthStatus } from "@/types/auth";
+import { PublicUser, AuthStatus } from "@/types/auth";
 import { PasswordChangeInput } from "@/lib/validators/auth";
 
 export interface AuthState {
-    user: AppUser | null;
+    user: PublicUser | null;
     status: AuthStatus;
-    setUser: (user: AppUser | null) => void;
+    setUser: (user: PublicUser | null) => void;
     setStatus: (status: AuthStatus) => void;
 
     // Actions

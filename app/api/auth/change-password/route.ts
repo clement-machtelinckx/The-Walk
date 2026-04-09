@@ -3,9 +3,19 @@ import { requireAuth } from "@/lib/auth/server";
 import { passwordChangeSchema } from "@/lib/validators/auth";
 import { NextResponse } from "next/server";
 import { AppError, UnauthorizedError, ValidationError } from "@/lib/errors";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
     try {
+        // 0. Rate limiting
+        const { ok } = rateLimit(req, { limit: 5, windowMs: 60 * 1000 }); // 5 attempts per minute
+        if (!ok) {
+            return NextResponse.json(
+                { error: "Trop de tentatives. Veuillez réessayer plus tard." },
+                { status: 429 },
+            );
+        }
+
         const user = await requireAuth();
         const body = await req.json();
 

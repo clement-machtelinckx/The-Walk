@@ -50,7 +50,7 @@ export async function getCurrentUser(): Promise<AppUser | null> {
 export async function requireAuth(): Promise<AppUser> {
     const user = await getCurrentUser();
     if (!user) {
-        throw new UnauthorizedError("Authentication required");
+        throw new UnauthorizedError("Authentification requise");
     }
     return user;
 }
@@ -77,7 +77,7 @@ export async function hasTableRole(tableId: string, role?: TableRole): Promise<b
 export async function requireTableRole(tableId: string, role?: TableRole): Promise<void> {
     const hasRole = await hasTableRole(tableId, role);
     if (!hasRole) {
-        throw new ForbiddenError(`Required role ${role || "any"} not found for table ${tableId}`);
+        throw new ForbiddenError(`Rôle ${role || "requis"} non trouvé pour cette table`);
     }
 }
 
