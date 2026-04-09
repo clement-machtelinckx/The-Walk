@@ -15,7 +15,7 @@ export const acceptInvitationSchema = z.object({
 
 export const createGroupInvitationSchema = z.object({
     role: tableRoleSchema.default("player"),
-    durationHours: z.enum(["24", "48", "168"]).transform((val) => parseInt(val)),
+    durationHours: z.union([z.literal(24), z.literal(48), z.literal(168)]),
 });
 
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
