@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSessionStore } from "@/store/session-store";
 import { useAuthStore } from "@/store/auth-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,15 +30,9 @@ export function LivechatBlock({ sessionId }: LivechatBlockProps) {
     const livechat = livechats[sessionId];
     const messages = useMemo(() => livechat?.data || [], [livechat]);
 
-    // Polling pragmatique (toutes les 5 secondes pour le live)
-    useEffect(() => {
-        fetchLivechatMessages(sessionId);
-        const interval = setInterval(() => {
-            fetchLivechatMessages(sessionId);
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [sessionId, fetchLivechatMessages]);
+    // Polling centralisé (toutes les 5 secondes pour le live)
+    const fetchFn = useCallback(() => fetchLivechatMessages(sessionId), [sessionId, fetchLivechatMessages]);
+    usePolling(fetchFn, { interval: 5000 });
 
     // Scroll automatique vers le bas lors de nouveaux messages
     useEffect(() => {

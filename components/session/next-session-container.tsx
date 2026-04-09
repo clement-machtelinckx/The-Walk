@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
@@ -10,6 +10,7 @@ import { ResponseSummary } from "./response-summary";
 import { PrechatBlock } from "./prechat-block";
 import { Loader2, Settings, Play, ExternalLink } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,16 +42,15 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
     const session = nextSessions[tableId];
     const activeSession = activeSessions[tableId];
 
-    useEffect(() => {
-        fetchNextSession(tableId);
-        fetchActiveSession(tableId);
+    // Polling centralisé pour l'état de la session (toutes les 30s)
+    const refreshSessions = useCallback(async () => {
+        await Promise.all([
+            fetchNextSession(tableId),
+            fetchActiveSession(tableId)
+        ]);
     }, [tableId, fetchNextSession, fetchActiveSession]);
 
-    useEffect(() => {
-        if (session?.id) {
-            fetchSessionResponses(session.id);
-        }
-    }, [session?.id, fetchSessionResponses]);
+    usePolling(refreshSessions, { interval: 30000 });
 
     const handleSuccess = () => {
         setIsEditing(false);

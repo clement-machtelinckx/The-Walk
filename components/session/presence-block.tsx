@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSessionStore } from "@/store/session-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import {
     Dialog,
     DialogContent,
@@ -37,6 +38,14 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
     const data = presenceData[sessionId];
     const rollCall = data?.rollCall || [];
     const summary = data?.summary;
+
+    // Polling centralisé (toutes les 20 secondes)
+    const fetchFn = useCallback(() => fetchPresence(sessionId), [sessionId, fetchPresence]);
+    usePolling(fetchFn, { 
+        interval: 20000,
+        // On évite de rafraîchir en plein milieu d'une édition locale par le MJ si le dialogue est ouvert
+        enabled: !isOpen 
+    });
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);

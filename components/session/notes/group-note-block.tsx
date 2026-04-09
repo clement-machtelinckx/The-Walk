@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSessionStore } from "@/store/session-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Users, Save, CheckCircle2 } from "lucide-react";
@@ -25,20 +26,18 @@ export function GroupNoteBlock({ sessionId, isGM }: GroupNoteBlockProps) {
     const [localContent, setLocalContent] = useState("");
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-    // Chargement initial
+    // Polling centralisé pour les joueurs (toutes les 10s)
+    const fetchFn = useCallback(() => fetchGroupNote(sessionId), [sessionId, fetchGroupNote]);
+    usePolling(fetchFn, { 
+        interval: 10000,
+        enabled: !isGM, // Seulement si ce n'est pas le MJ
+        immediate: false // Le premier chargement est géré par le useEffect ci-dessous
+    });
+
+    // Chargement initial pour tous (MJ inclus)
     useEffect(() => {
         fetchGroupNote(sessionId);
     }, [sessionId, fetchGroupNote]);
-
-    // Polling pour les joueurs (toutes les 30s)
-    useEffect(() => {
-        if (!isGM) {
-            const interval = setInterval(() => {
-                fetchGroupNote(sessionId);
-            }, 30000);
-            return () => clearInterval(interval);
-        }
-    }, [isGM, sessionId, fetchGroupNote]);
 
     // Synchro locale
     useEffect(() => {
