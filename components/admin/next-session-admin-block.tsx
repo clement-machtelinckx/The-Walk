@@ -13,6 +13,11 @@ interface NextSessionAdminBlockProps {
     tableId: string;
 }
 
+/**
+ * Bloc d'information sur la prochaine session dans l'espace Admin.
+ * Rôle : Structural / Informatif uniquement.
+ * N'est PAS le cockpit de préparation (RSVP/Prechat/Start sont sur la page Préparation).
+ */
 export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     const {
         nextSessions,
@@ -44,7 +49,7 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
                     </p>
                     <Button variant="outline" size="sm" asChild>
                         <Link href={`/tables/${tableId}/session/next`}>
-                            Planifier une session
+                            Accéder à la préparation
                         </Link>
                     </Button>
                 </CardContent>

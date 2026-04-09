@@ -17,6 +17,11 @@ interface TableHeaderProps {
     myRole: TableRole;
 }
 
+/**
+ * En-tête de table.
+ * Rôle : Navigation principale (Admin / Préparation).
+ * Bouton LIVE uniquement si une session est active.
+ */
 export function TableHeader({ tableId, name, description, myRole }: TableHeaderProps) {
     const router = useRouter();
     const { leaveTable } = useTableStore();
@@ -70,6 +75,7 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                    {/* ACCÈS ADMIN : Uniquement structural pour le MJ */}
                     {myRole === "gm" && (
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/tables/${tableId}/admin`}>
@@ -78,6 +84,8 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                             </Link>
                         </Button>
                     )}
+
+                    {/* ACCÈS PRÉPARATION : Lieu principal du planning / RSVP / démarrage */}
                     <Button variant="outline" size="sm" asChild>
                         <Link href={`/tables/${tableId}/session/next`}>
                             <Calendar className="mr-2 h-4 w-4" />
@@ -85,7 +93,7 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                         </Link>
                     </Button>
 
-                    {/* Bouton LIVE uniquement si actif */}
+                    {/* LIVE : Navigation vers la session active SEULEMENT si déjà démarrée */}
                     {activeSession && (
                         <Button size="sm" asChild className="bg-green-600 hover:bg-green-700">
                             <Link href={`/tables/${tableId}/session/live/${activeSession.id}`}>

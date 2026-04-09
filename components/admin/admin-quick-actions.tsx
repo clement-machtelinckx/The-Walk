@@ -9,6 +9,11 @@ interface AdminQuickActionsProps {
     tableId: string;
 }
 
+/**
+ * Bloc d'actions rapides pour le MJ dans l'espace Admin.
+ * Rôle : Navigation structurelle uniquement.
+ * N'est PAS un cockpit de contrôle de session (pas de bouton Start/Join direct).
+ */
 export function AdminQuickActions({
     tableId,
 }: AdminQuickActionsProps) {
@@ -32,7 +37,7 @@ export function AdminQuickActions({
                     <Button variant="outline" className="w-full h-12 text-sm font-medium" asChild>
                         <Link href={`/tables/${tableId}/session/next`}>
                             <Calendar size={18} className="mr-2" />
-                            Préparer la session
+                            Gérer la préparation
                         </Link>
                     </Button>
 
