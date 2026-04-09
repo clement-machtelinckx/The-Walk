@@ -66,15 +66,15 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
             <header className="flex flex-col justify-between gap-4 border-b pb-6 md:flex-row md:items-center">
                 <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600 animate-pulse">LIVE</Badge>
-                        <span className="text-muted-foreground text-sm font-medium">
+                        <Badge className="bg-green-600 animate-pulse shrink-0">LIVE</Badge>
+                        <span className="text-muted-foreground text-xs font-medium md:text-sm">
                             Lancé le {formatFullDate(session.started_at || session.created_at)}
                         </span>
                     </div>
-                    <h1 className="text-3xl font-extrabold tracking-tight italic">{session.title}</h1>
+                    <h1 className="text-2xl font-extrabold tracking-tight italic md:text-3xl">{session.title}</h1>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <PresenceBlock sessionId={session.id} isGM={isGM} />
                     <Button
                         variant="outline"
@@ -82,7 +82,8 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                         onClick={() => router.push(`/tables/${tableId}`)}
                         className="shadow-sm"
                     >
-                        Quitter le live
+                        <span className="hidden sm:inline">Quitter le live</span>
+                        <span className="sm:hidden">Quitter</span>
                     </Button>
                     {isGM && (
                         <Button
@@ -93,11 +94,12 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                             className="shadow-md"
                         >
                             {isEndingSession ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                                <LogOut className="mr-2 h-4 w-4" />
+                                <LogOut className="h-4 w-4 sm:mr-2" />
                             )}
-                            Clôturer la session
+                            <span className="hidden sm:inline">Clôturer la session</span>
+                            <span className="sm:hidden">Fin</span>
                         </Button>
                     )}
                 </div>

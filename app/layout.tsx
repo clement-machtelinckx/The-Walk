@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Poppins, Quicksand } from "next/font/google";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { siteConfig } from "@/config/site";
 import { AuthProvider } from "@/components/auth/auth-provider";
 
@@ -17,6 +17,14 @@ const quicksand = Quicksand({
     variable: "--font-quicksand",
 });
 
+export const viewport: Viewport = {
+    themeColor: "#7c3aed",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1, // Prevent auto-zoom on input focus in iOS
+    userScalable: false,
+};
+
 export const metadata: Metadata = {
     title: {
         default: siteConfig.name,
@@ -24,6 +32,11 @@ export const metadata: Metadata = {
     },
     description: siteConfig.description,
     metadataBase: new URL(siteConfig.url),
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: siteConfig.name,
+    },
     openGraph: {
         type: "website",
         locale: siteConfig.locale,
