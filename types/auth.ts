@@ -2,13 +2,20 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Profile } from "@/lib/repositories/profile-repository";
 
 /**
- * AppUser represents the combined authentication user (Supabase)
- * and the business profile (public.profiles).
+ * PublicUser represents the user data exposed to the client.
  */
-export interface AppUser {
+export interface PublicUser {
     id: string;
     email: string;
     profile: Profile | null;
+}
+
+/**
+ * AppUser represents the combined authentication user (Supabase)
+ * and the business profile (public.profiles).
+ * Internal server-side use only.
+ */
+export interface AppUser extends PublicUser {
     supabaseUser: SupabaseUser;
 }
 
@@ -21,7 +28,7 @@ export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
  * AuthSession represents the session state exposed to the application.
  */
 export interface AuthSession {
-    user: AppUser | null;
+    user: PublicUser | null;
     status: AuthStatus;
 }
 
@@ -30,6 +37,6 @@ export interface AuthSession {
  */
 export interface LoginResponse {
     success: boolean;
-    user: AppUser | null;
+    user: PublicUser | null;
     error?: string;
 }

@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { signupSchema } from "@/lib/validators/auth";
 import { NextResponse } from "next/server";
 import { ProfileRepository } from "@/lib/repositories/profile-repository";
-import { AppUser } from "@/types/auth";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {

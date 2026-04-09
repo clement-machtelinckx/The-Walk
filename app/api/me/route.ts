@@ -9,11 +9,17 @@ export async function GET() {
             return NextResponse.json({ user: null, status: "unauthenticated" });
         }
 
-        return NextResponse.json({ user, status: "authenticated" });
+        const publicUser = {
+            id: user.id,
+            email: user.email,
+            profile: user.profile,
+        };
+
+        return NextResponse.json({ user: publicUser, status: "authenticated" });
     } catch (error) {
         console.error("API /api/me error:", error);
         return NextResponse.json(
-            { error: "Internal server error", user: null, status: "unauthenticated" },
+            { error: "Erreur serveur interne", user: null, status: "unauthenticated" },
             { status: 500 },
         );
     }

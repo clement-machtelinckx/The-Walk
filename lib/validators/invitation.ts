@@ -13,5 +13,11 @@ export const acceptInvitationSchema = z.object({
     token: z.string().min(1, "Token requis"),
 });
 
+export const createGroupInvitationSchema = z.object({
+    role: tableRoleSchema.default("player"),
+    durationHours: z.enum(["24", "48", "168"]).transform((val) => parseInt(val)),
+});
+
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
 export type AcceptInvitationInput = z.infer<typeof acceptInvitationSchema>;
+export type CreateGroupInvitationInput = z.infer<typeof createGroupInvitationSchema>;
