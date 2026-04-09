@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
         start_url: "/tables",
         display: "standalone",
         background_color: "#ffffff",
-        theme_color: "#7c3aed", // Tailwind primary (violet-600)
+        theme_color: "#1e4d3a", // Forest Green primary
         icons: [
             {
                 src: "/favicon.ico",

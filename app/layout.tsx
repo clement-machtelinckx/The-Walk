@@ -18,11 +18,9 @@ const quicksand = Quicksand({
 });
 
 export const viewport: Viewport = {
-    themeColor: "#7c3aed",
+    themeColor: "#1e4d3a",
     width: "device-width",
     initialScale: 1,
-    maximumScale: 1, // Prevent auto-zoom on input focus in iOS
-    userScalable: false,
 };
 
 export const metadata: Metadata = {
