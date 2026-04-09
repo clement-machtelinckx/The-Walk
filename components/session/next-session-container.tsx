@@ -73,7 +73,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         activeSession === undefined
     ) {
         return (
-            <div className="flex justify-center py-20">
+            <div className="flex justify-center py-20" role="status">
                 <Loader2 className="text-primary/50 h-8 w-8 animate-spin" />
             </div>
         );
