@@ -204,7 +204,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
 
             {/* 3. Insights & Preparation */}
             <div className="mx-auto w-full max-w-3xl space-y-8">
-                <ResponseSummary sessionId={session!.id} />
+                <ResponseSummary sessionId={session!.id} collapsible defaultExpanded={false} />
                 <PrechatBlock sessionId={session!.id} />
             </div>
         </div>
