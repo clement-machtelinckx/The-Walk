@@ -47,10 +47,6 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
 
     usePolling(checkSessionStatus, { interval: 30000 });
 
-    useEffect(() => {
-        fetchPresence(session.id);
-    }, [session.id, fetchPresence]);
-
     const handleEndSession = async () => {
         if (
             !confirm(

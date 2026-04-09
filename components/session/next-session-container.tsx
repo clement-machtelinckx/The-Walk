@@ -52,12 +52,6 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
 
     usePolling(refreshSessions, { interval: 30000 });
 
-    useEffect(() => {
-        if (session?.id) {
-            fetchSessionResponses(session.id);
-        }
-    }, [session?.id, fetchSessionResponses]);
-
     const handleSuccess = () => {
         setIsEditing(false);
         setIsCreating(false);

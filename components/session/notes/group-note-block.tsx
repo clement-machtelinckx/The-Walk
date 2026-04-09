@@ -30,8 +30,14 @@ export function GroupNoteBlock({ sessionId, isGM }: GroupNoteBlockProps) {
     const fetchFn = useCallback(() => fetchGroupNote(sessionId), [sessionId, fetchGroupNote]);
     usePolling(fetchFn, { 
         interval: 10000,
-        enabled: !isGM // Seulement si ce n'est pas le MJ
+        enabled: !isGM, // Seulement si ce n'est pas le MJ
+        immediate: false // Le premier chargement est géré par le useEffect ci-dessous
     });
+
+    // Chargement initial pour tous (MJ inclus)
+    useEffect(() => {
+        fetchGroupNote(sessionId);
+    }, [sessionId, fetchGroupNote]);
 
     // Synchro locale
     useEffect(() => {
