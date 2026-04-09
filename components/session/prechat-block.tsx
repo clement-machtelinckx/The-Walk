@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSessionStore } from "@/store/session-store";
 import { useAuthStore } from "@/store/auth-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,15 +30,9 @@ export function PrechatBlock({ sessionId }: PrechatBlockProps) {
     const prechat = prechats[sessionId];
     const messages = useMemo(() => prechat?.data || [], [prechat]);
 
-    // Polling pragmatique (toutes les 10 secondes)
-    useEffect(() => {
-        fetchPrechatMessages(sessionId);
-        const interval = setInterval(() => {
-            fetchPrechatMessages(sessionId);
-        }, 10000);
-
-        return () => clearInterval(interval);
-    }, [sessionId, fetchPrechatMessages]);
+    // Polling centralisé (toutes les 10 secondes)
+    const fetchFn = useCallback(() => fetchPrechatMessages(sessionId), [sessionId, fetchPrechatMessages]);
+    usePolling(fetchFn, { interval: 10000 });
 
     // Scroll automatique vers le bas lors de nouveaux messages
     useEffect(() => {

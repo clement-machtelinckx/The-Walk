@@ -1,6 +1,8 @@
 "use client";
 
+import { useCallback } from "react";
 import { useSessionStore } from "@/store/session-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, HelpCircle, Clock, LucideIcon } from "lucide-react";
@@ -18,8 +20,12 @@ interface PersonDisplay {
 }
 
 export function ResponseSummary({ sessionId }: ResponseSummaryProps) {
-    const { responses } = useSessionStore();
+    const { responses, fetchSessionResponses } = useSessionStore();
     const data = responses[sessionId];
+
+    // Polling centralisé pour les réponses (toutes les 30 secondes)
+    const fetchFn = useCallback(() => fetchSessionResponses(sessionId), [sessionId, fetchSessionResponses]);
+    usePolling(fetchFn, { interval: 30000 });
 
     if (!data) return null;
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Session } from "@/types/session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, Loader2, Sword, Dice5, FileText, ExternalLink } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
+import { usePolling } from "@/lib/hooks/use-polling";
 import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
 import { PresenceBlock } from "./presence-block";
@@ -23,8 +24,28 @@ interface LiveSessionHubProps {
 
 export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps) {
     const router = useRouter();
-    const { endSession, isEndingSession, fetchPresence } = useSessionStore();
+    const { 
+        endSession, 
+        isEndingSession, 
+        fetchPresence,
+        activeSessions,
+        fetchActiveSession
+    } = useSessionStore();
     const isGM = myRole === "gm";
+
+    // Polling centralisé pour vérifier l'état de la session (toutes les 30s)
+    const checkSessionStatus = useCallback(async () => {
+        await fetchActiveSession(tableId);
+        const currentActive = activeSessions[tableId];
+        
+        // Si la session n'est plus active dans le store après le fetch, on redirige
+        // (Sauf si c'est nous qui venons de la fermer, mais le store sera déjà à jour)
+        if (currentActive === null) {
+            router.push(`/tables/${tableId}`);
+        }
+    }, [tableId, fetchActiveSession, activeSessions, router]);
+
+    usePolling(checkSessionStatus, { interval: 30000 });
 
     useEffect(() => {
         fetchPresence(session.id);
