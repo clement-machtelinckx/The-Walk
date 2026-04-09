@@ -5,7 +5,6 @@ import { useSessionStore } from "@/store/session-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Loader2, ArrowRight } from "lucide-react";
 import { formatShortDate } from "@/lib/utils/date";
-import { ResponseSummary } from "@/components/session/response-summary";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +13,16 @@ interface NextSessionAdminBlockProps {
     tableId: string;
 }
 
+/**
+ * Bloc d'information sur la prochaine session dans l'espace Admin.
+ * Rôle : Structural / Informatif uniquement.
+ * N'est PAS le cockpit de préparation (RSVP/Prechat/Start sont sur la page Préparation).
+ */
 export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     const {
         nextSessions,
         isLoadingSession,
         fetchNextSession,
-        fetchSessionResponses,
     } = useSessionStore();
 
     const session = nextSessions[tableId];
@@ -27,12 +30,6 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     useEffect(() => {
         fetchNextSession(tableId);
     }, [tableId, fetchNextSession]);
-
-    useEffect(() => {
-        if (session?.id) {
-            fetchSessionResponses(session.id);
-        }
-    }, [session?.id, fetchSessionResponses]);
 
     if (isLoadingSession && !session) {
         return (
@@ -44,7 +41,7 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
 
     if (!session) {
         return (
-            <Card className="border-dashed">
+            <Card className="border-dashed bg-muted/20">
                 <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                     <Calendar className="mb-2 h-8 w-8 text-muted-foreground/50" />
                     <p className="mb-4 text-sm text-muted-foreground italic">
@@ -52,7 +49,7 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
                     </p>
                     <Button variant="outline" size="sm" asChild>
                         <Link href={`/tables/${tableId}/session/next`}>
-                            Planifier la première session
+                            Accéder à la préparation
                         </Link>
                     </Button>
                 </CardContent>
@@ -61,38 +58,34 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     }
 
     return (
-        <div className="space-y-4">
-            <Card className="overflow-hidden border-primary/20 bg-card">
-                <CardHeader className="bg-primary/5 py-3">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2 text-md font-bold">
-                            <Calendar size={18} className="text-primary" />
-                            Prochaine session
-                        </CardTitle>
-                        <Badge variant="outline" className="bg-background">
-                            {formatShortDate(session.scheduled_at)}
-                        </Badge>
+        <Card className="overflow-hidden border-primary/20 bg-card">
+            <CardHeader className="bg-primary/5 py-3">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-md font-bold">
+                        <Calendar size={18} className="text-primary" />
+                        Session planifiée
+                    </CardTitle>
+                    <Badge variant="outline" className="bg-background">
+                        {formatShortDate(session.scheduled_at)}
+                    </Badge>
+                </div>
+            </CardHeader>
+            <CardContent className="pt-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 className="font-bold text-lg leading-tight">{session.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                            {session.description || "Pas de description."}
+                        </p>
                     </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h3 className="font-bold text-lg leading-tight">{session.title}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-                                {session.description || "Pas de description."}
-                            </p>
-                        </div>
-                        <Button variant="ghost" size="sm" className="shrink-0 text-primary" asChild>
-                            <Link href={`/tables/${tableId}/session/next`}>
-                                Gérer
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <ResponseSummary sessionId={session.id} />
-        </div>
+                    <Button variant="outline" size="sm" className="shrink-0" asChild>
+                        <Link href={`/tables/${tableId}/session/next`}>
+                            Gérer la préparation
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

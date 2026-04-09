@@ -13,8 +13,13 @@ interface NextSessionSummaryProps {
     activeSession?: Session | null;
 }
 
+/**
+ * Résumé de la prochaine session sur la page Table.
+ * Rôle : Vue d'ensemble.
+ * Redirige vers la page Préparation pour les actions.
+ */
 export function NextSessionSummary({ tableId, session, activeSession }: NextSessionSummaryProps) {
-    // Priorité à la session active
+    // Priorité à la session active : Navigation vers le live
     if (activeSession) {
         return (
             <Card className="border-green-600/30 bg-green-50/30 shadow-md">
@@ -62,7 +67,7 @@ export function NextSessionSummary({ tableId, session, activeSession }: NextSess
                     >
                         <Button variant="link" className="text-primary mt-2" asChild>
                             <Link href={`/tables/${tableId}/session/next`}>
-                                Planifier une session
+                                Gérer la préparation
                             </Link>
                         </Button>
                     </EmptyState>
@@ -101,7 +106,7 @@ export function NextSessionSummary({ tableId, session, activeSession }: NextSess
             <CardFooter>
                 <Button className="w-full" variant="outline" asChild>
                     <Link href={`/tables/${tableId}/session/next`}>
-                        Voir le détail
+                        Accéder à la préparation
                         <ArrowRight size={16} className="ml-2" />
                     </Link>
                 </Button>

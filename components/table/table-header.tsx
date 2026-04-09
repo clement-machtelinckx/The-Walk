@@ -17,21 +17,22 @@ interface TableHeaderProps {
     myRole: TableRole;
 }
 
+/**
+ * En-tête de table.
+ * Rôle : Navigation principale (Admin / Préparation).
+ * Bouton LIVE uniquement si une session est active.
+ */
 export function TableHeader({ tableId, name, description, myRole }: TableHeaderProps) {
     const router = useRouter();
     const { leaveTable } = useTableStore();
     const {
         activeSessions,
-        nextSessions,
         fetchActiveSession,
         fetchNextSession,
-        startSession,
-        isStartingSession,
     } = useSessionStore();
     const [isLeaving, setIsLeaving] = useState(false);
 
     const activeSession = activeSessions[tableId];
-    const nextSession = nextSessions[tableId];
 
     useEffect(() => {
         fetchActiveSession(tableId);
@@ -58,16 +59,6 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
         }
     };
 
-    const handleStartLive = async () => {
-        if (!nextSession?.id) return;
-        if (!confirm("Voulez-vous démarrer cette session et rejoindre le Live ?")) return;
-
-        const res = await startSession(nextSession.id);
-        if (res.success && res.session) {
-            router.push(`/tables/${tableId}/session/live/${res.session.id}`);
-        }
-    };
-
     return (
         <div className="space-y-4 border-b pb-4">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -84,50 +75,38 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                    {/* ACCÈS ADMIN : Uniquement structural pour le MJ */}
                     {myRole === "gm" && (
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/tables/${tableId}/admin`}>
                                 <Settings className="mr-2 h-4 w-4" />
-                                Gestion
+                                Admin
                             </Link>
                         </Button>
                     )}
+
+                    {/* ACCÈS PRÉPARATION : Lieu principal du planning / RSVP / démarrage */}
                     <Button variant="outline" size="sm" asChild>
                         <Link href={`/tables/${tableId}/session/next`}>
                             <Calendar className="mr-2 h-4 w-4" />
-                            Sessions
+                            Préparation
                         </Link>
                     </Button>
 
-                    {/* Bouton LIVE dynamique */}
-                    {activeSession ? (
+                    {/* LIVE : Navigation vers la session active SEULEMENT si déjà démarrée */}
+                    {activeSession && (
                         <Button size="sm" asChild className="bg-green-600 hover:bg-green-700">
                             <Link href={`/tables/${tableId}/session/live/${activeSession.id}`}>
                                 <Play className="mr-2 h-4 w-4 fill-current" />
                                 LIVE
                             </Link>
                         </Button>
-                    ) : myRole === "gm" && nextSession ? (
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-green-600 text-green-600 hover:bg-green-50"
-                            onClick={handleStartLive}
-                            disabled={isStartingSession}
-                        >
-                            {isStartingSession ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <Play className="mr-2 h-4 w-4 fill-current" />
-                            )}
-                            LANCER LIVE
-                        </Button>
-                    ) : null}
+                    )}
 
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive ml-auto"
                         onClick={handleLeaveTable}
                         disabled={isLeaving}
                     >

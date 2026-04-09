@@ -176,26 +176,20 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
                     onEdit={() => setIsEditing(true)}
                 />
 
-                {/* MJ Quick Actions */}
+                {/* MJ Primary Action */}
                 {canManage && (
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                        <Button variant="secondary" size="sm" asChild className="shadow-sm">
-                            <Link href={`/tables/${tableId}/admin`}>
-                                <Settings className="mr-2 h-4 w-4" />
-                                Admin de table
-                            </Link>
-                        </Button>
+                    <div className="flex justify-center">
                         <Button
                             variant="default"
-                            size="sm"
+                            size="lg"
                             onClick={handleStartSession}
                             disabled={isStartingSession}
-                            className="border-0 bg-green-600 text-white shadow-sm hover:bg-green-700"
+                            className="h-14 w-full max-w-sm border-0 bg-green-600 text-xl font-bold text-white shadow-lg hover:bg-green-700 sm:w-auto sm:px-12"
                         >
                             {isStartingSession ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="mr-3 h-6 w-6 animate-spin" />
                             ) : (
-                                <Play className="mr-2 h-4 w-4 fill-current" />
+                                <Play className="mr-3 h-6 w-6 fill-current" />
                             )}
                             Démarrer la session live
                         </Button>

@@ -41,21 +41,15 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
         >
             <div className="flex flex-col gap-8 py-4">
                 {/* 1. Actions Rapides MJ */}
-                <AdminQuickActions
-                    tableId={tableId}
-                    hasActiveSession={!!activeSession}
-                    hasPendingSession={!!nextSession}
-                    activeSessionId={activeSession?.id}
-                    pendingSessionId={nextSession?.id}
-                />
+                <AdminQuickActions tableId={tableId} />
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-                    {/* Left Column: Sessions & RSVPs */}
+                    {/* Left Column: Sessions & Governance */}
                     <div className="space-y-8 lg:col-span-7">
                         <section id="session">
                             <h2 className="mb-4 flex items-center gap-2 text-xl font-bold">
                                 <Calendar size={20} className="text-primary" />
-                                Pilotage Session
+                                État de la session
                             </h2>
                             <NextSessionAdminBlock tableId={tableId} />
                         </section>
