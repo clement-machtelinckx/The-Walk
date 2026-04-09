@@ -14,6 +14,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 export function LoginForm() {
     const [email, setEmail] = useState("");
@@ -37,7 +38,7 @@ export function LoginForm() {
             } else {
                 setError(result.error || "Identifiants invalides");
             }
-        } catch (err) {
+        } catch {
             setError("Une erreur est survenue");
         } finally {
             setIsLoading(false);
@@ -85,10 +86,16 @@ export function LoginForm() {
                         />
                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-4">
                     <Button type="submit" className="w-full" disabled={isLoading}>
                         {isLoading ? "Connexion en cours..." : "Se connecter"}
                     </Button>
+                    <div className="text-center text-sm">
+                        Pas encore de compte ?{" "}
+                        <Link href="/register" className="text-primary font-medium hover:underline">
+                            Créer un compte
+                        </Link>
+                    </div>
                 </CardFooter>
             </form>
         </Card>
