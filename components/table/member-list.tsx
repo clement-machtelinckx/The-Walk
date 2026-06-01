@@ -115,7 +115,9 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="player">Joueur</SelectItem>
+                                                        <SelectItem value="player">
+                                                            Joueur
+                                                        </SelectItem>
                                                         <SelectItem value="observer">
                                                             Observateur
                                                         </SelectItem>

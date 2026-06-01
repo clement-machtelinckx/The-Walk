@@ -6,7 +6,16 @@ import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, X, HelpCircle, Clock, LucideIcon, ChevronDown, ChevronUp, Users } from "lucide-react";
+import {
+    Check,
+    X,
+    HelpCircle,
+    Clock,
+    LucideIcon,
+    ChevronDown,
+    ChevronUp,
+    Users,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResponseStatus } from "@/types/session";
 
@@ -27,17 +36,20 @@ interface PersonDisplay {
  * Rôle : Information sur qui vient à la session.
  * Peut être rendu repliable pour réduire la densité visuelle.
  */
-export function ResponseSummary({ 
-    sessionId, 
+export function ResponseSummary({
+    sessionId,
     collapsible = false,
-    defaultExpanded = false 
+    defaultExpanded = false,
 }: ResponseSummaryProps) {
     const { responses, fetchSessionResponses } = useSessionStore();
     const [isExpanded, setIsExpanded] = useState(defaultExpanded);
     const data = responses[sessionId];
 
     // Polling centralisé pour les réponses (toutes les 30 secondes)
-    const fetchFn = useCallback(() => fetchSessionResponses(sessionId), [sessionId, fetchSessionResponses]);
+    const fetchFn = useCallback(
+        () => fetchSessionResponses(sessionId),
+        [sessionId, fetchSessionResponses],
+    );
     usePolling(fetchFn, { interval: 30000 });
 
     if (!data) return null;
@@ -91,11 +103,11 @@ export function ResponseSummary({
     ];
 
     return (
-        <Card className="w-full overflow-hidden border-primary/10">
-            <CardHeader 
+        <Card className="border-primary/10 w-full overflow-hidden">
+            <CardHeader
                 className={cn(
                     "pb-3 transition-colors",
-                    collapsible && "cursor-pointer hover:bg-muted/50"
+                    collapsible && "hover:bg-muted/50 cursor-pointer",
                 )}
                 onClick={() => collapsible && setIsExpanded(!isExpanded)}
             >
@@ -131,14 +143,16 @@ export function ResponseSummary({
 
                 {/* Détails repliables */}
                 {(!collapsible || isExpanded) && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <div className="animate-in fade-in slide-in-from-top-1 space-y-4 duration-200">
                         {groups.map(
                             (group) =>
                                 group.people.length > 0 && (
                                     <div key={group.status} className="space-y-2">
                                         <div className="flex items-center gap-2 border-b pb-1">
                                             <group.icon className={cn("h-3 w-3", group.color)} />
-                                            <h4 className="text-[10px] font-bold uppercase tracking-tight">{group.label}</h4>
+                                            <h4 className="text-[10px] font-bold tracking-tight uppercase">
+                                                {group.label}
+                                            </h4>
                                             <span className="ml-auto text-[10px] text-slate-500">
                                                 {group.people.length} joueur(s)
                                             </span>

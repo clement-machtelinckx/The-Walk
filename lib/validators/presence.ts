@@ -8,10 +8,12 @@ export const updatePresenceSchema = z.object({
 });
 
 export const rollCallSchema = z.object({
-    presences: z.array(z.object({
-        user_id: z.string().uuid(),
-        status: presenceStatusSchema,
-    })),
+    presences: z.array(
+        z.object({
+            user_id: z.string().uuid(),
+            status: presenceStatusSchema,
+        }),
+    ),
 });
 
 export type UpdatePresenceInput = z.infer<typeof updatePresenceSchema>;

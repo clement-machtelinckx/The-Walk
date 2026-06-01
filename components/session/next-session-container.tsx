@@ -44,10 +44,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
 
     // Polling centralisé pour l'état de la session (toutes les 30s)
     const refreshSessions = useCallback(async () => {
-        await Promise.all([
-            fetchNextSession(tableId),
-            fetchActiveSession(tableId)
-        ]);
+        await Promise.all([fetchNextSession(tableId), fetchActiveSession(tableId)]);
     }, [tableId, fetchNextSession, fetchActiveSession]);
 
     usePolling(refreshSessions, { interval: 30000 });

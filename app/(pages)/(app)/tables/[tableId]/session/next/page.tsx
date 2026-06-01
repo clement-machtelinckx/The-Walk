@@ -3,6 +3,7 @@ import { MembershipService } from "@/lib/services/memberships/membership-service
 import { TableRepository } from "@/lib/repositories/table-repository";
 import { PageShell } from "@/components/layout/app-shell";
 import { NextSessionContainer } from "@/components/session/next-session-container";
+import { SessionToolsDrawer } from "@/components/session/session-tools-drawer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +32,7 @@ export default async function NextSessionPage({
                 </Button>
             }
         >
+            <SessionToolsDrawer isGM={membership.role === "gm"} context="pre-session" />
             <NextSessionContainer tableId={tableId} myRole={membership.role} />
         </PageShell>
     );

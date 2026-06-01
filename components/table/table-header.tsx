@@ -25,11 +25,7 @@ interface TableHeaderProps {
 export function TableHeader({ tableId, name, description, myRole }: TableHeaderProps) {
     const router = useRouter();
     const { leaveTable } = useTableStore();
-    const {
-        activeSessions,
-        fetchActiveSession,
-        fetchNextSession,
-    } = useSessionStore();
+    const { activeSessions, fetchActiveSession, fetchNextSession } = useSessionStore();
     const [isLeaving, setIsLeaving] = useState(false);
 
     const activeSession = activeSessions[tableId];

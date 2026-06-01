@@ -19,17 +19,23 @@ interface NotesHubProps {
 export function NotesHub({ sessionId, isGM }: NotesHubProps) {
     return (
         <Tabs defaultValue={isGM ? "group" : "personal"} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1">
-                <TabsTrigger value="personal" className="flex items-center gap-2 text-xs font-bold tracking-tight uppercase">
+            <TabsList className="bg-muted/50 grid w-full grid-cols-2 p-1">
+                <TabsTrigger
+                    value="personal"
+                    className="flex items-center gap-2 text-xs font-bold tracking-tight uppercase"
+                >
                     <User size={14} />
                     Note Perso
                 </TabsTrigger>
-                <TabsTrigger value="group" className="flex items-center gap-2 text-xs font-bold tracking-tight uppercase">
+                <TabsTrigger
+                    value="group"
+                    className="flex items-center gap-2 text-xs font-bold tracking-tight uppercase"
+                >
                     <Users size={14} />
                     Note de Groupe
                 </TabsTrigger>
             </TabsList>
-            
+
             <div className="mt-3">
                 <TabsContent value="personal" className="m-0 mt-0">
                     <PersonalNoteBlock sessionId={sessionId} />

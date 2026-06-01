@@ -14,9 +14,7 @@ interface AdminQuickActionsProps {
  * Rôle : Navigation structurelle uniquement.
  * N'est PAS un cockpit de contrôle de session (pas de bouton Start/Join direct).
  */
-export function AdminQuickActions({
-    tableId,
-}: AdminQuickActionsProps) {
+export function AdminQuickActions({ tableId }: AdminQuickActionsProps) {
     return (
         <Card className="border-primary/20 bg-primary/5 shadow-sm">
             <CardHeader className="pb-3">
@@ -27,21 +25,21 @@ export function AdminQuickActions({
             </CardHeader>
             <CardContent>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <Button variant="outline" className="w-full h-12 text-sm font-medium" asChild>
+                    <Button variant="outline" className="h-12 w-full text-sm font-medium" asChild>
                         <Link href={`/tables/${tableId}`}>
                             <ExternalLink size={18} className="mr-2" />
                             Retour à l&apos;accueil table
                         </Link>
                     </Button>
 
-                    <Button variant="outline" className="w-full h-12 text-sm font-medium" asChild>
+                    <Button variant="outline" className="h-12 w-full text-sm font-medium" asChild>
                         <Link href={`/tables/${tableId}/session/next`}>
                             <Calendar size={18} className="mr-2" />
                             Gérer la préparation
                         </Link>
                     </Button>
 
-                    <Button variant="outline" className="w-full h-12 text-sm font-medium" asChild>
+                    <Button variant="outline" className="h-12 w-full text-sm font-medium" asChild>
                         <Link href="#members">
                             <UserPlus size={18} className="mr-2" />
                             Gérer les membres

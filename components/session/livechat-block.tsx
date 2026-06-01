@@ -37,7 +37,10 @@ export function LivechatBlock({ sessionId }: LivechatBlockProps) {
     const messages = useMemo(() => livechat?.data || [], [livechat]);
 
     // Polling centralisé (toutes les 5 secondes pour le live)
-    const fetchFn = useCallback(() => fetchLivechatMessages(sessionId), [sessionId, fetchLivechatMessages]);
+    const fetchFn = useCallback(
+        () => fetchLivechatMessages(sessionId),
+        [sessionId, fetchLivechatMessages],
+    );
     usePolling(fetchFn, { interval: 5000 });
 
     // Scroll automatique vers le bas lors de nouveaux messages
@@ -58,14 +61,16 @@ export function LivechatBlock({ sessionId }: LivechatBlockProps) {
     };
 
     return (
-        <Card className={cn(
-            "border-primary/20 flex w-full flex-col shadow-sm transition-all duration-300",
-            isCollapsed ? "h-auto" : "h-[500px] md:h-[600px]"
-        )}>
-            <CardHeader 
+        <Card
+            className={cn(
+                "border-primary/20 flex w-full flex-col shadow-sm transition-all duration-300",
+                isCollapsed ? "h-auto" : "h-[500px] md:h-[600px]",
+            )}
+        >
+            <CardHeader
                 className={cn(
-                    "bg-primary/5 cursor-pointer border-b pb-3 transition-colors hover:bg-primary/10",
-                    isCollapsed && "border-b-0"
+                    "bg-primary/5 hover:bg-primary/10 cursor-pointer border-b pb-3 transition-colors",
+                    isCollapsed && "border-b-0",
                 )}
                 onClick={() => setIsCollapsed(!isCollapsed)}
             >
@@ -108,7 +113,9 @@ export function LivechatBlock({ sessionId }: LivechatBlockProps) {
                                     >
                                         <div className="text-muted-foreground flex items-center gap-2 px-1 text-[10px] font-bold tracking-wider uppercase">
                                             {!isMe && (
-                                                <span>{msg.profiles?.display_name || "Anonyme"}</span>
+                                                <span>
+                                                    {msg.profiles?.display_name || "Anonyme"}
+                                                </span>
                                             )}
                                             <span>{formatShortDate(msg.created_at)}</span>
                                         </div>

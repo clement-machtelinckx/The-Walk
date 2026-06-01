@@ -19,11 +19,7 @@ interface NextSessionAdminBlockProps {
  * N'est PAS le cockpit de préparation (RSVP/Prechat/Start sont sur la page Préparation).
  */
 export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
-    const {
-        nextSessions,
-        isLoadingSession,
-        fetchNextSession,
-    } = useSessionStore();
+    const { nextSessions, isLoadingSession, fetchNextSession } = useSessionStore();
 
     const session = nextSessions[tableId];
 
@@ -34,17 +30,17 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     if (isLoadingSession && !session) {
         return (
             <Card className="flex h-32 items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
             </Card>
         );
     }
 
     if (!session) {
         return (
-            <Card className="border-dashed bg-muted/20">
+            <Card className="bg-muted/20 border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-                    <Calendar className="mb-2 h-8 w-8 text-muted-foreground/50" />
-                    <p className="mb-4 text-sm text-muted-foreground italic">
+                    <Calendar className="text-muted-foreground/50 mb-2 h-8 w-8" />
+                    <p className="text-muted-foreground mb-4 text-sm italic">
                         Aucune session planifiée pour le moment.
                     </p>
                     <Button variant="outline" size="sm" asChild>
@@ -58,10 +54,10 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     }
 
     return (
-        <Card className="overflow-hidden border-primary/20 bg-card">
+        <Card className="border-primary/20 bg-card overflow-hidden">
             <CardHeader className="bg-primary/5 py-3">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-md font-bold">
+                    <CardTitle className="text-md flex items-center gap-2 font-bold">
                         <Calendar size={18} className="text-primary" />
                         Session planifiée
                     </CardTitle>
@@ -73,8 +69,8 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
             <CardContent className="pt-4">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h3 className="font-bold text-lg leading-tight">{session.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                        <h3 className="text-lg leading-tight font-bold">{session.title}</h3>
+                        <p className="text-muted-foreground mt-1 line-clamp-1 text-sm">
                             {session.description || "Pas de description."}
                         </p>
                     </div>

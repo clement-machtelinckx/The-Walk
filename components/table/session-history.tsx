@@ -36,7 +36,7 @@ export function SessionHistory({ tableId }: SessionHistoryProps) {
                         Historique des sessions
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                <CardContent className="text-muted-foreground flex flex-col items-center justify-center py-12 text-center">
                     <History size={40} className="mb-4 opacity-20" />
                     <p className="text-sm italic">Aucune session terminée pour le moment.</p>
                 </CardContent>
@@ -56,7 +56,7 @@ export function SessionHistory({ tableId }: SessionHistoryProps) {
                 {history.map((item) => (
                     <div
                         key={item.session.id}
-                        className="group relative flex flex-col gap-3 rounded-lg border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                        className="group bg-card hover:border-primary/30 relative flex flex-col gap-3 rounded-lg border p-4 transition-all hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
                     >
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
@@ -76,22 +76,36 @@ export function SessionHistory({ tableId }: SessionHistoryProps) {
                                 <div className="flex gap-3">
                                     <div className="flex items-center gap-1">
                                         <div className="h-2 w-2 rounded-full bg-green-500" />
-                                        <span className="text-xs font-bold">{item.presenceSummary.present}</span>
-                                        <span className="text-muted-foreground text-[10px] uppercase font-medium">Présents</span>
+                                        <span className="text-xs font-bold">
+                                            {item.presenceSummary.present}
+                                        </span>
+                                        <span className="text-muted-foreground text-[10px] font-medium uppercase">
+                                            Présents
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <div className="h-2 w-2 rounded-full bg-amber-500" />
-                                        <span className="text-xs font-bold">{item.presenceSummary.late}</span>
-                                        <span className="text-muted-foreground text-[10px] uppercase font-medium">Retards</span>
+                                        <span className="text-xs font-bold">
+                                            {item.presenceSummary.late}
+                                        </span>
+                                        <span className="text-muted-foreground text-[10px] font-medium uppercase">
+                                            Retards
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <div className="h-2 w-2 rounded-full bg-red-500" />
-                                        <span className="text-xs font-bold">{item.presenceSummary.absent}</span>
-                                        <span className="text-muted-foreground text-[10px] uppercase font-medium">Absents</span>
+                                        <span className="text-xs font-bold">
+                                            {item.presenceSummary.absent}
+                                        </span>
+                                        <span className="text-muted-foreground text-[10px] font-medium uppercase">
+                                            Absents
+                                        </span>
                                     </div>
                                 </div>
                             ) : (
-                                <span className="text-muted-foreground text-[10px] italic">Appel non enregistré</span>
+                                <span className="text-muted-foreground text-[10px] italic">
+                                    Appel non enregistré
+                                </span>
                             )}
                         </div>
                     </div>

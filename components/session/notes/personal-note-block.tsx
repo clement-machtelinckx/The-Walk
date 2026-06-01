@@ -46,7 +46,7 @@ export function PersonalNoteBlock({ sessionId }: PersonalNoteBlockProps) {
                 setLastSaved(new Date());
             }
         }, 1000),
-        [sessionId, savePersonalNote, note?.content]
+        [sessionId, savePersonalNote, note?.content],
     );
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -57,12 +57,12 @@ export function PersonalNoteBlock({ sessionId }: PersonalNoteBlockProps) {
 
     return (
         <Card className="bg-card/50 flex h-full flex-col shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase">
                     <User size={14} className="text-primary" />
                     MA NOTE PERSO
                 </CardTitle>
-                <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-2 text-[10px] font-medium">
                     {isSavingPersonalNote ? (
                         <>
                             <Loader2 size={10} className="animate-spin" />
@@ -84,7 +84,7 @@ export function PersonalNoteBlock({ sessionId }: PersonalNoteBlockProps) {
             <CardContent className="flex-grow p-4 pt-0">
                 {isLoadingPersonalNote && !note ? (
                     <div className="flex items-center justify-center py-10">
-                        <Loader2 className="h-4 w-4 animate-spin text-primary/50" />
+                        <Loader2 className="text-primary/50 h-4 w-4 animate-spin" />
                     </div>
                 ) : (
                     <Textarea

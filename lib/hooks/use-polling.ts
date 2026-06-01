@@ -16,16 +16,8 @@ interface UsePollingOptions {
  * - pauseOnHidden: boolean to stop polling if tab is hidden (default true)
  * - immediate: boolean to execute the fetch function immediately on mount (default true)
  */
-export function usePolling(
-    fetchFn: () => void | Promise<void>,
-    options: UsePollingOptions = {}
-) {
-    const {
-        interval = 10000,
-        enabled = true,
-        pauseOnHidden = true,
-        immediate = true,
-    } = options;
+export function usePolling(fetchFn: () => void | Promise<void>, options: UsePollingOptions = {}) {
+    const { interval = 10000, enabled = true, pauseOnHidden = true, immediate = true } = options;
 
     const fetchRef = useRef(fetchFn);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -37,7 +29,7 @@ export function usePolling(
 
     const executeFetch = useCallback(async () => {
         if (!enabled) return;
-        
+
         // Pause if hidden and option is set
         if (pauseOnHidden && typeof document !== "undefined" && document.hidden) {
             return;
@@ -52,7 +44,7 @@ export function usePolling(
 
     const startPolling = useCallback(() => {
         if (timerRef.current) clearInterval(timerRef.current);
-        
+
         timerRef.current = setInterval(executeFetch, interval);
     }, [executeFetch, interval]);
 

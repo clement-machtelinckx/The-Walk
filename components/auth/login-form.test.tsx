@@ -6,76 +6,90 @@ import { useRouter } from "next/navigation";
 
 // Mock the useAuth hook
 vi.mock("./auth-provider", () => ({
-  useAuth: vi.fn(),
+    useAuth: vi.fn(),
 }));
 
 describe("LoginForm", () => {
-  const mockLogin = vi.fn();
+    const mockLogin = vi.fn();
+    type AuthContextValue = ReturnType<typeof useAuth>;
+    type AppRouter = ReturnType<typeof useRouter>;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    (useAuth as any).mockReturnValue({
-      login: mockLogin,
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(useAuth).mockReturnValue({
+            login: mockLogin,
+        } as unknown as AuthContextValue);
+
+        // useRouter is already mocked in vitest.setup.ts
+        const mockPush = vi.fn();
+        vi.mocked(useRouter).mockReturnValue({
+            push: mockPush,
+            refresh: vi.fn(),
+        } as unknown as AppRouter);
     });
-    
-    // useRouter is already mocked in vitest.setup.ts
-    const mockPush = vi.fn();
-    (useRouter as any).mockReturnValue({
-      push: mockPush,
-      refresh: vi.fn(),
+
+    it("should render the login form", () => {
+        render(<LoginForm />);
+        expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Mot de passe/i)).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Se connecter/i })).toBeInTheDocument();
     });
-  });
 
-  it("should render the login form", () => {
-    render(<LoginForm />);
-    expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Mot de passe/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Se connecter/i })).toBeInTheDocument();
-  });
+    it("should show error message on failed login", async () => {
+        mockLogin.mockResolvedValue({ success: false, error: "Invalid credentials" });
 
-  it("should show error message on failed login", async () => {
-    mockLogin.mockResolvedValue({ success: false, error: "Invalid credentials" });
-    
-    render(<LoginForm />);
-    
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: "test@example.com" } });
-    fireEvent.change(screen.getByLabelText(/Mot de passe/i), { target: { value: "password123" } });
-    fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
+        render(<LoginForm />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument();
+        fireEvent.change(screen.getByLabelText(/Email/i), {
+            target: { value: "test@example.com" },
+        });
+        fireEvent.change(screen.getByLabelText(/Mot de passe/i), {
+            target: { value: "password123" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
+
+        await waitFor(() => {
+            expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument();
+        });
     });
-  });
 
-  it("should redirect on successful login", async () => {
-    const mockPush = vi.fn();
-    (useRouter as any).mockReturnValue({
-      push: mockPush,
-      refresh: vi.fn(),
+    it("should redirect on successful login", async () => {
+        const mockPush = vi.fn();
+        vi.mocked(useRouter).mockReturnValue({
+            push: mockPush,
+            refresh: vi.fn(),
+        } as unknown as AppRouter);
+        mockLogin.mockResolvedValue({ success: true });
+
+        render(<LoginForm />);
+
+        fireEvent.change(screen.getByLabelText(/Email/i), {
+            target: { value: "test@example.com" },
+        });
+        fireEvent.change(screen.getByLabelText(/Mot de passe/i), {
+            target: { value: "password123" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
+
+        await waitFor(() => {
+            expect(mockPush).toHaveBeenCalledWith("/tables");
+        });
     });
-    mockLogin.mockResolvedValue({ success: true });
-    
-    render(<LoginForm />);
-    
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: "test@example.com" } });
-    fireEvent.change(screen.getByLabelText(/Mot de passe/i), { target: { value: "password123" } });
-    fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
 
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/tables");
+    it("should disable button while loading", async () => {
+        // Return a promise that doesn't resolve immediately
+        mockLogin.mockReturnValue(new Promise(() => {}));
+
+        render(<LoginForm />);
+
+        fireEvent.change(screen.getByLabelText(/Email/i), {
+            target: { value: "test@example.com" },
+        });
+        fireEvent.change(screen.getByLabelText(/Mot de passe/i), {
+            target: { value: "password123" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
+
+        expect(screen.getByRole("button", { name: /Connexion en cours.../i })).toBeDisabled();
     });
-  });
-
-  it("should disable button while loading", async () => {
-    // Return a promise that doesn't resolve immediately
-    mockLogin.mockReturnValue(new Promise(() => {}));
-    
-    render(<LoginForm />);
-    
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: "test@example.com" } });
-    fireEvent.change(screen.getByLabelText(/Mot de passe/i), { target: { value: "password123" } });
-    fireEvent.click(screen.getByRole("button", { name: /Se connecter/i }));
-
-    expect(screen.getByRole("button", { name: /Connexion en cours.../i })).toBeDisabled();
-  });
 });
