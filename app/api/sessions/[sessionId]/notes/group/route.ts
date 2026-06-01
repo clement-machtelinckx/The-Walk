@@ -28,13 +28,21 @@ export async function POST(
     try {
         const user = await requireAuth();
         const { sessionId } = await params;
-        const { content } = await request.json();
+        const { content, expectedUpdatedAt = null } = await request.json();
 
-        const note = await NoteService.updateGroupNote(user.id, sessionId, content);
+        const note = await NoteService.updateGroupNote(
+            user.id,
+            sessionId,
+            content,
+            expectedUpdatedAt,
+        );
         return NextResponse.json({ success: true, note });
     } catch (error) {
         if (error instanceof AppError) {
-            return NextResponse.json({ error: error.message }, { status: error.status });
+            return NextResponse.json(
+                { error: error.message, code: error.code, details: error.details },
+                { status: error.status },
+            );
         }
         return NextResponse.json({ error: "Une erreur interne est survenue" }, { status: 500 });
     }

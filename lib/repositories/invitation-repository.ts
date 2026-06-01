@@ -1,4 +1,4 @@
-import { getServerClient } from "@/lib/db";
+import { getServerClient, getServiceRoleClient } from "@/lib/db";
 import { handleDbError } from "./_shared/base";
 import { NotFoundError } from "@/lib/errors";
 import { Invitation, Table } from "@/types/table";
@@ -86,5 +86,23 @@ export const InvitationRepository = {
 
         handleDbError(error, "InvitationRepository.listPendingByEmail");
         return (data as unknown as InvitationWithTableInfo[]) || [];
+    },
+
+    async getTableInfoForInvitation(tableId: string): Promise<Pick<Table, "name" | "description">> {
+        const supabase = getServiceRoleClient();
+        const { data, error } = await supabase
+            .from("tables")
+            .select("name, description")
+            .eq("id", tableId)
+            .single();
+
+        if (error && error.code === "PGRST116") {
+            throw new NotFoundError("Table", tableId);
+        }
+        handleDbError(error, "InvitationRepository.getTableInfoForInvitation");
+        if (!data) {
+            throw new NotFoundError("Table", tableId);
+        }
+        return data;
     },
 };

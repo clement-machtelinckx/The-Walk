@@ -1,7 +1,7 @@
 import { NoteRepository } from "@/lib/repositories/note-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
-import { ForbiddenError, NotFoundError } from "@/lib/errors";
+import { ConflictError, DatabaseError, ForbiddenError, NotFoundError } from "@/lib/errors";
 import { PersonalNote, GroupNote } from "@/types/note";
 
 export const NoteService = {
@@ -28,28 +28,75 @@ export const NoteService = {
         return await NoteRepository.getPersonalByTable(userId, tableId);
     },
 
-    async updatePersonalNote(userId: string, sessionId: string, content: string): Promise<PersonalNote> {
+    async updatePersonalNote(
+        userId: string,
+        sessionId: string,
+        content: string,
+    ): Promise<PersonalNote> {
         const { tableId } = await this.getTableContext(userId, sessionId);
         return await NoteRepository.upsertPersonal(userId, tableId, content);
     },
 
     /**
      * Note de groupe de table.
-     * MJ uniquement en édition (V1 Option B).
-     * Lecture pour tous les membres.
+     * Lecture et édition explicite pour tous les membres.
      */
     async getGroupNote(userId: string, sessionId: string): Promise<GroupNote | null> {
         const { tableId } = await this.getTableContext(userId, sessionId);
         return await NoteRepository.getGroupByTable(tableId);
     },
 
-    async updateGroupNote(userId: string, sessionId: string, content: string): Promise<GroupNote> {
-        const { tableId, role } = await this.getTableContext(userId, sessionId);
-        
-        if (role !== "gm") {
-            throw new ForbiddenError("Seul le Maître du Jeu peut éditer la note de groupe.");
+    async updateGroupNote(
+        userId: string,
+        sessionId: string,
+        content: string,
+        expectedUpdatedAt: string | null,
+    ): Promise<GroupNote> {
+        const { tableId } = await this.getTableContext(userId, sessionId);
+        const currentNote = await NoteRepository.getGroupByTable(tableId);
+
+        if (!currentNote) {
+            if (expectedUpdatedAt !== null) {
+                throw new ConflictError(
+                    "La note de groupe a changé depuis votre chargement. Rechargez la dernière version avant d'enregistrer.",
+                    { currentNote },
+                );
+            }
+
+            try {
+                return await NoteRepository.createGroup(tableId, content);
+            } catch (error) {
+                if (!(error instanceof DatabaseError)) {
+                    throw error;
+                }
+
+                throw new ConflictError(
+                    "La note de groupe a été créée entre-temps. Rechargez la dernière version avant d'enregistrer.",
+                );
+            }
         }
 
-        return await NoteRepository.upsertGroup(tableId, content);
+        if (expectedUpdatedAt !== currentNote.updated_at) {
+            throw new ConflictError(
+                "La note de groupe a changé depuis votre chargement. Rechargez la dernière version avant d'enregistrer.",
+                { currentNote },
+            );
+        }
+
+        const versionToUpdate = currentNote.updated_at;
+        const updatedNote = await NoteRepository.updateGroupIfVersionMatches(
+            tableId,
+            content,
+            versionToUpdate,
+        );
+
+        if (!updatedNote) {
+            throw new ConflictError(
+                "La note de groupe a changé pendant l'enregistrement. Rechargez la dernière version avant de réessayer.",
+                { currentNote: await NoteRepository.getGroupByTable(tableId) },
+            );
+        }
+
+        return updatedNote;
     },
 };

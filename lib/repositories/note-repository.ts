@@ -153,4 +153,33 @@ export const NoteRepository = {
         handleDbError(error, "NoteRepository.upsertGroup");
         return data;
     },
+
+    async createGroup(tableId: string, content: string) {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("group_notes")
+            .insert({
+                table_id: tableId,
+                content,
+            })
+            .select()
+            .single();
+
+        handleDbError(error, "NoteRepository.createGroup");
+        return data;
+    },
+
+    async updateGroupIfVersionMatches(tableId: string, content: string, expectedUpdatedAt: string) {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("group_notes")
+            .update({ content })
+            .eq("table_id", tableId)
+            .eq("updated_at", expectedUpdatedAt)
+            .select()
+            .maybeSingle();
+
+        handleDbError(error, "NoteRepository.updateGroupIfVersionMatches");
+        return data;
+    },
 };
