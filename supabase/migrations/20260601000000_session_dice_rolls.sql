@@ -1,9 +1,10 @@
 -- Migration: 20260601000000_session_dice_rolls.sql
--- Description: Persistent dice roll journal for session tools.
+-- Description: Persistent table-level dice roll journal with optional session context.
 
 create table public.session_dice_rolls (
     id uuid default gen_random_uuid() primary key,
-    session_id uuid references public.sessions(id) on delete cascade not null,
+    table_id uuid references public.tables(id) on delete cascade not null,
+    session_id uuid references public.sessions(id) on delete set null,
     user_id uuid references public.profiles(id) on delete cascade not null,
     dice_type integer not null,
     quantity integer default 1 not null,
@@ -20,11 +21,15 @@ create table public.session_dice_rolls (
     constraint session_dice_rolls_roll_kind_check check (char_length(roll_kind) between 1 and 40)
 );
 
-create index idx_session_dice_rolls_session_created
-    on public.session_dice_rolls(session_id, created_at desc);
+create index idx_session_dice_rolls_table_created
+    on public.session_dice_rolls(table_id, created_at desc);
 
 create index idx_session_dice_rolls_user
     on public.session_dice_rolls(user_id);
+
+create index idx_session_dice_rolls_session
+    on public.session_dice_rolls(session_id)
+    where session_id is not null;
 
 alter table public.session_dice_rolls enable row level security;
 
@@ -33,9 +38,8 @@ create policy "Dice rolls are viewable by table members"
     using (
         exists (
             select 1
-            from public.sessions s
-            join public.table_memberships tm on tm.table_id = s.table_id
-            where s.id = public.session_dice_rolls.session_id
+            from public.table_memberships tm
+            where tm.table_id = public.session_dice_rolls.table_id
             and tm.user_id = auth.uid()
         )
     );
@@ -46,9 +50,8 @@ create policy "Table members can create dice rolls"
         auth.uid() = user_id
         and exists (
             select 1
-            from public.sessions s
-            join public.table_memberships tm on tm.table_id = s.table_id
-            where s.id = public.session_dice_rolls.session_id
+            from public.table_memberships tm
+            where tm.table_id = public.session_dice_rolls.table_id
             and tm.user_id = auth.uid()
         )
     );

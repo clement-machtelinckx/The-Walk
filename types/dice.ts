@@ -6,7 +6,8 @@ export interface DiceRollProfile {
 
 export interface DiceRollLog {
     id: string;
-    session_id: string;
+    table_id: string;
+    session_id: string | null;
     user_id: string;
     dice_type: number;
     quantity: number;

@@ -10,25 +10,27 @@ function rollDice(quantity: number, diceType: number): number[] {
 }
 
 export const DiceService = {
-    async listRolls(userId: string, sessionId: string): Promise<DiceRollLog[]> {
-        const session = await SessionRepository.getById(sessionId);
-        if (!session) throw new NotFoundError("Session", sessionId);
-
-        const membership = await MembershipRepository.getByUserAndTable(userId, session.table_id);
+    async listRolls(userId: string, tableId: string): Promise<DiceRollLog[]> {
+        const membership = await MembershipRepository.getByUserAndTable(userId, tableId);
         if (!membership) {
             throw new ForbiddenError("Seuls les membres de la table peuvent voir les lancers.");
         }
 
-        return DiceRepository.listBySession(sessionId);
+        return DiceRepository.listByTable(tableId, 20);
     },
 
     async createRoll(userId: string, input: DiceRollInput): Promise<DiceRollLog> {
-        const session = await SessionRepository.getById(input.session_id);
-        if (!session) throw new NotFoundError("Session", input.session_id);
-
-        const membership = await MembershipRepository.getByUserAndTable(userId, session.table_id);
+        const membership = await MembershipRepository.getByUserAndTable(userId, input.table_id);
         if (!membership) {
             throw new ForbiddenError("Seuls les membres de la table peuvent lancer les dés.");
+        }
+
+        if (input.session_id) {
+            const session = await SessionRepository.getById(input.session_id);
+            if (!session) throw new NotFoundError("Session", input.session_id);
+            if (session.table_id !== input.table_id) {
+                throw new ForbiddenError("Cette session n'appartient pas à cette table.");
+            }
         }
 
         const rolls = rollDice(input.quantity, input.dice_type);

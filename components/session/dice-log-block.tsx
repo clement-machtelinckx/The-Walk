@@ -17,7 +17,8 @@ import { DiceRollLog } from "@/types/dice";
 import { cn } from "@/lib/utils";
 
 interface DiceLogBlockProps {
-    sessionId: string;
+    tableId: string;
+    sessionId?: string;
 }
 
 function formatFormula(roll: Pick<DiceRollLog, "quantity" | "dice_type" | "modifier">) {
@@ -34,7 +35,7 @@ function formatTime(value: string) {
     }).format(new Date(value));
 }
 
-export function DiceLogBlock({ sessionId }: DiceLogBlockProps) {
+export function DiceLogBlock({ tableId, sessionId }: DiceLogBlockProps) {
     const [diceType, setDiceType] = useState("20");
     const [quantity, setQuantity] = useState(1);
     const [modifier, setModifier] = useState(0);
@@ -54,7 +55,7 @@ export function DiceLogBlock({ sessionId }: DiceLogBlockProps) {
     );
 
     const fetchRolls = useCallback(async () => {
-        const response = await fetch(`/api/sessions/${sessionId}/dice`);
+        const response = await fetch(`/api/tables/${tableId}/dice`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -65,7 +66,7 @@ export function DiceLogBlock({ sessionId }: DiceLogBlockProps) {
         setRolls(data.rolls || []);
         setIsLoading(false);
         setError(null);
-    }, [sessionId]);
+    }, [tableId]);
 
     usePolling(fetchRolls, { interval: 10000 });
 
@@ -76,13 +77,14 @@ export function DiceLogBlock({ sessionId }: DiceLogBlockProps) {
         setError(null);
 
         try {
-            const response = await fetch(`/api/sessions/${sessionId}/dice`, {
+            const response = await fetch(`/api/tables/${tableId}/dice`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     dice_type: Number(diceType),
                     quantity,
                     modifier,
+                    session_id: sessionId ?? null,
                 }),
             });
             const data = await response.json();

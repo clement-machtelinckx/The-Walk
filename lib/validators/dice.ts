@@ -3,7 +3,8 @@ import { z } from "zod";
 export const ALLOWED_DICE_TYPES = [3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 30, 100] as const;
 
 export const diceRollSchema = z.object({
-    session_id: z.string().uuid(),
+    table_id: z.string().uuid(),
+    session_id: z.string().uuid().nullable().optional(),
     dice_type: z
         .number()
         .int()
@@ -18,7 +19,8 @@ export const diceRollSchema = z.object({
     roll_kind: z.string().trim().min(1).max(40).default("standard"),
 });
 
-export const createDiceRollSchema = diceRollSchema.omit({ session_id: true }).partial({
+export const createDiceRollSchema = diceRollSchema.omit({ table_id: true }).partial({
+    session_id: true,
     quantity: true,
     modifier: true,
     roll_kind: true,

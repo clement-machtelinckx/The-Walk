@@ -19,6 +19,7 @@ import { DiceLogBlock } from "./dice-log-block";
 
 interface SessionToolsDrawerProps {
     isGM: boolean;
+    tableId: string;
     context?: SessionToolsContext;
     sessionId?: string;
 }
@@ -131,7 +132,12 @@ function PlaceholderItem({
     );
 }
 
-export function SessionToolsDrawer({ isGM, context = "live", sessionId }: SessionToolsDrawerProps) {
+export function SessionToolsDrawer({
+    isGM,
+    tableId,
+    context = "live",
+    sessionId,
+}: SessionToolsDrawerProps) {
     const [open, setOpen] = useState(false);
     const [activeTool, setActiveTool] = useState<SessionToolId>("players");
     const visibleTools = SESSION_TOOLS.filter((tool) => tool.id !== "gm" || isGM);
@@ -247,14 +253,7 @@ export function SessionToolsDrawer({ isGM, context = "live", sessionId }: Sessio
                                     title="Dés / initiative"
                                     description="Jets de dés accessibles largement, initiative réservée au live."
                                 >
-                                    {sessionId ? (
-                                        <DiceLogBlock sessionId={sessionId} />
-                                    ) : (
-                                        <PlaceholderItem
-                                            label="Dés"
-                                            detail="Les lancers persistants seront disponibles ici dès qu'une session est sélectionnée."
-                                        />
-                                    )}
+                                    <DiceLogBlock tableId={tableId} sessionId={sessionId} />
                                     <PlaceholderItem
                                         label="Initiative"
                                         detail={

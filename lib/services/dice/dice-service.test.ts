@@ -27,15 +27,16 @@ describe("DiceService", () => {
     });
 
     it("calculates rolls server-side and persists the structured result", async () => {
+        vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+            id: "membership-1",
+        } as Membership);
         vi.mocked(SessionRepository.getById).mockResolvedValue({
             id: mockSessionId,
             table_id: mockTableId,
         } as SessionById);
-        vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
-            id: "membership-1",
-        } as Membership);
         vi.mocked(DiceRepository.create).mockResolvedValue({
             id: "roll-1",
+            table_id: mockTableId,
             session_id: mockSessionId,
             user_id: mockUserId,
             dice_type: 6,
@@ -48,6 +49,7 @@ describe("DiceService", () => {
         } as DiceRoll);
 
         const result = await DiceService.createRoll(mockUserId, {
+            table_id: mockTableId,
             session_id: mockSessionId,
             dice_type: 6,
             quantity: 2,
@@ -58,6 +60,7 @@ describe("DiceService", () => {
         expect(DiceRepository.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 session_id: mockSessionId,
+                table_id: mockTableId,
                 dice_type: 6,
                 quantity: 2,
                 modifier: 3,
@@ -69,16 +72,12 @@ describe("DiceService", () => {
         expect(result.total).toBe(10);
     });
 
-    it("rejects rolls from users outside the session table", async () => {
-        vi.mocked(SessionRepository.getById).mockResolvedValue({
-            id: mockSessionId,
-            table_id: mockTableId,
-        } as SessionById);
+    it("rejects rolls from users outside the table", async () => {
         vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue(null);
 
         await expect(
             DiceService.createRoll(mockUserId, {
-                session_id: mockSessionId,
+                table_id: mockTableId,
                 dice_type: 20,
                 quantity: 1,
                 modifier: 0,
@@ -86,5 +85,16 @@ describe("DiceService", () => {
             }),
         ).rejects.toThrow(ForbiddenError);
         expect(DiceRepository.create).not.toHaveBeenCalled();
+    });
+
+    it("lists only the latest table rolls through the repository limit", async () => {
+        vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+            id: "membership-1",
+        } as Membership);
+        vi.mocked(DiceRepository.listByTable).mockResolvedValue([]);
+
+        await DiceService.listRolls(mockUserId, mockTableId);
+
+        expect(DiceRepository.listByTable).toHaveBeenCalledWith(mockTableId, 20);
     });
 });

@@ -37,6 +37,7 @@ export default async function NextSessionPage({
         >
             <SessionToolsDrawer
                 isGM={membership.role === "gm"}
+                tableId={tableId}
                 context="pre-session"
                 sessionId={nextSession?.id ?? activeSession?.id}
             />

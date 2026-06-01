@@ -5,14 +5,11 @@ import { createDiceRollSchema, diceRollSchema } from "@/lib/validators/dice";
 import { AppError } from "@/lib/errors";
 import { z } from "zod";
 
-export async function GET(
-    _request: Request,
-    { params }: { params: Promise<{ sessionId: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ tableId: string }> }) {
     try {
         const user = await requireAuth();
-        const { sessionId } = await params;
-        const rolls = await DiceService.listRolls(user.id, sessionId);
+        const { tableId } = await params;
+        const rolls = await DiceService.listRolls(user.id, tableId);
 
         return NextResponse.json({ rolls });
     } catch (error) {
@@ -24,19 +21,16 @@ export async function GET(
     }
 }
 
-export async function POST(
-    request: Request,
-    { params }: { params: Promise<{ sessionId: string }> },
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ tableId: string }> }) {
     try {
         const user = await requireAuth();
-        const { sessionId } = await params;
+        const { tableId } = await params;
         const body = await request.json();
 
         const payload = createDiceRollSchema.parse(body);
         const validated = diceRollSchema.parse({
             ...payload,
-            session_id: sessionId,
+            table_id: tableId,
         });
 
         const roll = await DiceService.createRoll(user.id, validated);

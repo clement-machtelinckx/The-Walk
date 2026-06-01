@@ -33,6 +33,7 @@ export default async function TableDetailPage({
             <div className="space-y-8 py-4">
                 <SessionToolsDrawer
                     isGM={details.myRole === "gm"}
+                    tableId={tableId}
                     context="table"
                     sessionId={details.activeSession?.id ?? details.nextSession?.id}
                 />

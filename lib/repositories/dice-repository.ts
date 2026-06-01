@@ -14,7 +14,8 @@ export const DiceRepository = {
         const { data, error } = await supabase
             .from("session_dice_rolls")
             .insert({
-                session_id: input.session_id,
+                table_id: input.table_id,
+                session_id: input.session_id ?? null,
                 user_id: userId,
                 dice_type: input.dice_type,
                 quantity: input.quantity,
@@ -30,16 +31,16 @@ export const DiceRepository = {
         return data as DiceRollLog;
     },
 
-    async listBySession(sessionId: string, limit = 50): Promise<DiceRollLog[]> {
+    async listByTable(tableId: string, limit = 20): Promise<DiceRollLog[]> {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_dice_rolls")
             .select("*, profiles!inner(id, display_name, avatar_url)")
-            .eq("session_id", sessionId)
+            .eq("table_id", tableId)
             .order("created_at", { ascending: false })
             .limit(limit);
 
-        handleDbError(error, "DiceRepository.listBySession");
+        handleDbError(error, "DiceRepository.listByTable");
         return (data as DiceRollLog[]) || [];
     },
 };
