@@ -130,7 +130,7 @@ export function RegisterForm({ nextPath }: RegisterFormProps) {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="mt-6 w-full" disabled={isLoading}>
                         {isLoading ? "Inscription en cours..." : "S'inscrire"}
                     </Button>
                     <div className="text-center text-sm">

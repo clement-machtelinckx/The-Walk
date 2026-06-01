@@ -91,7 +91,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="mt-6 w-full" disabled={isLoading}>
                         {isLoading ? "Connexion en cours..." : "Se connecter"}
                     </Button>
                     <div className="text-center text-sm">
