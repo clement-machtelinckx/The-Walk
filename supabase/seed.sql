@@ -14,6 +14,7 @@ insert into auth.users (
     email,
     encrypted_password,
     email_confirmed_at,
+    confirmed_at,
     raw_app_meta_data,
     raw_user_meta_data,
     created_at,
@@ -28,6 +29,7 @@ values
         'yazii@email.com',
         crypt('1234AZER$', gen_salt('bf')),
         now(),
+        now(),
         '{"provider":"email","providers":["email"]}',
         '{"display_name":"Yazii"}',
         now(),
@@ -40,6 +42,7 @@ values
         'authenticated',
         'test@email.com',
         crypt('1234AZER$', gen_salt('bf')),
+        now(),
         now(),
         '{"provider":"email","providers":["email"]}',
         '{"display_name":"Testeur 1"}',
@@ -54,14 +57,86 @@ values
         'test2@email.com',
         crypt('1234AZER$', gen_salt('bf')),
         now(),
+        now(),
         '{"provider":"email","providers":["email"]}',
         '{"display_name":"Testeur 2"}',
         now(),
         now()
-    );
+    )
+    on conflict (id) do update
+                            set
+                                email = excluded.email,
+                            encrypted_password = excluded.encrypted_password,
+                            email_confirmed_at = excluded.email_confirmed_at,
+                            confirmed_at = excluded.confirmed_at,
+                            raw_app_meta_data = excluded.raw_app_meta_data,
+                            raw_user_meta_data = excluded.raw_user_meta_data,
+                            updated_at = now();
 
 -- =========================================================
--- 2. Business profiles
+-- 2. Auth identities
+-- Required for local email/password sign-in to behave properly
+-- =========================================================
+
+insert into auth.identities (
+    id,
+    user_id,
+    identity_data,
+    provider,
+    provider_id,
+    created_at,
+    updated_at
+)
+values
+    (
+        '10000000-0000-0000-0000-000000000001',
+        '00000000-0000-0000-0000-000000000001',
+        jsonb_build_object(
+                'sub', '00000000-0000-0000-0000-000000000001',
+                'email', 'yazii@email.com',
+                'email_verified', true
+        ),
+        'email',
+        'yazii@email.com',
+        now(),
+        now()
+    ),
+    (
+        '10000000-0000-0000-0000-000000000002',
+        '00000000-0000-0000-0000-000000000002',
+        jsonb_build_object(
+                'sub', '00000000-0000-0000-0000-000000000002',
+                'email', 'test@email.com',
+                'email_verified', true
+        ),
+        'email',
+        'test@email.com',
+        now(),
+        now()
+    ),
+    (
+        '10000000-0000-0000-0000-000000000003',
+        '00000000-0000-0000-0000-000000000003',
+        jsonb_build_object(
+                'sub', '00000000-0000-0000-0000-000000000003',
+                'email', 'test2@email.com',
+                'email_verified', true
+        ),
+        'email',
+        'test2@email.com',
+        now(),
+        now()
+    )
+    on conflict (id) do update
+                            set
+                                user_id = excluded.user_id,
+                            identity_data = excluded.identity_data,
+                            provider = excluded.provider,
+                            provider_id = excluded.provider_id,
+                            updated_at = now();
+
+-- =========================================================
+-- 3. Business profiles
 -- Explicit insert for reliable local seed
 -- =========================================================
 
@@ -106,7 +181,7 @@ values
                             updated_at = now();
 
 -- =========================================================
--- 3. Table
+-- 4. Table
 -- =========================================================
 
 insert into public.tables (
@@ -125,11 +200,11 @@ values
         '00000000-0000-0000-0000-000000000001',
         now(),
         now()
-    );
+    )
+    on conflict (id) do nothing;
 
 -- =========================================================
--- 4. Membership owner (GM)
--- table_memberships has joined_at, not created_at/updated_at
+-- 5. Membership owner (GM)
 -- =========================================================
 
 insert into public.table_memberships (
@@ -144,10 +219,11 @@ values
         '00000000-0000-0000-0000-000000000001',
         'gm',
         now()
-    );
+    )
+    on conflict do nothing;
 
 -- =========================================================
--- 5. Targeted invitation
+-- 6. Targeted invitation
 -- =========================================================
 
 insert into public.invitations (
@@ -172,10 +248,11 @@ values
         now() + interval '7 days',
         now(),
         now()
-    );
+    )
+    on conflict do nothing;
 
 -- =========================================================
--- 6. Scheduled session
+-- 7. Scheduled session
 -- =========================================================
 
 insert into public.sessions (
@@ -196,4 +273,5 @@ values
         now() + interval '2 days',
         now(),
         now()
-    );
+    )
+    on conflict do nothing;
