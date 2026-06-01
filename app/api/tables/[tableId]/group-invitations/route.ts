@@ -33,10 +33,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ tableId
     }
 }
 
-export async function GET(
-    _req: Request,
-    { params }: { params: Promise<{ tableId: string }> },
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ tableId: string }> }) {
     try {
         const user = await requireAuth();
         const { tableId } = await params;

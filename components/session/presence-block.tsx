@@ -24,13 +24,8 @@ interface PresenceBlockProps {
 }
 
 export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
-    const {
-        presenceData,
-        fetchPresence,
-        savePresence,
-        isLoadingPresence,
-        isSavingPresence,
-    } = useSessionStore();
+    const { presenceData, fetchPresence, savePresence, isLoadingPresence, isSavingPresence } =
+        useSessionStore();
     const [isOpen, setIsOpen] = useState(false);
     const [localPresences, setLocalPresences] = useState<RollCallMember[]>([]);
     const [localError, setLocalError] = useState<string | null>(null);
@@ -41,10 +36,10 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
 
     // Polling centralisé (toutes les 20 secondes)
     const fetchFn = useCallback(() => fetchPresence(sessionId), [sessionId, fetchPresence]);
-    usePolling(fetchFn, { 
+    usePolling(fetchFn, {
         interval: 20000,
         // On évite de rafraîchir en plein milieu d'une édition locale par le MJ si le dialogue est ouvert
-        enabled: !isOpen 
+        enabled: !isOpen,
     });
 
     const handleOpenChange = (open: boolean) => {
@@ -129,7 +124,7 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
 
                 <div className="flex-grow space-y-6 overflow-y-auto px-6 py-2">
                     {localError && (
-                        <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md border border-destructive/20 p-3 text-xs font-medium">
+                        <div className="bg-destructive/10 text-destructive border-destructive/20 flex items-center gap-2 rounded-md border p-3 text-xs font-medium">
                             <AlertCircle size={14} />
                             {localError}
                         </div>

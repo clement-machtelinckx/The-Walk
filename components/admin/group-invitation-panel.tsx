@@ -26,7 +26,7 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
     const { tableGroupInvitations, fetchTableGroupInvitations, createGroupInvitation } =
         useInvitationStore();
     const { nextSessions } = useSessionStore();
-    
+
     const [role, setRole] = useState<TableRole>("player");
     const [duration, setDuration] = useState<string>("168"); // 1 week default
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,10 +52,10 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
         setTimeout(() => setCopiedKey(null), 2000);
     };
 
-    const inviteUrl = latestInvitation 
+    const inviteUrl = latestInvitation
         ? `${window.location.origin}/group-invitation/${latestInvitation.token}`
         : "";
-    
+
     const roleLabel = latestInvitation
         ? latestInvitation.role === "gm"
             ? "Maître du Jeu (Co-MJ)"
@@ -74,20 +74,23 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
     const shortMessage = `Rejoins ma table JDR "${tableName}" sur The-Walk !\nLien d'invitation de groupe : ${inviteUrl}`;
 
     return (
-        <Card className="overflow-hidden border-primary/20">
+        <Card className="border-primary/20 overflow-hidden">
             <CardHeader className="bg-primary/5 pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg font-bold">
                     <LinkIcon size={18} className="text-primary" />
                     Invitation de groupe (Lien public)
                 </CardTitle>
                 <CardDescription>
-                    Générez un lien temporaire que n&apos;importe qui peut utiliser pour rejoindre la table.
+                    Générez un lien temporaire que n&apos;importe qui peut utiliser pour rejoindre
+                    la table.
                 </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6 space-y-6">
+            <CardContent className="space-y-6 pt-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Rôle</label>
+                        <label className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                            Rôle
+                        </label>
                         <Select value={role} onValueChange={(v) => setRole(v as TableRole)}>
                             <SelectTrigger>
                                 <SelectValue />
@@ -100,7 +103,9 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Durée</label>
+                        <label className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                            Durée
+                        </label>
                         <Select value={duration} onValueChange={setDuration}>
                             <SelectTrigger>
                                 <SelectValue />
@@ -113,30 +118,31 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                         </Select>
                     </div>
                     <div className="flex items-end">
-                        <Button 
-                            className="w-full" 
-                            onClick={handleGenerate} 
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+                        <Button className="w-full" onClick={handleGenerate} disabled={isSubmitting}>
+                            {isSubmitting ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <LinkIcon className="mr-2 h-4 w-4" />
+                            )}
                             Générer le lien
                         </Button>
                     </div>
                 </div>
 
                 {!latestInvitation ? (
-                    <div className="rounded-lg border border-dashed p-8 text-center bg-muted/20">
-                        <p className="text-sm text-muted-foreground italic">
+                    <div className="bg-muted/20 rounded-lg border border-dashed p-8 text-center">
+                        <p className="text-muted-foreground text-sm italic">
                             Aucun lien actif. Générez-en un pour commencer.
                         </p>
                     </div>
                 ) : (
-                    <div className="space-y-4 pt-2 border-t">
+                    <div className="space-y-4 border-t pt-2">
                         <div className="flex items-center justify-between">
                             <div className="space-y-0.5">
                                 <p className="text-sm font-bold">Lien actif ({roleLabel})</p>
-                                <p className="text-xs text-muted-foreground italic">
-                                    Expire le {new Date(latestInvitation.expires_at).toLocaleString()}
+                                <p className="text-muted-foreground text-xs italic">
+                                    Expire le{" "}
+                                    {new Date(latestInvitation.expires_at).toLocaleString()}
                                 </p>
                             </div>
                         </div>
@@ -148,7 +154,7 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                             </TabsList>
 
                             <TabsContent value="full" className="space-y-4">
-                                <div className="relative rounded-lg border bg-muted/30 p-4 text-sm whitespace-pre-wrap">
+                                <div className="bg-muted/30 relative rounded-lg border p-4 text-sm whitespace-pre-wrap">
                                     {fullMessage}
                                 </div>
                                 <div className="flex flex-wrap gap-2">
@@ -158,7 +164,11 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                                         className="flex-grow"
                                         onClick={() => copyToClipboard(fullMessage, "full")}
                                     >
-                                        {copiedKey === "full" ? <Check size={16} /> : <Copy size={16} />}
+                                        {copiedKey === "full" ? (
+                                            <Check size={16} />
+                                        ) : (
+                                            <Copy size={16} />
+                                        )}
                                         <span className="ml-2">Copier le message</span>
                                     </Button>
                                     <Button
@@ -166,14 +176,18 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                                         size="sm"
                                         onClick={() => copyToClipboard(inviteUrl, "url")}
                                     >
-                                        {copiedKey === "url" ? <Check size={16} /> : <Share2 size={16} />}
+                                        {copiedKey === "url" ? (
+                                            <Check size={16} />
+                                        ) : (
+                                            <Share2 size={16} />
+                                        )}
                                         <span className="ml-2">Lien seul</span>
                                     </Button>
                                 </div>
                             </TabsContent>
 
                             <TabsContent value="short" className="space-y-4">
-                                <div className="relative rounded-lg border bg-muted/30 p-4 text-sm whitespace-pre-wrap">
+                                <div className="bg-muted/30 relative rounded-lg border p-4 text-sm whitespace-pre-wrap">
                                     {shortMessage}
                                 </div>
                                 <div className="flex flex-wrap gap-2">
@@ -183,7 +197,11 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                                         className="flex-grow"
                                         onClick={() => copyToClipboard(shortMessage, "short")}
                                     >
-                                        {copiedKey === "short" ? <Check size={16} /> : <Copy size={16} />}
+                                        {copiedKey === "short" ? (
+                                            <Check size={16} />
+                                        ) : (
+                                            <Copy size={16} />
+                                        )}
                                         <span className="ml-2">Copier le message court</span>
                                     </Button>
                                     <Button
@@ -191,7 +209,11 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                                         size="sm"
                                         onClick={() => copyToClipboard(inviteUrl, "url")}
                                     >
-                                        {copiedKey === "url" ? <Check size={16} /> : <Share2 size={16} />}
+                                        {copiedKey === "url" ? (
+                                            <Check size={16} />
+                                        ) : (
+                                            <Share2 size={16} />
+                                        )}
                                         <span className="ml-2">Lien seul</span>
                                     </Button>
                                 </div>
@@ -203,7 +225,8 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                 <div className="flex items-start gap-2 rounded-md bg-blue-50 p-3 text-xs text-blue-800 dark:bg-blue-950/30 dark:text-blue-200">
                     <Info size={14} className="mt-0.5 shrink-0" />
                     <p>
-                        Contrairement à l&apos;invitation par email, ce lien peut être utilisé par n&apos;importe qui possédant le lien.
+                        Contrairement à l&apos;invitation par email, ce lien peut être utilisé par
+                        n&apos;importe qui possédant le lien.
                     </p>
                 </div>
             </CardContent>

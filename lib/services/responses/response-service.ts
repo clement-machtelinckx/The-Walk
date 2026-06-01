@@ -2,10 +2,7 @@ import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
 import { ForbiddenError, NotFoundError } from "@/lib/errors";
 import { SessionResponseInput } from "@/lib/validators/session";
-import {
-    SessionResponse,
-    SessionResponsesSummary,
-} from "@/types/session";
+import { SessionResponse, SessionResponsesSummary } from "@/types/session";
 
 export const ResponseService = {
     /**

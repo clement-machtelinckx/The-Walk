@@ -13,5 +13,4 @@ export const siteConfig = {
     links: {
         crawl: process.env.THE_CRAWL_URL || "https://the-crawl.vercel.app/",
     },
-
 };

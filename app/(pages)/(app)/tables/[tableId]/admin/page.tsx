@@ -11,7 +11,12 @@ import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionAdminBlock } from "@/components/admin/next-session-admin-block";
 import { GroupInvitationPanel } from "@/components/admin/group-invitation-panel";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
     await requireAuth();
@@ -71,10 +76,17 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
                                 <Settings2 size={16} className="text-primary" />
                                 Accès & Invitations
                             </h2>
-                            
-                            <Accordion type="multiple" defaultValue={["invitations"]} className="w-full space-y-4">
-                                <AccordionItem value="invitations" className="border rounded-xl bg-card px-4">
-                                    <AccordionTrigger className="hover:no-underline py-4">
+
+                            <Accordion
+                                type="multiple"
+                                defaultValue={["invitations"]}
+                                className="w-full space-y-4"
+                            >
+                                <AccordionItem
+                                    value="invitations"
+                                    className="bg-card rounded-xl border px-4"
+                                >
+                                    <AccordionTrigger className="py-4 hover:no-underline">
                                         <div className="flex items-center gap-2 text-sm font-bold">
                                             <UserPlus size={18} className="text-primary" />
                                             Invitations ciblées (Email)
@@ -85,15 +97,21 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
                                     </AccordionContent>
                                 </AccordionItem>
 
-                                <AccordionItem value="group-invitations" className="border rounded-xl bg-card px-4">
-                                    <AccordionTrigger className="hover:no-underline py-4">
+                                <AccordionItem
+                                    value="group-invitations"
+                                    className="bg-card rounded-xl border px-4"
+                                >
+                                    <AccordionTrigger className="py-4 hover:no-underline">
                                         <div className="flex items-center gap-2 text-sm font-bold">
                                             <LinkIcon size={18} className="text-primary" />
                                             Lien d&apos;invitation public
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="pb-6">
-                                        <GroupInvitationPanel tableId={tableId} tableName={table.name} />
+                                        <GroupInvitationPanel
+                                            tableId={tableId}
+                                            tableName={table.name}
+                                        />
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>

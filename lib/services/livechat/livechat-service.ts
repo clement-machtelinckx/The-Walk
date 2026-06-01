@@ -10,7 +10,7 @@ export const LivechatService = {
     /**
      * Liste les messages du chat live d'une session.
      * Vérifie que l'utilisateur est membre de la table liée.
-     * Note: On peut éventuellement lire l'historique d'une session terminée, 
+     * Note: On peut éventuellement lire l'historique d'une session terminée,
      * mais l'envoi est bloqué.
      */
     async listMessages(
@@ -38,12 +38,16 @@ export const LivechatService = {
         if (!session) throw new NotFoundError("Session", input.session_id);
 
         if (session.status !== "active") {
-            throw new ValidationError("Le chat live n'est disponible que pendant une session active.");
+            throw new ValidationError(
+                "Le chat live n'est disponible que pendant une session active.",
+            );
         }
 
         const membership = await MembershipRepository.getByUserAndTable(userId, session.table_id);
         if (!membership) {
-            throw new ForbiddenError("Seuls les membres de la table peuvent envoyer des messages live.");
+            throw new ForbiddenError(
+                "Seuls les membres de la table peuvent envoyer des messages live.",
+            );
         }
 
         return await MessageRepository.createLiveSession(input, userId);

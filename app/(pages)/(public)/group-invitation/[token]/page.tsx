@@ -17,7 +17,11 @@ export const metadata = {
     description: "Rejoignez une table sur The-Walk via un lien de groupe.",
 };
 
-export default async function GroupInvitationPage({ params }: { params: Promise<{ token: string }> }) {
+export default async function GroupInvitationPage({
+    params,
+}: {
+    params: Promise<{ token: string }>;
+}) {
     const { token } = await params;
     const user = await getCurrentUser();
 

@@ -44,7 +44,7 @@ export const GroupInvitationRepository = {
     async listByTable(tableId: string): Promise<GroupInvitation[]> {
         const supabase = await getServerClient();
         const now = new Date().toISOString();
-        
+
         const { data, error } = await supabase
             .from("table_group_invitations")
             .select("*")

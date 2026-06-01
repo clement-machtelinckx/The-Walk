@@ -31,7 +31,10 @@ export function PrechatBlock({ sessionId }: PrechatBlockProps) {
     const messages = useMemo(() => prechat?.data || [], [prechat]);
 
     // Polling centralisé (toutes les 10 secondes)
-    const fetchFn = useCallback(() => fetchPrechatMessages(sessionId), [sessionId, fetchPrechatMessages]);
+    const fetchFn = useCallback(
+        () => fetchPrechatMessages(sessionId),
+        [sessionId, fetchPrechatMessages],
+    );
     usePolling(fetchFn, { interval: 10000 });
 
     // Scroll automatique vers le bas lors de nouveaux messages

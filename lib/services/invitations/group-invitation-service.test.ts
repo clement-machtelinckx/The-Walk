@@ -9,83 +9,96 @@ vi.mock("@/lib/repositories/membership-repository");
 vi.mock("@/lib/repositories/table-repository");
 
 describe("GroupInvitationService", () => {
-  const mockUserId = "user-123";
-  const mockTableId = "table-456";
-  const mockToken = "token-789";
+    const mockUserId = "user-123";
+    const mockTableId = "table-456";
+    const mockToken = "token-789";
+    type Membership = Awaited<ReturnType<typeof MembershipRepository.getByUserAndTable>>;
+    type GroupInvitation = Awaited<ReturnType<typeof GroupInvitationRepository.getByToken>>;
+    type CreatedGroupInvitation = Awaited<ReturnType<typeof GroupInvitationRepository.create>>;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  describe("create", () => {
-    it("should create invitation if user is GM", async () => {
-      vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
-        role: "gm",
-      } as any);
-
-      vi.mocked(GroupInvitationRepository.create).mockResolvedValue({ id: "inv-1" } as any);
-
-      await GroupInvitationService.create(mockUserId, mockTableId, "player", 24);
-
-      expect(GroupInvitationRepository.create).toHaveBeenCalled();
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    it("should throw ForbiddenError if user is not GM", async () => {
-      vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
-        role: "player",
-      } as any);
+    describe("create", () => {
+        it("should create invitation if user is GM", async () => {
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+                role: "gm",
+            } as Membership);
 
-      await expect(GroupInvitationService.create(mockUserId, mockTableId, "player", 24))
-        .rejects.toThrow(ForbiddenError);
-    });
-  });
+            vi.mocked(GroupInvitationRepository.create).mockResolvedValue({
+                id: "inv-1",
+            } as CreatedGroupInvitation);
 
-  describe("accept", () => {
-    it("should create membership if invitation is valid", async () => {
-      const futureDate = new Date();
-      futureDate.setHours(futureDate.getHours() + 1);
+            await GroupInvitationService.create(mockUserId, mockTableId, "player", 24);
 
-      vi.mocked(GroupInvitationRepository.getByToken).mockResolvedValue({
-        table_id: mockTableId,
-        role: "player",
-        expires_at: futureDate.toISOString(),
-      } as any);
+            expect(GroupInvitationRepository.create).toHaveBeenCalled();
+        });
 
-      vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue(null);
+        it("should throw ForbiddenError if user is not GM", async () => {
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+                role: "player",
+            } as Membership);
 
-      await GroupInvitationService.accept(mockUserId, mockToken);
-
-      expect(MembershipRepository.create).toHaveBeenCalledWith(mockTableId, mockUserId, "player");
+            await expect(
+                GroupInvitationService.create(mockUserId, mockTableId, "player", 24),
+            ).rejects.toThrow(ForbiddenError);
+        });
     });
 
-    it("should throw ValidationError if invitation is expired", async () => {
-      const pastDate = new Date();
-      pastDate.setHours(pastDate.getHours() - 1);
+    describe("accept", () => {
+        it("should create membership if invitation is valid", async () => {
+            const futureDate = new Date();
+            futureDate.setHours(futureDate.getHours() + 1);
 
-      vi.mocked(GroupInvitationRepository.getByToken).mockResolvedValue({
-        expires_at: pastDate.toISOString(),
-      } as any);
+            vi.mocked(GroupInvitationRepository.getByToken).mockResolvedValue({
+                table_id: mockTableId,
+                role: "player",
+                expires_at: futureDate.toISOString(),
+            } as GroupInvitation);
 
-      await expect(GroupInvitationService.accept(mockUserId, mockToken))
-        .rejects.toThrow(ValidationError);
-      expect(MembershipRepository.create).not.toHaveBeenCalled();
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue(null);
+
+            await GroupInvitationService.accept(mockUserId, mockToken);
+
+            expect(MembershipRepository.create).toHaveBeenCalledWith(
+                mockTableId,
+                mockUserId,
+                "player",
+            );
+        });
+
+        it("should throw ValidationError if invitation is expired", async () => {
+            const pastDate = new Date();
+            pastDate.setHours(pastDate.getHours() - 1);
+
+            vi.mocked(GroupInvitationRepository.getByToken).mockResolvedValue({
+                expires_at: pastDate.toISOString(),
+            } as GroupInvitation);
+
+            await expect(GroupInvitationService.accept(mockUserId, mockToken)).rejects.toThrow(
+                ValidationError,
+            );
+            expect(MembershipRepository.create).not.toHaveBeenCalled();
+        });
+
+        it("should return tableId without creating new membership if user is already a member", async () => {
+            const futureDate = new Date();
+            futureDate.setHours(futureDate.getHours() + 1);
+
+            vi.mocked(GroupInvitationRepository.getByToken).mockResolvedValue({
+                table_id: mockTableId,
+                expires_at: futureDate.toISOString(),
+            } as GroupInvitation);
+
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+                id: "existing",
+            } as Membership);
+
+            const result = await GroupInvitationService.accept(mockUserId, mockToken);
+
+            expect(result.tableId).toBe(mockTableId);
+            expect(MembershipRepository.create).not.toHaveBeenCalled();
+        });
     });
-
-    it("should return tableId without creating new membership if user is already a member", async () => {
-      const futureDate = new Date();
-      futureDate.setHours(futureDate.getHours() + 1);
-
-      vi.mocked(GroupInvitationRepository.getByToken).mockResolvedValue({
-        table_id: mockTableId,
-        expires_at: futureDate.toISOString(),
-      } as any);
-
-      vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({ id: "existing" } as any);
-
-      const result = await GroupInvitationService.accept(mockUserId, mockToken);
-
-      expect(result.tableId).toBe(mockTableId);
-      expect(MembershipRepository.create).not.toHaveBeenCalled();
-    });
-  });
 });

@@ -3,10 +3,7 @@ import { requireAuth } from "@/lib/auth/server";
 import { SessionService } from "@/lib/services/sessions/session-service";
 import { AppError } from "@/lib/errors";
 
-export async function GET(
-    _request: Request,
-    { params }: { params: Promise<{ tableId: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ tableId: string }> }) {
     try {
         const user = await requireAuth();
         const { tableId } = await params;
