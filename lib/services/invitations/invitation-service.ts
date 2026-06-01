@@ -1,9 +1,8 @@
 import { InvitationRepository } from "@/lib/repositories/invitation-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
-import { TableRepository } from "@/lib/repositories/table-repository";
 import { Invitation, Table } from "@/types/table";
 import { CreateInvitationInput } from "@/lib/validators/invitation";
-import { AppError, ForbiddenError, ValidationError } from "@/lib/errors";
+import { ForbiddenError, ValidationError } from "@/lib/errors";
 
 export interface InvitationWithTable extends Invitation {
     tables: Pick<Table, "name" | "description">;
@@ -43,8 +42,8 @@ export const InvitationService = {
             throw new ValidationError("Cette invitation a expiré.");
         }
 
-        // Fetch table details
-        const table = await TableRepository.getById(invitation.table_id);
+        // Invitation pages must show the table name before the recipient is a member.
+        const table = await InvitationRepository.getTableInfoForInvitation(invitation.table_id);
 
         return {
             ...invitation,
@@ -80,7 +79,10 @@ export const InvitationService = {
             throw new ForbiddenError("Vous devez être connecté pour accepter une invitation.");
         }
 
-        if (invitation.email && invitation.email.toLowerCase() !== userData.user.email?.toLowerCase()) {
+        if (
+            invitation.email &&
+            invitation.email.toLowerCase() !== userData.user.email?.toLowerCase()
+        ) {
             throw new ValidationError(
                 `Cette invitation est destinée à ${invitation.email}. Vous êtes connecté avec ${userData.user.email}.`,
             );

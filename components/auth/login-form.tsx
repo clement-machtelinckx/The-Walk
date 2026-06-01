@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 
-export function LoginForm() {
+interface LoginFormProps {
+    nextPath?: string | null;
+}
+
+export function LoginForm({ nextPath }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +37,7 @@ export function LoginForm() {
         try {
             const result = await login(email, password);
             if (result.success) {
-                router.push("/tables");
+                router.push(nextPath || "/tables");
                 router.refresh();
             } else {
                 setError(result.error || "Identifiants invalides");
@@ -87,12 +91,19 @@ export function LoginForm() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="mt-6 w-full" disabled={isLoading}>
                         {isLoading ? "Connexion en cours..." : "Se connecter"}
                     </Button>
                     <div className="text-center text-sm">
                         Pas encore de compte ?{" "}
-                        <Link href="/register" className="text-primary font-medium hover:underline">
+                        <Link
+                            href={
+                                nextPath
+                                    ? `/register?next=${encodeURIComponent(nextPath)}`
+                                    : "/register"
+                            }
+                            className="text-primary font-medium hover:underline"
+                        >
                             Créer un compte
                         </Link>
                     </div>

@@ -11,6 +11,7 @@ import { Mail, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { InvitationAcceptButton } from "@/components/special/invitation-accept-button";
 import { RoleBadge } from "@/components/special/role-badge";
+import { getLoginPathWithNext } from "@/lib/auth/redirect";
 
 export const metadata = {
     title: "Invitation",
@@ -20,6 +21,7 @@ export const metadata = {
 export default async function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = await params;
     const user = await getCurrentUser();
+    const invitationPath = `/invitation/${token}`;
 
     let invitation: InvitationWithTable | null = null;
     let errorMessage: string | null = null;
@@ -86,7 +88,11 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
                                         <span className="font-bold">{user.email}</span>.
                                     </p>
                                     <Button asChild variant="outline" size="sm" className="mt-2">
-                                        <Link href="/login">Changer de compte</Link>
+                                        <Link
+                                            href={`/api/auth/logout?next=${encodeURIComponent(invitationPath)}`}
+                                        >
+                                            Changer de compte
+                                        </Link>
                                     </Button>
                                 </div>
                             ) : (
@@ -110,12 +116,14 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
                             </div>
                             <div className="grid grid-cols-1 gap-3">
                                 <Button asChild size="lg" className="w-full">
-                                    <Link href={`/login?next=/invitation/${token}`}>
+                                    <Link href={getLoginPathWithNext(invitationPath)}>
                                         Se connecter
                                     </Link>
                                 </Button>
                                 <Button asChild variant="outline" size="lg" className="w-full">
-                                    <Link href={`/register?next=/invitation/${token}`}>
+                                    <Link
+                                        href={`/register?next=${encodeURIComponent(invitationPath)}`}
+                                    >
                                         Créer un compte
                                     </Link>
                                 </Button>

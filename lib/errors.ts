@@ -45,6 +45,16 @@ export class ForbiddenError extends AppError {
 }
 
 /**
+ * Error when a write would overwrite a newer version of a resource.
+ */
+export class ConflictError extends AppError {
+    constructor(message: string = "Conflit détecté", details?: unknown) {
+        super(message, "CONFLICT", 409, details);
+        this.name = "ConflictError";
+    }
+}
+
+/**
  * Error for authentication issues.
  */
 export class UnauthorizedError extends AppError {

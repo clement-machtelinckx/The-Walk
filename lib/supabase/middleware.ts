@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { getSafeNextPath } from "@/lib/auth/redirect";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
@@ -46,10 +47,10 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    // 2. Redirect authenticated users from auth routes (login/register) to /tables
+    // 2. Redirect authenticated users from auth routes to the intended safe path, or /tables.
     if (user && isAuthRoute) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/tables";
+        const nextPath = getSafeNextPath(request.nextUrl.searchParams.get("next")) || "/tables";
+        const url = new URL(nextPath, request.nextUrl.origin);
         return NextResponse.redirect(url);
     }
 

@@ -107,11 +107,17 @@ interface SessionState {
         content: string,
     ) => Promise<{ success: boolean; error?: string }>;
 
-    fetchGroupNote: (sessionId: string) => Promise<void>;
+    fetchGroupNote: (sessionId: string) => Promise<GroupNote | null | undefined>;
     saveGroupNote: (
         sessionId: string,
         content: string,
-    ) => Promise<{ success: boolean; error?: string }>;
+        expectedUpdatedAt: string | null,
+    ) => Promise<{
+        success: boolean;
+        note?: GroupNote;
+        error?: string;
+        code?: string;
+    }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -602,24 +608,27 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     },
                     isLoadingGroupNote: false,
                 }));
+                return data.note;
             } else {
                 set({
                     error: data.error || "Erreur lors de la récupération de la note de groupe",
                     isLoadingGroupNote: false,
                 });
+                return undefined;
             }
         } catch (err) {
             set({ error: "Erreur réseau", isLoadingGroupNote: false });
+            return undefined;
         }
     },
 
-    saveGroupNote: async (sessionId: string, content: string) => {
+    saveGroupNote: async (sessionId: string, content: string, expectedUpdatedAt: string | null) => {
         set({ isSavingGroupNote: true, error: null });
         try {
             const res = await fetch(`/api/sessions/${sessionId}/notes/group`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
+                body: JSON.stringify({ content, expectedUpdatedAt }),
             });
             const data = await res.json();
             if (res.ok) {
@@ -630,10 +639,14 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     },
                     isSavingGroupNote: false,
                 }));
-                return { success: true };
+                return { success: true, note: data.note };
             } else {
                 set({ isSavingGroupNote: false, error: data.error });
-                return { success: false, error: data.error };
+                return {
+                    success: false,
+                    error: data.error,
+                    code: data.code,
+                };
             }
         } catch (err) {
             set({ isSavingGroupNote: false, error: "Erreur réseau" });

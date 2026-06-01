@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 
-export function RegisterForm() {
+interface RegisterFormProps {
+    nextPath?: string | null;
+}
+
+export function RegisterForm({ nextPath }: RegisterFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -46,13 +50,13 @@ export function RegisterForm() {
                 setSuccess(result.message || "Inscription réussie !");
                 // Optional: redirect to tables after a short delay if immediately logged in
                 setTimeout(() => {
-                    router.push("/tables");
+                    router.push(nextPath || "/tables");
                     router.refresh();
                 }, 1500);
             } else {
                 setError(result.error || "Erreur lors de l'inscription");
             }
-        } catch (err) {
+        } catch {
             setError("Une erreur est survenue");
         } finally {
             setIsLoading(false);
@@ -126,12 +130,17 @@ export function RegisterForm() {
                     </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="mt-6 w-full" disabled={isLoading}>
                         {isLoading ? "Inscription en cours..." : "S'inscrire"}
                     </Button>
                     <div className="text-center text-sm">
                         Déjà un compte ?{" "}
-                        <Link href="/login" className="text-primary font-medium hover:underline">
+                        <Link
+                            href={
+                                nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : "/login"
+                            }
+                            className="text-primary font-medium hover:underline"
+                        >
                             Se connecter
                         </Link>
                     </div>
