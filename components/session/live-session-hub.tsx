@@ -54,7 +54,7 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
 
     return (
         <div className="space-y-6 py-2 md:py-4">
-            <SessionToolsDrawer isGM={isGM} context="live" />
+            <SessionToolsDrawer isGM={isGM} context="live" sessionId={session.id} />
 
             {/* Header plus compact */}
             <header className="flex flex-col justify-between gap-4 border-b pb-4 md:flex-row md:items-center">

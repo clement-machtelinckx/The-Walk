@@ -15,10 +15,12 @@ import { Badge } from "@/components/ui/badge";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Crown, Dice5, ExternalLink, MessageSquare, Shield, Users, Wrench } from "lucide-react";
+import { DiceLogBlock } from "./dice-log-block";
 
 interface SessionToolsDrawerProps {
     isGM: boolean;
     context?: SessionToolsContext;
+    sessionId?: string;
 }
 
 type SessionToolsContext = "table" | "pre-session" | "live";
@@ -129,7 +131,7 @@ function PlaceholderItem({
     );
 }
 
-export function SessionToolsDrawer({ isGM, context = "live" }: SessionToolsDrawerProps) {
+export function SessionToolsDrawer({ isGM, context = "live", sessionId }: SessionToolsDrawerProps) {
     const [open, setOpen] = useState(false);
     const [activeTool, setActiveTool] = useState<SessionToolId>("players");
     const visibleTools = SESSION_TOOLS.filter((tool) => tool.id !== "gm" || isGM);
@@ -245,10 +247,14 @@ export function SessionToolsDrawer({ isGM, context = "live" }: SessionToolsDrawe
                                     title="Dés / initiative"
                                     description="Jets de dés accessibles largement, initiative réservée au live."
                                 >
-                                    <PlaceholderItem
-                                        label="Dés"
-                                        detail="Espace prévu pour des jets utilisables depuis la table, la préparation et le live."
-                                    />
+                                    {sessionId ? (
+                                        <DiceLogBlock sessionId={sessionId} />
+                                    ) : (
+                                        <PlaceholderItem
+                                            label="Dés"
+                                            detail="Les lancers persistants seront disponibles ici dès qu'une session est sélectionnée."
+                                        />
+                                    )}
                                     <PlaceholderItem
                                         label="Initiative"
                                         detail={

@@ -31,7 +31,11 @@ export default async function TableDetailPage({
     return (
         <PageShell>
             <div className="space-y-8 py-4">
-                <SessionToolsDrawer isGM={details.myRole === "gm"} context="table" />
+                <SessionToolsDrawer
+                    isGM={details.myRole === "gm"}
+                    context="table"
+                    sessionId={details.activeSession?.id ?? details.nextSession?.id}
+                />
 
                 <TableHeader
                     tableId={tableId}
