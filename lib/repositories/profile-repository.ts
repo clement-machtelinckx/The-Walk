@@ -1,4 +1,4 @@
-import { getServerClient } from "@/lib/db";
+import { getServerClient, getServiceRoleClient } from "@/lib/db";
 import { handleDbError } from "./_shared/base";
 import { NotFoundError } from "@/lib/errors";
 
@@ -35,6 +35,18 @@ export const ProfileRepository = {
             throw new NotFoundError("Profile", email);
         }
         handleDbError(error, "ProfileRepository.getByEmail");
+        return data;
+    },
+
+    async getByEmailForSystem(email: string): Promise<Profile | null> {
+        const supabase = getServiceRoleClient();
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("email", email)
+            .maybeSingle();
+
+        handleDbError(error, "ProfileRepository.getByEmailForSystem");
         return data;
     },
 

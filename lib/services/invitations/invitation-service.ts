@@ -2,6 +2,7 @@ import { InvitationRepository } from "@/lib/repositories/invitation-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
 import { TableRepository } from "@/lib/repositories/table-repository";
 import { TransactionalEmailService } from "@/lib/services/email/transactional-email-service";
+import { NotificationEventService } from "@/lib/services/notifications/notification-event-service";
 import { Invitation, Table } from "@/types/table";
 import { CreateInvitationInput } from "@/lib/validators/invitation";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
@@ -10,7 +11,7 @@ export interface InvitationWithTable extends Invitation {
     tables: Pick<Table, "name" | "description">;
 }
 
-function sendInvitationEmailLater(userId: string, invitation: Invitation) {
+function processInvitationSideEffectsLater(userId: string, invitation: Invitation) {
     void (async () => {
         try {
             const table = await TableRepository.getById(invitation.table_id);
@@ -26,6 +27,12 @@ function sendInvitationEmailLater(userId: string, invitation: Invitation) {
             });
         } catch (error) {
             console.error("[INVITATION_EMAIL]", error);
+        }
+
+        try {
+            await NotificationEventService.notifyTargetedInvitationReceived(invitation);
+        } catch (error) {
+            console.error("[INVITATION_NOTIFICATION]", error);
         }
     })();
 }
@@ -43,7 +50,7 @@ export const InvitationService = {
         }
 
         const invitation = await InvitationRepository.create(input, userId);
-        sendInvitationEmailLater(userId, invitation);
+        processInvitationSideEffectsLater(userId, invitation);
         return invitation;
     },
 

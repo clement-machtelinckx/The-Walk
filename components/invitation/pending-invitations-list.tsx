@@ -44,26 +44,30 @@ export function PendingInvitationsList() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
-                    {pendingInvitations.map((invitation) => (
-                        <div
-                            key={invitation.id}
-                            className="bg-card flex flex-col justify-between gap-4 rounded-lg border p-4 shadow-sm sm:flex-row sm:items-center"
-                        >
-                            <div className="space-y-1">
-                                <h4 className="text-primary font-bold">{invitation.tables.name}</h4>
-                                <div className="flex items-center gap-2 text-xs">
-                                    <span className="text-muted-foreground">Rôle :</span>
-                                    <RoleBadge role={invitation.role} size="sm" />
+                    {pendingInvitations.map((invitation) => {
+                        const tableName = invitation.tables?.name || "Table de jeu";
+
+                        return (
+                            <div
+                                key={invitation.id}
+                                className="bg-card flex flex-col justify-between gap-4 rounded-lg border p-4 shadow-sm sm:flex-row sm:items-center"
+                            >
+                                <div className="space-y-1">
+                                    <h4 className="text-primary font-bold">{tableName}</h4>
+                                    <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-muted-foreground">Rôle :</span>
+                                        <RoleBadge role={invitation.role} size="sm" />
+                                    </div>
                                 </div>
+                                <Button asChild size="sm">
+                                    <Link href={`/invitation/${invitation.token}`}>
+                                        Voir l&apos;invitation
+                                        <ArrowRight size={14} className="ml-2" />
+                                    </Link>
+                                </Button>
                             </div>
-                            <Button asChild size="sm">
-                                <Link href={`/invitation/${invitation.token}`}>
-                                    Voir l&apos;invitation
-                                    <ArrowRight size={14} className="ml-2" />
-                                </Link>
-                            </Button>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </CardContent>
         </Card>

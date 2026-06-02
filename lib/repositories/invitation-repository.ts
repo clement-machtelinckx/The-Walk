@@ -85,7 +85,27 @@ export const InvitationRepository = {
             .order("created_at", { ascending: false });
 
         handleDbError(error, "InvitationRepository.listPendingByEmail");
-        return (data as unknown as InvitationWithTableInfo[]) || [];
+
+        const invitations =
+            (data as unknown as Array<
+                Invitation & {
+                    tables: Pick<Table, "name" | "description"> | null;
+                }
+            >) || [];
+
+        return await Promise.all(
+            invitations.map(async (invitation) => {
+                if (invitation.tables) {
+                    return invitation as InvitationWithTableInfo;
+                }
+
+                const table = await this.getTableInfoForInvitation(invitation.table_id);
+                return {
+                    ...invitation,
+                    tables: table,
+                };
+            }),
+        );
     },
 
     async getTableInfoForInvitation(tableId: string): Promise<Pick<Table, "name" | "description">> {

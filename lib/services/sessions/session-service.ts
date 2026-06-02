@@ -1,5 +1,6 @@
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
+import { NotificationEventService } from "@/lib/services/notifications/notification-event-service";
 import { PresenceService } from "@/lib/services/presence/presence-service";
 import { CreateSessionInput, UpdateSessionInput } from "@/lib/validators/session";
 import { Session, PresenceSummary } from "@/types/session";
@@ -8,6 +9,18 @@ import { ForbiddenError, ValidationError } from "@/lib/errors";
 export interface SessionHistoryItem {
     session: Session;
     presenceSummary: PresenceSummary | null;
+}
+
+function notifyUpcomingSessionLater(userId: string, session: Session) {
+    void NotificationEventService.notifyUpcomingSessionScheduled(userId, session).catch((error) => {
+        console.error("[SESSION_SCHEDULED_NOTIFICATION]", error);
+    });
+}
+
+function notifyLiveSessionStartedLater(userId: string, session: Session) {
+    void NotificationEventService.notifySessionLiveStarted(userId, session).catch((error) => {
+        console.error("[SESSION_LIVE_NOTIFICATION]", error);
+    });
 }
 
 export const SessionService = {
@@ -22,10 +35,13 @@ export const SessionService = {
             throw new ForbiddenError("Seul le Maître du Jeu peut créer des sessions.");
         }
 
-        return await SessionRepository.create({
+        const session = await SessionRepository.create({
             ...input,
             status: input.status || "scheduled",
         });
+
+        notifyUpcomingSessionLater(userId, session);
+        return session;
     },
 
     /**
@@ -91,10 +107,13 @@ export const SessionService = {
             throw new ValidationError("Une session est déjà en cours sur cette table.");
         }
 
-        return await SessionRepository.update(sessionId, {
+        const updatedSession = await SessionRepository.update(sessionId, {
             status: "active",
             started_at: new Date().toISOString(),
         });
+
+        notifyLiveSessionStartedLater(userId, updatedSession);
+        return updatedSession;
     },
 
     /**
