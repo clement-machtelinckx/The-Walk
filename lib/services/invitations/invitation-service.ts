@@ -10,21 +10,10 @@ export interface InvitationWithTable extends Invitation {
     tables: Pick<Table, "name" | "description">;
 }
 
-export const InvitationService = {
-    /**
-     * Create a new invitation for a table.
-     * Restricts creation to GM of the table.
-     */
-    async create(userId: string, input: CreateInvitationInput): Promise<Invitation> {
-        // 1. Check if user is MJ of the table
-        const membership = await MembershipRepository.getByUserAndTable(userId, input.table_id);
-        if (!membership || membership.role !== "gm") {
-            throw new ForbiddenError("Seul le Maître du Jeu peut inviter des joueurs.");
-        }
-
-        const invitation = await InvitationRepository.create(input, userId);
+function sendInvitationEmailLater(userId: string, invitation: Invitation) {
+    void (async () => {
         try {
-            const table = await TableRepository.getById(input.table_id);
+            const table = await TableRepository.getById(invitation.table_id);
 
             await TransactionalEmailService.sendTableInvitationNonBlocking({
                 senderUserId: userId,
@@ -38,7 +27,23 @@ export const InvitationService = {
         } catch (error) {
             console.error("[INVITATION_EMAIL]", error);
         }
+    })();
+}
 
+export const InvitationService = {
+    /**
+     * Create a new invitation for a table.
+     * Restricts creation to GM of the table.
+     */
+    async create(userId: string, input: CreateInvitationInput): Promise<Invitation> {
+        // 1. Check if user is MJ of the table
+        const membership = await MembershipRepository.getByUserAndTable(userId, input.table_id);
+        if (!membership || membership.role !== "gm") {
+            throw new ForbiddenError("Seul le Maître du Jeu peut inviter des joueurs.");
+        }
+
+        const invitation = await InvitationRepository.create(input, userId);
+        sendInvitationEmailLater(userId, invitation);
         return invitation;
     },
 

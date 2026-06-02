@@ -31,36 +31,126 @@ describe("InvitationService", () => {
 
     describe("create", () => {
         it("should create invitation if user is GM", async () => {
-            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
-                role: "gm",
-            } as Membership);
-
-            vi.mocked(InvitationRepository.create).mockResolvedValue({
+            const createdInvitation = {
                 id: "inv-1",
                 table_id: mockTableId,
                 email: mockEmail,
                 token: mockToken,
                 role: "player",
-            } as CreatedInvitation);
+            } as CreatedInvitation;
+
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+
+            vi.mocked(InvitationRepository.create).mockResolvedValue(createdInvitation);
             vi.mocked(TableRepository.getById).mockResolvedValue({
                 id: mockTableId,
                 name: "Table Test",
             } as Awaited<ReturnType<typeof TableRepository.getById>>);
+            vi.mocked(TransactionalEmailService.sendTableInvitationNonBlocking).mockResolvedValue();
 
-            await InvitationService.create(mockUserId, {
+            const result = await InvitationService.create(mockUserId, {
                 table_id: mockTableId,
                 email: mockEmail,
                 role: "player",
             });
 
+            expect(result).toEqual(createdInvitation);
             expect(InvitationRepository.create).toHaveBeenCalled();
-            expect(TransactionalEmailService.sendTableInvitationNonBlocking).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    senderUserId: mockUserId,
-                    recipientEmail: mockEmail,
-                    tableName: "Table Test",
-                }),
+            await vi.waitFor(() =>
+                expect(
+                    TransactionalEmailService.sendTableInvitationNonBlocking,
+                ).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        senderUserId: mockUserId,
+                        recipientEmail: mockEmail,
+                        tableId: mockTableId,
+                        invitationId: "inv-1",
+                        invitationToken: mockToken,
+                        tableName: "Table Test",
+                        role: "player",
+                    }),
+                ),
             );
+        });
+
+        it("should not wait for email delivery to resolve", async () => {
+            const createdInvitation = {
+                id: "inv-1",
+                table_id: mockTableId,
+                email: mockEmail,
+                token: mockToken,
+                role: "player",
+            } as CreatedInvitation;
+            const pendingEmail = new Promise<void>(() => {});
+
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+            vi.mocked(InvitationRepository.create).mockResolvedValue(createdInvitation);
+            vi.mocked(TableRepository.getById).mockResolvedValue({
+                id: mockTableId,
+                name: "Table Test",
+            } as Awaited<ReturnType<typeof TableRepository.getById>>);
+            vi.mocked(TransactionalEmailService.sendTableInvitationNonBlocking).mockReturnValue(
+                pendingEmail,
+            );
+
+            await expect(
+                InvitationService.create(mockUserId, {
+                    table_id: mockTableId,
+                    email: mockEmail,
+                    role: "player",
+                }),
+            ).resolves.toEqual(createdInvitation);
+
+            await vi.waitFor(() =>
+                expect(TransactionalEmailService.sendTableInvitationNonBlocking).toHaveBeenCalled(),
+            );
+        });
+
+        it("should still return the created invitation when email sending fails", async () => {
+            const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+            const createdInvitation = {
+                id: "inv-1",
+                table_id: mockTableId,
+                email: mockEmail,
+                token: mockToken,
+                role: "player",
+            } as CreatedInvitation;
+
+            vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+            vi.mocked(InvitationRepository.create).mockResolvedValue(createdInvitation);
+            vi.mocked(TableRepository.getById).mockResolvedValue({
+                id: mockTableId,
+                name: "Table Test",
+            } as Awaited<ReturnType<typeof TableRepository.getById>>);
+            vi.mocked(TransactionalEmailService.sendTableInvitationNonBlocking).mockRejectedValue(
+                new Error("Provider unavailable"),
+            );
+
+            await expect(
+                InvitationService.create(mockUserId, {
+                    table_id: mockTableId,
+                    email: mockEmail,
+                    role: "player",
+                }),
+            ).resolves.toEqual(createdInvitation);
+
+            await vi.waitFor(() =>
+                expect(TransactionalEmailService.sendTableInvitationNonBlocking).toHaveBeenCalled(),
+            );
+            await vi.waitFor(() =>
+                expect(consoleErrorSpy).toHaveBeenCalledWith(
+                    "[INVITATION_EMAIL]",
+                    expect.any(Error),
+                ),
+            );
+
+            consoleErrorSpy.mockRestore();
         });
 
         it("should throw ForbiddenError if user is not GM", async () => {
