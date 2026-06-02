@@ -47,7 +47,7 @@ export const useTableStore = create<TableState>((set) => ({
                 set({ isLoading: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isLoading: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -81,7 +81,7 @@ export const useTableStore = create<TableState>((set) => ({
                 },
             }));
             return [];
-        } catch (err) {
+        } catch {
             set((state) => ({
                 error: "Erreur réseau",
                 loadingMembersByTable: {
@@ -107,7 +107,7 @@ export const useTableStore = create<TableState>((set) => ({
                 set({ isLoading: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isLoading: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -127,7 +127,7 @@ export const useTableStore = create<TableState>((set) => ({
                 set({ isLoading: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isLoading: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -149,7 +149,7 @@ export const useTableStore = create<TableState>((set) => ({
                 set({ isLoading: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isLoading: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }

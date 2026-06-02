@@ -2,7 +2,7 @@ import { GroupInvitationRepository } from "@/lib/repositories/group-invitation-r
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
 import { TableRepository } from "@/lib/repositories/table-repository";
 import { GroupInvitation, Table, TableRole } from "@/types/table";
-import { AppError, ForbiddenError, ValidationError } from "@/lib/errors";
+import { ForbiddenError, ValidationError } from "@/lib/errors";
 
 export interface GroupInvitationWithTable extends GroupInvitation {
     tables: Pick<Table, "name" | "description">;

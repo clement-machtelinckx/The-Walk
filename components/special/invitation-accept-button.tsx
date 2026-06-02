@@ -39,7 +39,7 @@ export function InvitationAcceptButton({ token }: InvitationAcceptButtonProps) {
                 router.push(result.redirectTo || "/tables");
                 router.refresh();
             }, 1000);
-        } catch (err) {
+        } catch {
             setError("Erreur réseau ou serveur.");
             setIsLoading(false);
         }

@@ -42,7 +42,7 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
 
     const handleGenerate = async () => {
         setIsSubmitting(true);
-        await createGroupInvitation(tableId, role, parseInt(duration));
+        await createGroupInvitation(tableId, role, Number.parseInt(duration));
         setIsSubmitting(false);
     };
 

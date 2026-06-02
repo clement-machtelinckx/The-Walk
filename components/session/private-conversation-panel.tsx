@@ -11,12 +11,12 @@ import { useAuthStore } from "@/store/auth-store";
 import { useSessionStore } from "@/store/session-store";
 import { Loader2, Send } from "lucide-react";
 
-interface PrivateConversationPanelProps {
+type PrivateConversationPanelProps = Readonly<{
     tableId: string;
     sessionId?: string;
     recipientUserId: string;
     recipientName: string;
-}
+}>;
 
 export function PrivateConversationPanel({
     tableId,

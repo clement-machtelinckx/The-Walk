@@ -18,12 +18,12 @@ import { Crown, Dice5, ExternalLink, MessageSquare, Shield, Users, Wrench } from
 import { DiceLogBlock } from "./dice-log-block";
 import { PlayerPresencePanel } from "./player-presence-panel";
 
-interface SessionToolsDrawerProps {
+type SessionToolsDrawerProps = Readonly<{
     isGM: boolean;
     tableId: string;
     context?: SessionToolsContext;
     sessionId?: string;
-}
+}>;
 
 type SessionToolsContext = "table" | "pre-session" | "live";
 type SessionToolId = "players" | "rolls" | "advanced" | "gm";

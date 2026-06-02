@@ -15,7 +15,7 @@ export async function GET(
 
         // On peut éventuellement récupérer la page via searchParams
         const { searchParams } = new URL(_request.url);
-        const page = parseInt(searchParams.get("page") || "1");
+        const page = Number.parseInt(searchParams.get("page") || "1");
 
         const data = await LivechatService.listMessages(user.id, sessionId, { page });
 

@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ tabl
         const user = await requireAuth();
         const { tableId } = await params;
         const { searchParams } = new URL(request.url);
-        const page = parseInt(searchParams.get("page") || "1");
+        const page = Number.parseInt(searchParams.get("page") || "1");
         const recipientInput = privateMessageRecipientSchema.parse({
             recipient_user_id: searchParams.get("recipient_user_id"),
         });

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/server";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { TableRole } from "@/types/table";
-import { ForbiddenError, ValidationError, AppError } from "@/lib/errors";
+import { AppError } from "@/lib/errors";
 
 export async function PATCH(
     req: Request,

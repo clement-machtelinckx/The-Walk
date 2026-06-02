@@ -16,10 +16,10 @@ import { ALLOWED_DICE_TYPES } from "@/lib/validators/dice";
 import { DiceRollLog } from "@/types/dice";
 import { cn } from "@/lib/utils";
 
-interface DiceLogBlockProps {
+type DiceLogBlockProps = Readonly<{
     tableId: string;
     sessionId?: string;
-}
+}>;
 
 function formatFormula(roll: Pick<DiceRollLog, "quantity" | "dice_type" | "modifier">) {
     const base = `${roll.quantity > 1 ? roll.quantity : ""}d${roll.dice_type}`;

@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         let profile = null;
         try {
             profile = await ProfileRepository.getById(supabaseUser.id);
-        } catch (profileError) {
+        } catch {
             console.error("Profile not found after login:", supabaseUser.id);
             // Profile might not be created yet if trigger failed or sync issue
         }

@@ -19,10 +19,10 @@ import { Users, Loader2, Check, Clock, X, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PresenceStatus, PresenceSummary, RollCallMember } from "@/types/session";
 
-interface PresenceBlockProps {
+type PresenceBlockProps = Readonly<{
     sessionId: string;
     isGM: boolean;
-}
+}>;
 
 const STATUS_ITEMS: Array<{
     key: keyof Omit<PresenceSummary, "total">;

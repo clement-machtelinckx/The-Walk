@@ -29,7 +29,7 @@ export function GroupInvitationAcceptButton({ token }: GroupInvitationAcceptButt
             } else {
                 alert(data.error || "Une erreur est survenue.");
             }
-        } catch (error) {
+        } catch {
             alert("Erreur réseau.");
         } finally {
             setIsLoading(false);
