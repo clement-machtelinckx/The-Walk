@@ -71,11 +71,18 @@ describe("PrivateMessageRepository", () => {
         const dataQuery = {
             data: [
                 {
-                    id: "message-1",
+                    id: "message-new",
                     table_id: tableId,
                     sender_user_id: senderId,
                     recipient_user_id: recipientId,
-                    content: "Secret",
+                    content: "New",
+                },
+                {
+                    id: "message-old",
+                    table_id: tableId,
+                    sender_user_id: recipientId,
+                    recipient_user_id: senderId,
+                    content: "Old",
                 },
             ],
             error: null,
@@ -106,8 +113,8 @@ describe("PrivateMessageRepository", () => {
         expect(dataQuery.eq).toHaveBeenCalledWith("table_id", tableId);
         expect(countQuery.or).toHaveBeenCalledWith(pairFilter);
         expect(dataQuery.or).toHaveBeenCalledWith(pairFilter);
-        expect(dataQuery.order).toHaveBeenCalledWith("created_at", { ascending: true });
+        expect(dataQuery.order).toHaveBeenCalledWith("created_at", { ascending: false });
         expect(dataQuery.range).toHaveBeenCalledWith(0, 49);
-        expect(result.data).toHaveLength(1);
+        expect(result.data.map((message) => message.id)).toEqual(["message-old", "message-new"]);
     });
 });

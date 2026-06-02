@@ -52,14 +52,14 @@ export const PrivateMessageRepository = {
             .eq("table_id", tableId)
             .or(pairFilter);
 
-        query = applyPagination(query, params, "created_at");
+        query = applyPagination(query, { ...params, ascending: false }, "created_at");
 
         const { data, error } = await query;
         handleDbError(error, "PrivateMessageRepository.listConversation");
 
         const limit = params.limit || 50;
         return {
-            data: data || [],
+            data: data ? [...data].reverse() : [],
             total: count || 0,
             page: params.page || 1,
             limit,
