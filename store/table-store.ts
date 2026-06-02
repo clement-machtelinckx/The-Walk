@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import { CreateTableInput } from "@/lib/validators/table";
 import { Table, TableRole } from "@/types/table";
+import type { TableMemberDTO } from "@/lib/services/memberships/membership-service";
 
 interface TableState {
     isLoading: boolean;
+    loadingMembersByTable: Record<string, boolean>;
     error: string | null;
+    membersByTable: Record<string, TableMemberDTO[]>;
 
     createTable: (
         payload: CreateTableInput,
     ) => Promise<{ success: boolean; table?: Table; error?: string }>;
+    fetchMembers: (tableId: string) => Promise<TableMemberDTO[]>;
     leaveTable: (tableId: string) => Promise<{ success: boolean; error?: string }>;
     removeMember: (
         tableId: string,
@@ -23,7 +27,9 @@ interface TableState {
 
 export const useTableStore = create<TableState>((set) => ({
     isLoading: false,
+    loadingMembersByTable: {},
     error: null,
+    membersByTable: {},
 
     createTable: async (payload: CreateTableInput) => {
         set({ isLoading: true, error: null });
@@ -44,6 +50,46 @@ export const useTableStore = create<TableState>((set) => ({
         } catch (err) {
             set({ isLoading: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchMembers: async (tableId: string) => {
+        set((state) => ({
+            loadingMembersByTable: { ...state.loadingMembersByTable, [tableId]: true },
+            error: null,
+        }));
+        try {
+            const res = await fetch(`/api/tables/${tableId}/members`);
+            const data = await res.json();
+            if (res.ok) {
+                const members = data.members || [];
+                set((state) => ({
+                    membersByTable: { ...state.membersByTable, [tableId]: members },
+                    loadingMembersByTable: {
+                        ...state.loadingMembersByTable,
+                        [tableId]: false,
+                    },
+                }));
+                return members;
+            }
+
+            set((state) => ({
+                error: data.error || "Erreur lors de la récupération des membres",
+                loadingMembersByTable: {
+                    ...state.loadingMembersByTable,
+                    [tableId]: false,
+                },
+            }));
+            return [];
+        } catch (err) {
+            set((state) => ({
+                error: "Erreur réseau",
+                loadingMembersByTable: {
+                    ...state.loadingMembersByTable,
+                    [tableId]: false,
+                },
+            }));
+            return [];
         }
     },
 

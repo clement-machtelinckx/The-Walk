@@ -95,7 +95,7 @@ interface SessionState {
         sessionId: string,
     ) => Promise<{ success: boolean; session?: Session; error?: string }>;
 
-    fetchPresence: (sessionId: string) => Promise<void>;
+    fetchPresence: (sessionId: string) => Promise<PresenceStateData | null>;
     savePresence: (
         sessionId: string,
         payload: RollCallInput,
@@ -506,14 +506,17 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     },
                     isLoadingPresence: false,
                 }));
+                return data;
             } else {
                 set({
                     error: data.error || "Erreur lors de la récupération de la présence",
                     isLoadingPresence: false,
                 });
+                return null;
             }
         } catch (err) {
             set({ error: "Erreur réseau", isLoadingPresence: false });
+            return null;
         }
     },
 

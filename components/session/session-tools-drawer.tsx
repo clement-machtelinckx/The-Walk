@@ -16,6 +16,7 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Crown, Dice5, ExternalLink, MessageSquare, Shield, Users, Wrench } from "lucide-react";
 import { DiceLogBlock } from "./dice-log-block";
+import { PlayerPresencePanel } from "./player-presence-panel";
 
 interface SessionToolsDrawerProps {
     isGM: boolean;
@@ -226,14 +227,12 @@ export function SessionToolsDrawer({
                                     <PlaceholderItem
                                         label="Messages privés de table"
                                         detail="Espace prévu pour rester accessible depuis la table, la préparation et le live."
+                                        state="future"
                                     />
-                                    <PlaceholderItem
-                                        label="Vue joueurs"
-                                        detail={
-                                            isGM
-                                                ? "Vue stable des joueurs et futurs raccourcis MJ liés aux participants."
-                                                : "Vue stable des joueurs, séparée du chat live principal."
-                                        }
+                                    <PlayerPresencePanel
+                                        tableId={tableId}
+                                        sessionId={sessionId}
+                                        isGM={isGM}
                                     />
                                     <PlaceholderItem
                                         label="Contrôles live ciblés"
