@@ -2,12 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { InvitationService } from "./invitation-service";
 import { InvitationRepository } from "@/lib/repositories/invitation-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
+import { TableRepository } from "@/lib/repositories/table-repository";
+import { TransactionalEmailService } from "@/lib/services/email/transactional-email-service";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
 import { getServerClient } from "@/lib/db";
 
 vi.mock("@/lib/repositories/invitation-repository");
 vi.mock("@/lib/repositories/membership-repository");
 vi.mock("@/lib/repositories/table-repository");
+vi.mock("@/lib/services/email/transactional-email-service");
 vi.mock("@/lib/db", () => ({
     getServerClient: vi.fn(),
 }));
@@ -34,7 +37,15 @@ describe("InvitationService", () => {
 
             vi.mocked(InvitationRepository.create).mockResolvedValue({
                 id: "inv-1",
+                table_id: mockTableId,
+                email: mockEmail,
+                token: mockToken,
+                role: "player",
             } as CreatedInvitation);
+            vi.mocked(TableRepository.getById).mockResolvedValue({
+                id: mockTableId,
+                name: "Table Test",
+            } as Awaited<ReturnType<typeof TableRepository.getById>>);
 
             await InvitationService.create(mockUserId, {
                 table_id: mockTableId,
@@ -43,6 +54,13 @@ describe("InvitationService", () => {
             });
 
             expect(InvitationRepository.create).toHaveBeenCalled();
+            expect(TransactionalEmailService.sendTableInvitationNonBlocking).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    senderUserId: mockUserId,
+                    recipientEmail: mockEmail,
+                    tableName: "Table Test",
+                }),
+            );
         });
 
         it("should throw ForbiddenError if user is not GM", async () => {

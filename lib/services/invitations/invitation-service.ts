@@ -1,5 +1,7 @@
 import { InvitationRepository } from "@/lib/repositories/invitation-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
+import { TableRepository } from "@/lib/repositories/table-repository";
+import { TransactionalEmailService } from "@/lib/services/email/transactional-email-service";
 import { Invitation, Table } from "@/types/table";
 import { CreateInvitationInput } from "@/lib/validators/invitation";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
@@ -20,7 +22,24 @@ export const InvitationService = {
             throw new ForbiddenError("Seul le Maître du Jeu peut inviter des joueurs.");
         }
 
-        return await InvitationRepository.create(input, userId);
+        const invitation = await InvitationRepository.create(input, userId);
+        try {
+            const table = await TableRepository.getById(input.table_id);
+
+            await TransactionalEmailService.sendTableInvitationNonBlocking({
+                senderUserId: userId,
+                recipientEmail: invitation.email,
+                tableId: invitation.table_id,
+                invitationId: invitation.id,
+                invitationToken: invitation.token,
+                tableName: table.name,
+                role: invitation.role,
+            });
+        } catch (error) {
+            console.error("[INVITATION_EMAIL]", error);
+        }
+
+        return invitation;
     },
 
     /**

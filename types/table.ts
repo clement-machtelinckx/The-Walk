@@ -21,6 +21,7 @@ export interface TableMember {
 export interface TableMemberWithProfile extends TableMember {
     profiles: {
         id: string;
+        email: string;
         display_name: string | null;
         avatar_url: string | null;
     };

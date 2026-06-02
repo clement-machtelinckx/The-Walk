@@ -7,5 +7,6 @@ export * from "./message-repository";
 export * from "./note-repository";
 export * from "./presence-repository";
 export * from "./private-message-repository";
+export * from "./email-delivery-repository";
 export * from "./dice-repository";
 export * from "./_shared/base";
