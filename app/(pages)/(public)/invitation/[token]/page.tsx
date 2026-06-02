@@ -4,7 +4,7 @@ import {
     InvitationWithTable,
 } from "@/lib/services/invitations/invitation-service";
 import { PageShell } from "@/components/layout/app-shell";
-import { EmptyState } from "@/components/special/empty-state";
+import { PageErrorState } from "@/components/special/page-error-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, AlertCircle } from "lucide-react";
@@ -38,15 +38,19 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
     if (errorMessage || !invitation) {
         return (
             <PageShell className="mx-auto max-w-md pt-12">
-                <EmptyState
-                    title="Invitation invalide"
+                <PageErrorState
+                    title="Invitation indisponible"
                     description={errorMessage || "Cette invitation est introuvable."}
                     icon={AlertCircle}
-                >
-                    <Button asChild variant="outline" className="mt-4">
-                        <Link href="/">Retour à l&apos;accueil</Link>
-                    </Button>
-                </EmptyState>
+                    primaryAction={{
+                        label: "Réessayer",
+                        href: invitationPath,
+                    }}
+                    secondaryAction={{
+                        label: "Retour à l'accueil",
+                        href: "/",
+                    }}
+                />
             </PageShell>
         );
     }
