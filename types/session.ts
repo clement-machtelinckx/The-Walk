@@ -91,8 +91,36 @@ export interface SessionMessage {
     };
 }
 
+export interface TablePrivateMessage {
+    id: string;
+    table_id: string;
+    session_id: string | null;
+    sender_user_id: string;
+    recipient_user_id: string;
+    content: string;
+    created_at: string;
+    sender_profile?: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    };
+    recipient_profile?: {
+        id: string;
+        display_name: string | null;
+        avatar_url: string | null;
+    };
+}
+
 export interface SessionPrechatData {
     data: SessionMessage[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
+export interface TablePrivateMessageData {
+    data: TablePrivateMessage[];
     total: number;
     page: number;
     limit: number;

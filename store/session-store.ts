@@ -6,6 +6,7 @@ import {
     SessionLiveChatData,
     RollCallMember,
     PresenceSummary,
+    TablePrivateMessageData,
 } from "@/types/session";
 import { PersonalNote, GroupNote } from "@/types/note";
 import {
@@ -33,6 +34,7 @@ interface SessionState {
     responses: Record<string, SessionResponsesSummary | null>;
     prechats: Record<string, SessionPrechatData | null>;
     livechats: Record<string, SessionLiveChatData | null>;
+    privateMessages: Record<string, TablePrivateMessageData | null>;
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
     groupNotes: Record<string, GroupNote | null>;
@@ -44,12 +46,14 @@ interface SessionState {
     isLoadingResponses: boolean;
     isLoadingPrechat: boolean;
     isLoadingLivechat: boolean;
+    isLoadingPrivateMessages: boolean;
     isLoadingPresence: boolean;
     isLoadingPersonalNote: boolean;
     isLoadingGroupNote: boolean;
     isResponding: boolean;
     isSendingMessage: boolean;
     isSendingLiveMessage: boolean;
+    isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
     isSavingPresence: boolean;
@@ -86,6 +90,17 @@ interface SessionState {
     sendLivechatMessage: (
         sessionId: string,
         content: string,
+    ) => Promise<{ success: boolean; error?: string }>;
+    fetchPrivateMessages: (
+        tableId: string,
+        recipientUserId: string,
+        page?: number,
+    ) => Promise<void>;
+    sendPrivateMessage: (
+        tableId: string,
+        recipientUserId: string,
+        content: string,
+        sessionId?: string,
     ) => Promise<{ success: boolean; error?: string }>;
 
     startSession: (
@@ -128,6 +143,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     responses: {},
     prechats: {},
     livechats: {},
+    privateMessages: {},
     presenceData: {},
     personalNotes: {},
     groupNotes: {},
@@ -137,12 +153,14 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isLoadingResponses: false,
     isLoadingPrechat: false,
     isLoadingLivechat: false,
+    isLoadingPrivateMessages: false,
     isLoadingPresence: false,
     isLoadingPersonalNote: false,
     isLoadingGroupNote: false,
     isResponding: false,
     isSendingMessage: false,
     isSendingLiveMessage: false,
+    isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
     isSavingPresence: false,
@@ -489,6 +507,70 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch (err) {
             set({ isEndingSession: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchPrivateMessages: async (tableId: string, recipientUserId: string, page = 1) => {
+        const conversationKey = `${tableId}:${recipientUserId}`;
+        set({ isLoadingPrivateMessages: true, error: null });
+        try {
+            const params = new URLSearchParams({
+                recipient_user_id: recipientUserId,
+                page: String(page),
+            });
+            const res = await fetch(`/api/tables/${tableId}/private-messages?${params}`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    privateMessages: {
+                        ...state.privateMessages,
+                        [conversationKey]: data,
+                    },
+                    isLoadingPrivateMessages: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération des messages privés",
+                    isLoadingPrivateMessages: false,
+                });
+            }
+        } catch (err) {
+            set({ error: "Erreur réseau", isLoadingPrivateMessages: false });
+        }
+    },
+
+    sendPrivateMessage: async (
+        tableId: string,
+        recipientUserId: string,
+        content: string,
+        sessionId?: string,
+    ) => {
+        set({ isSendingPrivateMessage: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}/private-messages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    recipient_user_id: recipientUserId,
+                    content,
+                    session_id: sessionId || null,
+                }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                await get().fetchPrivateMessages(tableId, recipientUserId);
+                set({ isSendingPrivateMessage: false });
+                return { success: true };
+            } else {
+                set({ isSendingPrivateMessage: false, error: data.error });
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de l'envoi du message privé",
+                };
+            }
+        } catch (err) {
+            set({ isSendingPrivateMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

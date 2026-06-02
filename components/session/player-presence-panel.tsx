@@ -5,11 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 import { useSessionStore } from "@/store/session-store";
 import { useTableStore } from "@/store/table-store";
 import type { PresenceStatus, ResponseStatus, RollCallMember } from "@/types/session";
-import { Check, Clock, Loader2, MessageSquare, MoreHorizontal, Users, X } from "lucide-react";
+import { Check, Clock, Loader2, MoreHorizontal, Users, X } from "lucide-react";
 import { PresenceRollCallDialog } from "./presence-block";
+import { PrivateConversationPanel } from "./private-conversation-panel";
 
 const PRESENCE_META: Record<
     PresenceStatus,
@@ -79,6 +81,7 @@ export function PlayerPresencePanel({
 }) {
     const { presenceData, fetchPresence, isLoadingPresence } = useSessionStore();
     const { membersByTable, loadingMembersByTable, fetchMembers } = useTableStore();
+    const { user } = useAuthStore();
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
     const data = sessionId ? presenceData[sessionId] : null;
@@ -124,8 +127,11 @@ export function PlayerPresencePanel({
     }, [rollCall, tableMembers]);
 
     const selectedMember = useMemo(
-        () => players.find((member) => member.user_id === selectedUserId) || players[0],
-        [players, selectedUserId],
+        () =>
+            players.find((member) => member.user_id === selectedUserId) ||
+            players.find((member) => member.user_id !== user?.id) ||
+            players[0],
+        [players, selectedUserId, user?.id],
     );
 
     if ((isLoadingMembers && players.length === 0) || (isLoadingPresence && players.length === 0)) {
@@ -271,15 +277,13 @@ export function PlayerPresencePanel({
                             </p>
                         </div>
                     </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                        <Button variant="outline" size="sm" className="gap-1.5 text-xs" disabled>
-                            <MessageSquare className="h-3.5 w-3.5" />
-                            Message privé
-                        </Button>
-                        <Button variant="outline" size="sm" className="gap-1.5 text-xs" disabled>
-                            <MoreHorizontal className="h-3.5 w-3.5" />
-                            Action ciblée
-                        </Button>
+                    <div className="mt-3">
+                        <PrivateConversationPanel
+                            tableId={tableId}
+                            sessionId={sessionId}
+                            recipientUserId={selectedMember.user_id}
+                            recipientName={selectedMember.display_name || "Anonyme"}
+                        />
                     </div>
                 </div>
             )}
