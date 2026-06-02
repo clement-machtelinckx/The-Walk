@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             } else {
                 return { success: false, error: data.error };
             }
-        } catch (error) {
+        } catch {
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             } else {
                 return { success: false, error: data.error };
             }
-        } catch (error) {
+        } catch {
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             await fetch("/api/auth/logout", { method: "POST" });
             set({ user: null, status: "unauthenticated" });
-        } catch (error) {
+        } catch {
             console.error("Logout failed:", error);
         }
     },
@@ -110,7 +110,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             }
 
             return { success: true };
-        } catch (err) {
+        } catch {
             return { success: false, error: "Erreur réseau ou serveur" };
         }
     },

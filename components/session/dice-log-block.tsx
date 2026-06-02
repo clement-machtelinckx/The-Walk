@@ -16,10 +16,10 @@ import { ALLOWED_DICE_TYPES } from "@/lib/validators/dice";
 import { DiceRollLog } from "@/types/dice";
 import { cn } from "@/lib/utils";
 
-interface DiceLogBlockProps {
+type DiceLogBlockProps = Readonly<{
     tableId: string;
     sessionId?: string;
-}
+}>;
 
 function formatFormula(roll: Pick<DiceRollLog, "quantity" | "dice_type" | "modifier">) {
     const base = `${roll.quantity > 1 ? roll.quantity : ""}d${roll.dice_type}`;
@@ -174,7 +174,7 @@ export function DiceLogBlock({ tableId, sessionId }: DiceLogBlockProps) {
                         Aucun lancer pour cette session.
                     </p>
                 ) : (
-                    <div className="max-h-[360px] space-y-2 overflow-y-auto pr-1">
+                    <div className="max-h-[250px] space-y-2 overflow-y-auto pr-1">
                         {rolls.map((roll) => (
                             <article
                                 key={roll.id}

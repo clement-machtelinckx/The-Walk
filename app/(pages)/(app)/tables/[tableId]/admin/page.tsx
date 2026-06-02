@@ -2,7 +2,6 @@ import { requireAuth, requireTableRole } from "@/lib/auth/server";
 import { PageShell } from "@/components/layout/app-shell";
 import { InvitationManager } from "@/components/admin/invitation-manager";
 import { TableRepository } from "@/lib/repositories/table-repository";
-import { SessionRepository } from "@/lib/repositories/session-repository";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, UserPlus, Calendar, Link as LinkIcon, Settings2 } from "lucide-react";
@@ -25,11 +24,9 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
     // Ensure user is GM
     await requireTableRole(tableId, "gm");
 
-    const [table, members, nextSession, activeSession] = await Promise.all([
+    const [table, members] = await Promise.all([
         TableRepository.getById(tableId),
         MembershipService.listMembers(tableId),
-        SessionRepository.getNextSession(tableId),
-        SessionRepository.getActiveSessionByTable(tableId),
     ]);
 
     return (

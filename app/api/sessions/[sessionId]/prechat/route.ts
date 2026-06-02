@@ -14,8 +14,8 @@ export async function GET(
         const { sessionId } = await params;
 
         const { searchParams } = new URL(request.url);
-        const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "50");
+        const page = Number.parseInt(searchParams.get("page") || "1");
+        const limit = Number.parseInt(searchParams.get("limit") || "50");
 
         const result = await PrechatService.listMessages(user.id, sessionId, { page, limit });
 

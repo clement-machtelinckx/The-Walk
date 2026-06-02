@@ -58,7 +58,7 @@ export async function POST(request: Request) {
             // We wait a tiny bit to let the trigger run (pragmatic approach)
             // In a real high-load scenario, we might retry or accept null for a moment.
             profile = await ProfileRepository.getById(supabaseUser.id);
-        } catch (profileError) {
+        } catch {
             console.warn("Profile not immediately available for user:", supabaseUser.id);
         }
         const appUser = {

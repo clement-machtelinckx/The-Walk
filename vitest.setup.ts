@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { vi, beforeAll, afterAll, beforeEach, afterEach } from "vitest";
+import { vi } from "vitest";
 
 // Mock Supabase to avoid real network calls
 vi.mock("@supabase/ssr", () => ({

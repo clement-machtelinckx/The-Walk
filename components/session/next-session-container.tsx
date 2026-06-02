@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { SessionCard } from "./session-card";
 import { SessionForm } from "./session-form";
@@ -8,19 +8,18 @@ import { NextSessionEmptyState } from "./next-session-empty-state";
 import { ResponseBlock } from "./response-block";
 import { ResponseSummary } from "./response-summary";
 import { PrechatBlock } from "./prechat-block";
-import { Loader2, Settings, Play, ExternalLink } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 
-interface NextSessionContainerProps {
+type NextSessionContainerProps = Readonly<{
     tableId: string;
     myRole: string;
-}
+}>;
 
 export function NextSessionContainer({ tableId, myRole }: NextSessionContainerProps) {
     const router = useRouter();
@@ -31,7 +30,6 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         isLoadingActiveSession,
         fetchNextSession,
         fetchActiveSession,
-        fetchSessionResponses,
         startSession,
         isStartingSession,
     } = useSessionStore();

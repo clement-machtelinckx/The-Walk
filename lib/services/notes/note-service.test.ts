@@ -3,7 +3,7 @@ import { NoteService } from "./note-service";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
 import { NoteRepository } from "@/lib/repositories/note-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
-import { ConflictError } from "@/lib/errors";
+import { ConflictError, DatabaseError, ForbiddenError } from "@/lib/errors";
 import { GroupNote } from "@/types/note";
 
 vi.mock("@/lib/repositories/membership-repository");
@@ -77,5 +77,59 @@ describe("NoteService", () => {
         ).rejects.toThrow(ConflictError);
 
         expect(NoteRepository.updateGroupIfVersionMatches).not.toHaveBeenCalled();
+    });
+
+    it("refuse l'accès aux notes pour les utilisateurs hors table", async () => {
+        vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue(null);
+
+        await expect(NoteService.getPersonalNote(userId, sessionId)).rejects.toThrow(
+            ForbiddenError,
+        );
+
+        expect(NoteRepository.getPersonalByTable).not.toHaveBeenCalled();
+    });
+
+    it("crée la note de groupe si elle n'existe pas et que la version attendue est nulle", async () => {
+        const createdNote = {
+            ...groupNote,
+            content: "Première version",
+        };
+        vi.mocked(NoteRepository.getGroupByTable).mockResolvedValue(null);
+        vi.mocked(NoteRepository.createGroup).mockResolvedValue(createdNote);
+
+        const result = await NoteService.updateGroupNote(
+            userId,
+            sessionId,
+            "Première version",
+            null,
+        );
+
+        expect(result).toEqual(createdNote);
+        expect(NoteRepository.createGroup).toHaveBeenCalledWith(tableId, "Première version");
+    });
+
+    it("détecte une création concurrente de note de groupe", async () => {
+        vi.mocked(NoteRepository.getGroupByTable).mockResolvedValue(null);
+        vi.mocked(NoteRepository.createGroup).mockRejectedValue(new DatabaseError("duplicate"));
+
+        await expect(
+            NoteService.updateGroupNote(userId, sessionId, "Première version", null),
+        ).rejects.toThrow(ConflictError);
+    });
+
+    it("détecte une modification concurrente pendant l'enregistrement", async () => {
+        const newerNote = {
+            ...groupNote,
+            content: "Version distante",
+            updated_at: "2026-01-01T10:06:00.000Z",
+        };
+        vi.mocked(NoteRepository.getGroupByTable)
+            .mockResolvedValueOnce(groupNote)
+            .mockResolvedValueOnce(newerNote);
+        vi.mocked(NoteRepository.updateGroupIfVersionMatches).mockResolvedValue(null);
+
+        await expect(
+            NoteService.updateGroupNote(userId, sessionId, "Brouillon local", loadedUpdatedAt),
+        ).rejects.toThrow(ConflictError);
     });
 });

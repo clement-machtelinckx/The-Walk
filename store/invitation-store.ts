@@ -44,7 +44,7 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                     isLoading: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoading: false });
         }
     },
@@ -69,7 +69,7 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                     isLoading: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoading: false });
         }
     },
@@ -95,7 +95,7 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                     isLoading: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoading: false });
         }
     },
@@ -127,7 +127,7 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                     error: data.error || "Erreur lors de la création de l'invitation",
                 };
             }
-        } catch (err) {
+        } catch {
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -158,7 +158,7 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
                     error: data.error || "Erreur lors de la création de l'invitation de groupe",
                 };
             }
-        } catch (err) {
+        } catch {
             return { success: false, error: "Erreur réseau" };
         }
     },

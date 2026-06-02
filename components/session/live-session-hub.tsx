@@ -15,11 +15,11 @@ import { LivechatBlock } from "./livechat-block";
 import { NotesHub } from "./notes/notes-hub";
 import { SessionToolsDrawer } from "./session-tools-drawer";
 
-interface LiveSessionHubProps {
+type LiveSessionHubProps = Readonly<{
     session: Session;
     tableId: string;
     myRole: string;
-}
+}>;
 
 export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps) {
     const router = useRouter();

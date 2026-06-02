@@ -6,6 +6,7 @@ import {
     SessionLiveChatData,
     RollCallMember,
     PresenceSummary,
+    TablePrivateMessageData,
 } from "@/types/session";
 import { PersonalNote, GroupNote } from "@/types/note";
 import {
@@ -33,6 +34,7 @@ interface SessionState {
     responses: Record<string, SessionResponsesSummary | null>;
     prechats: Record<string, SessionPrechatData | null>;
     livechats: Record<string, SessionLiveChatData | null>;
+    privateMessages: Record<string, TablePrivateMessageData | null>;
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
     groupNotes: Record<string, GroupNote | null>;
@@ -44,12 +46,14 @@ interface SessionState {
     isLoadingResponses: boolean;
     isLoadingPrechat: boolean;
     isLoadingLivechat: boolean;
+    isLoadingPrivateMessages: boolean;
     isLoadingPresence: boolean;
     isLoadingPersonalNote: boolean;
     isLoadingGroupNote: boolean;
     isResponding: boolean;
     isSendingMessage: boolean;
     isSendingLiveMessage: boolean;
+    isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
     isSavingPresence: boolean;
@@ -87,6 +91,17 @@ interface SessionState {
         sessionId: string,
         content: string,
     ) => Promise<{ success: boolean; error?: string }>;
+    fetchPrivateMessages: (
+        tableId: string,
+        recipientUserId: string,
+        page?: number,
+    ) => Promise<void>;
+    sendPrivateMessage: (
+        tableId: string,
+        recipientUserId: string,
+        content: string,
+        sessionId?: string,
+    ) => Promise<{ success: boolean; error?: string }>;
 
     startSession: (
         sessionId: string,
@@ -95,7 +110,7 @@ interface SessionState {
         sessionId: string,
     ) => Promise<{ success: boolean; session?: Session; error?: string }>;
 
-    fetchPresence: (sessionId: string) => Promise<void>;
+    fetchPresence: (sessionId: string) => Promise<PresenceStateData | null>;
     savePresence: (
         sessionId: string,
         payload: RollCallInput,
@@ -128,6 +143,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     responses: {},
     prechats: {},
     livechats: {},
+    privateMessages: {},
     presenceData: {},
     personalNotes: {},
     groupNotes: {},
@@ -137,12 +153,14 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isLoadingResponses: false,
     isLoadingPrechat: false,
     isLoadingLivechat: false,
+    isLoadingPrivateMessages: false,
     isLoadingPresence: false,
     isLoadingPersonalNote: false,
     isLoadingGroupNote: false,
     isResponding: false,
     isSendingMessage: false,
     isSendingLiveMessage: false,
+    isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
     isSavingPresence: false,
@@ -170,7 +188,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingSession: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingSession: false });
         }
     },
@@ -194,7 +212,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingActiveSession: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingActiveSession: false });
         }
     },
@@ -218,7 +236,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingHistory: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingHistory: false });
         }
     },
@@ -246,7 +264,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     error: data.error || "Erreur lors de la création de la session",
                 };
             }
-        } catch (err) {
+        } catch {
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -278,7 +296,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     error: data.error || "Erreur lors de la modification de la session",
                 };
             }
-        } catch (err) {
+        } catch {
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -302,7 +320,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingResponses: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingResponses: false });
         }
     },
@@ -327,7 +345,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     error: data.error || "Erreur lors de l'enregistrement de la réponse",
                 };
             }
-        } catch (err) {
+        } catch {
             set({ isResponding: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -352,7 +370,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingPrechat: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingPrechat: false });
         }
     },
@@ -377,7 +395,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     error: data.error || "Erreur lors de l'envoi du message",
                 };
             }
-        } catch (err) {
+        } catch {
             set({ isSendingMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -402,7 +420,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingLivechat: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingLivechat: false });
         }
     },
@@ -427,7 +445,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     error: data.error || "Erreur lors de l'envoi du message",
                 };
             }
-        } catch (err) {
+        } catch {
             set({ isSendingLiveMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -458,7 +476,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 set({ isStartingSession: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isStartingSession: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -487,8 +505,72 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 set({ isEndingSession: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isEndingSession: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    fetchPrivateMessages: async (tableId: string, recipientUserId: string, page = 1) => {
+        const conversationKey = `${tableId}:${recipientUserId}`;
+        set({ isLoadingPrivateMessages: true, error: null });
+        try {
+            const params = new URLSearchParams({
+                recipient_user_id: recipientUserId,
+                page: String(page),
+            });
+            const res = await fetch(`/api/tables/${tableId}/private-messages?${params}`);
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    privateMessages: {
+                        ...state.privateMessages,
+                        [conversationKey]: data,
+                    },
+                    isLoadingPrivateMessages: false,
+                }));
+            } else {
+                set({
+                    error: data.error || "Erreur lors de la récupération des messages privés",
+                    isLoadingPrivateMessages: false,
+                });
+            }
+        } catch {
+            set({ error: "Erreur réseau", isLoadingPrivateMessages: false });
+        }
+    },
+
+    sendPrivateMessage: async (
+        tableId: string,
+        recipientUserId: string,
+        content: string,
+        sessionId?: string,
+    ) => {
+        set({ isSendingPrivateMessage: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}/private-messages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    recipient_user_id: recipientUserId,
+                    content,
+                    session_id: sessionId || null,
+                }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                await get().fetchPrivateMessages(tableId, recipientUserId);
+                set({ isSendingPrivateMessage: false });
+                return { success: true };
+            } else {
+                set({ isSendingPrivateMessage: false, error: data.error });
+                return {
+                    success: false,
+                    error: data.error || "Erreur lors de l'envoi du message privé",
+                };
+            }
+        } catch {
+            set({ isSendingPrivateMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -506,14 +588,17 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     },
                     isLoadingPresence: false,
                 }));
+                return data;
             } else {
                 set({
                     error: data.error || "Erreur lors de la récupération de la présence",
                     isLoadingPresence: false,
                 });
+                return null;
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingPresence: false });
+            return null;
         }
     },
 
@@ -537,7 +622,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     error: data.error || "Erreur lors de l'enregistrement de l'appel",
                 };
             }
-        } catch (err) {
+        } catch {
             set({ isSavingPresence: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -562,7 +647,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     isLoadingPersonalNote: false,
                 });
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingPersonalNote: false });
         }
     },
@@ -589,7 +674,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 set({ isSavingPersonalNote: false, error: data.error });
                 return { success: false, error: data.error };
             }
-        } catch (err) {
+        } catch {
             set({ isSavingPersonalNote: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
@@ -616,7 +701,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 });
                 return undefined;
             }
-        } catch (err) {
+        } catch {
             set({ error: "Erreur réseau", isLoadingGroupNote: false });
             return undefined;
         }
@@ -648,7 +733,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                     code: data.code,
                 };
             }
-        } catch (err) {
+        } catch {
             set({ isSavingGroupNote: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
