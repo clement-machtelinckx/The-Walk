@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth/server";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { TableRepository } from "@/lib/repositories/table-repository";
+import { SessionRepository } from "@/lib/repositories/session-repository";
 import { PageShell } from "@/components/layout/app-shell";
 import { NextSessionContainer } from "@/components/session/next-session-container";
 import { SessionToolsDrawer } from "@/components/session/session-tools-drawer";
@@ -18,6 +19,8 @@ export default async function NextSessionPage({
 
     const membership = await MembershipService.requireMembership(user.id, tableId);
     const table = await TableRepository.getById(tableId);
+    const nextSession = await SessionRepository.getNextSession(tableId);
+    const activeSession = await SessionRepository.getActiveSessionByTable(tableId);
 
     return (
         <PageShell
@@ -32,7 +35,12 @@ export default async function NextSessionPage({
                 </Button>
             }
         >
-            <SessionToolsDrawer isGM={membership.role === "gm"} context="pre-session" />
+            <SessionToolsDrawer
+                isGM={membership.role === "gm"}
+                tableId={tableId}
+                context="pre-session"
+                sessionId={nextSession?.id ?? activeSession?.id}
+            />
             <NextSessionContainer tableId={tableId} myRole={membership.role} />
         </PageShell>
     );
