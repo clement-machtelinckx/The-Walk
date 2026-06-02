@@ -19,6 +19,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Loader2, CheckCircle2, AlertCircle, LogOut } from "lucide-react";
 import { PendingInvitationsList } from "@/components/invitation/pending-invitations-list";
+import { EmailUsageCard } from "@/components/profile/email-usage-card";
 
 interface ProfileContentProps {
     user: AppUser;
@@ -80,6 +81,8 @@ export function ProfileContent({ user: serverUser }: ProfileContentProps) {
 
             {/* Pending Invitations */}
             <PendingInvitationsList />
+
+            <EmailUsageCard />
 
             {/* Account Settings */}
             <div className="app-list">

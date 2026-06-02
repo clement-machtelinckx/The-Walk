@@ -3,6 +3,7 @@ import { signupSchema } from "@/lib/validators/auth";
 import { NextResponse } from "next/server";
 import { ProfileRepository } from "@/lib/repositories/profile-repository";
 import { rateLimit } from "@/lib/rate-limit";
+import { TransactionalEmailService } from "@/lib/services/email/transactional-email-service";
 
 export async function POST(request: Request) {
     try {
@@ -66,6 +67,12 @@ export async function POST(request: Request) {
             email: supabaseUser.email!,
             profile,
         };
+
+        if (supabaseUser.identities && supabaseUser.identities.length > 0) {
+            await TransactionalEmailService.sendSignupConfirmationNonBlocking({
+                recipientEmail: appUser.email,
+            });
+        }
 
         return NextResponse.json({
             success: true,

@@ -123,6 +123,7 @@ Créer un fichier `.env.local` à partir de `.env.example`, puis renseigner les 
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_APP_URL=
 THE_CRAWL_URL=
 ```
 
@@ -139,6 +140,48 @@ npm run dev
 ```
 
 L'application est ensuite disponible sur l'URL affichée par Next.js, généralement `http://localhost:3000`.
+
+## Emails transactionnels
+
+Le système email utilise une abstraction provider avec Mailtrap en développement et Brevo en production. Les emails sont journalisés dans `email_delivery_logs` et le quota mensuel par utilisateur émetteur est configurable.
+
+Variables communes :
+
+```bash
+EMAIL_PROVIDER=mailtrap
+EMAIL_FROM_EMAIL=noreply@the-walk.local
+EMAIL_FROM_NAME=The-Walk
+EMAIL_MONTHLY_QUOTA=20
+ALWAYS_MAIL_TO=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+APP_URL=http://localhost:3000
+```
+
+Pour le développement local, utiliser Mailtrap :
+
+```bash
+MAILTRAP_API_TOKEN=
+MAILTRAP_API_URL=https://send.api.mailtrap.io/api/send
+```
+
+Pour la production, utiliser Brevo :
+
+```bash
+EMAIL_PROVIDER=brevo
+BREVO_API_KEY=
+BREVO_API_URL=https://api.brevo.com/v3/smtp/email
+```
+
+Valeurs par défaut côté code :
+
+- `EMAIL_PROVIDER` : `mailtrap` hors production, `brevo` en production.
+- `EMAIL_FROM_EMAIL` : `noreply@the-walk.local`.
+- `EMAIL_FROM_NAME` : `The-Walk`.
+- `EMAIL_MONTHLY_QUOTA` : `20`.
+- `ALWAYS_MAIL_TO` : désactivé si vide. Si renseigné, tous les emails transactionnels sont envoyés à cette adresse et le destinataire original est conservé en metadata du journal.
+- `MAILTRAP_API_URL` et `BREVO_API_URL` : endpoints API standards des providers.
+
+`NEXT_PUBLIC_APP_URL` est prioritaire pour générer les liens d'action dans les emails. `APP_URL` sert de fallback serveur, puis `VERCEL_URL` si disponible.
 
 ## Supabase local
 

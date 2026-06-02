@@ -1,11 +1,33 @@
 import { InvitationRepository } from "@/lib/repositories/invitation-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
+import { TableRepository } from "@/lib/repositories/table-repository";
+import { TransactionalEmailService } from "@/lib/services/email/transactional-email-service";
 import { Invitation, Table } from "@/types/table";
 import { CreateInvitationInput } from "@/lib/validators/invitation";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
 
 export interface InvitationWithTable extends Invitation {
     tables: Pick<Table, "name" | "description">;
+}
+
+function sendInvitationEmailLater(userId: string, invitation: Invitation) {
+    void (async () => {
+        try {
+            const table = await TableRepository.getById(invitation.table_id);
+
+            await TransactionalEmailService.sendTableInvitationNonBlocking({
+                senderUserId: userId,
+                recipientEmail: invitation.email,
+                tableId: invitation.table_id,
+                invitationId: invitation.id,
+                invitationToken: invitation.token,
+                tableName: table.name,
+                role: invitation.role,
+            });
+        } catch (error) {
+            console.error("[INVITATION_EMAIL]", error);
+        }
+    })();
 }
 
 export const InvitationService = {
@@ -20,7 +42,9 @@ export const InvitationService = {
             throw new ForbiddenError("Seul le Maître du Jeu peut inviter des joueurs.");
         }
 
-        return await InvitationRepository.create(input, userId);
+        const invitation = await InvitationRepository.create(input, userId);
+        sendInvitationEmailLater(userId, invitation);
+        return invitation;
     },
 
     /**
