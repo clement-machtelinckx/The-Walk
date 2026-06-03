@@ -72,7 +72,11 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+type RootLayoutProps = Readonly<{
+    children: React.ReactNode;
+}>;
+
+export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html
             lang="fr"

@@ -18,7 +18,11 @@ export const metadata = {
     description: "Rejoignez une table sur The-Walk.",
 };
 
-export default async function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
+type InvitationPageProps = Readonly<{
+    params: Promise<{ token: string }>;
+}>;
+
+export default async function InvitationPage({ params }: InvitationPageProps) {
     const { token } = await params;
     const user = await getCurrentUser();
     const invitationPath = `/invitation/${token}`;

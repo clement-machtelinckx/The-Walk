@@ -3,10 +3,11 @@ import { requireAuth } from "@/lib/auth/server";
 import { SessionService } from "@/lib/services/sessions/session-service";
 import { AppError } from "@/lib/errors";
 
-export async function POST(
-    _request: Request,
-    { params }: { params: Promise<{ sessionId: string }> },
-) {
+type SessionRouteContext = Readonly<{
+    params: Promise<{ sessionId: string }>;
+}>;
+
+export async function POST(_request: Request, { params }: SessionRouteContext) {
     try {
         const user = await requireAuth();
         const { sessionId } = await params;

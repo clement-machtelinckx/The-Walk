@@ -7,3 +7,4 @@ export * from "./note";
 export * from "./presence";
 export * from "./private-message";
 export * from "./live-module-settings";
+export * from "./profile";

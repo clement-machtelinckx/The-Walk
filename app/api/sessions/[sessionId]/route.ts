@@ -4,7 +4,11 @@ import { updateSessionSchema } from "@/lib/validators/session";
 import { NextResponse } from "next/server";
 import { AppError } from "@/lib/errors";
 
-export async function GET(_req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
+type SessionRouteContext = Readonly<{
+    params: Promise<{ sessionId: string }>;
+}>;
+
+export async function GET(_req: Request, { params }: SessionRouteContext) {
     try {
         const user = await requireAuth();
         const { sessionId } = await params;
@@ -21,7 +25,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ session
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
+export async function PATCH(req: Request, { params }: SessionRouteContext) {
     try {
         const user = await requireAuth();
         const { sessionId } = await params;

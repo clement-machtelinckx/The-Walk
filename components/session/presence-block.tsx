@@ -84,6 +84,18 @@ function PresenceSummaryInline({ summary }: { summary: PresenceSummary }) {
     );
 }
 
+function getPresenceStatusLabel(summary: PresenceSummary) {
+    if (summary.absent > 0) {
+        return `${summary.absent} absent${summary.absent > 1 ? "s" : ""}`;
+    }
+
+    if (summary.late > 0) {
+        return `${summary.late} retard${summary.late > 1 ? "s" : ""}`;
+    }
+
+    return "Tous présents";
+}
+
 export function PresenceRollCallDialog({
     sessionId,
     trigger,
@@ -303,12 +315,7 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
         ) : null;
     }
 
-    const statusLabel =
-        summary.absent > 0
-            ? `${summary.absent} absent${summary.absent > 1 ? "s" : ""}`
-            : summary.late > 0
-              ? `${summary.late} retard${summary.late > 1 ? "s" : ""}`
-              : "Tous présents";
+    const statusLabel = getPresenceStatusLabel(summary);
 
     return (
         <div className="bg-muted/25 flex max-w-full flex-wrap items-center gap-2 rounded-md border px-2 py-1.5">

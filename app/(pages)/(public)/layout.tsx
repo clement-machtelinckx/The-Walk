@@ -2,7 +2,11 @@ import { Container } from "@/components/layout/container";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+type PublicLayoutProps = Readonly<{
+    children: React.ReactNode;
+}>;
+
+export default function PublicLayout({ children }: PublicLayoutProps) {
     return (
         <div className="flex min-h-screen flex-col">
             <header className="bg-background/90 border-b py-4 backdrop-blur">

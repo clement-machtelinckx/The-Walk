@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { AppUser } from "@/types/auth";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useForm } from "react-hook-form";
@@ -20,6 +21,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Loader2, CheckCircle2, AlertCircle, LogOut } from "lucide-react";
 import { PendingInvitationsList } from "@/components/invitation/pending-invitations-list";
 import { EmailUsageCard } from "@/components/profile/email-usage-card";
+import { AvatarPicker } from "@/components/profile/avatar-picker";
+import { getAvatarByKey, getAvatarImagePath } from "@/config/avatars";
 
 interface ProfileContentProps {
     user: AppUser;
@@ -36,6 +39,7 @@ export function ProfileContent({ user: serverUser }: ProfileContentProps) {
     const initials = user.profile?.display_name
         ? user.profile.display_name.substring(0, 2).toUpperCase()
         : user.email.substring(0, 2).toUpperCase();
+    const profileAvatar = getAvatarByKey(user.profile?.avatar_key);
 
     const form = useForm<PasswordChangeInput>({
         resolver: zodResolver(passwordChangeSchema),
@@ -68,8 +72,18 @@ export function ProfileContent({ user: serverUser }: ProfileContentProps) {
                 <div className="bg-primary/10 h-24 sm:h-32" />
                 <CardContent className="px-6 pb-6">
                     <div className="relative -mt-12 mb-4">
-                        <div className="bg-primary text-primary-foreground ring-background flex h-24 w-24 items-center justify-center rounded-full text-3xl font-bold shadow-xl ring-4">
-                            {initials}
+                        <div className="bg-primary text-primary-foreground ring-background flex h-24 w-24 items-center justify-center overflow-hidden rounded-full text-3xl font-bold shadow-xl ring-4">
+                            {profileAvatar ? (
+                                <Image
+                                    src={getAvatarImagePath(profileAvatar.key)}
+                                    alt={profileAvatar.label}
+                                    width={96}
+                                    height={96}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                initials
+                            )}
                         </div>
                     </div>
                     <h2 className="text-foreground text-2xl font-bold">
@@ -83,6 +97,8 @@ export function ProfileContent({ user: serverUser }: ProfileContentProps) {
             <PendingInvitationsList />
 
             <EmailUsageCard />
+
+            <AvatarPicker currentAvatarKey={user.profile?.avatar_key} />
 
             {/* Account Settings */}
             <div className="app-list">

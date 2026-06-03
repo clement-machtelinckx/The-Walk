@@ -17,9 +17,15 @@ import { useSessionStore } from "@/store/session-store";
 import { formatShortDate } from "@/lib/utils/date";
 import { TableRole } from "@/types/table";
 
-interface GroupInvitationPanelProps {
+type GroupInvitationPanelProps = Readonly<{
     tableId: string;
     tableName: string;
+}>;
+
+function getRoleLabel(role: TableRole) {
+    if (role === "gm") return "Maître du Jeu (Co-MJ)";
+    if (role === "observer") return "Observateur";
+    return "Joueur";
 }
 
 export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPanelProps) {
@@ -53,16 +59,10 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
     };
 
     const inviteUrl = latestInvitation
-        ? `${window.location.origin}/group-invitation/${latestInvitation.token}`
+        ? `${globalThis.location.origin}/group-invitation/${latestInvitation.token}`
         : "";
 
-    const roleLabel = latestInvitation
-        ? latestInvitation.role === "gm"
-            ? "Maître du Jeu (Co-MJ)"
-            : latestInvitation.role === "observer"
-              ? "Observateur"
-              : "Joueur"
-        : "";
+    const roleLabel = latestInvitation ? getRoleLabel(latestInvitation.role) : "";
 
     let sessionInfo = "";
     if (nextSession) {
@@ -88,11 +88,14 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
             <CardContent className="space-y-6 pt-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
-                        <label className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                        <label
+                            htmlFor="group-invitation-role"
+                            className="text-muted-foreground text-xs font-bold tracking-wider uppercase"
+                        >
                             Rôle
                         </label>
                         <Select value={role} onValueChange={(v) => setRole(v as TableRole)}>
-                            <SelectTrigger>
+                            <SelectTrigger id="group-invitation-role">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -103,11 +106,14 @@ export function GroupInvitationPanel({ tableId, tableName }: GroupInvitationPane
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                        <label
+                            htmlFor="group-invitation-duration"
+                            className="text-muted-foreground text-xs font-bold tracking-wider uppercase"
+                        >
                             Durée
                         </label>
                         <Select value={duration} onValueChange={setDuration}>
-                            <SelectTrigger>
+                            <SelectTrigger id="group-invitation-duration">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>

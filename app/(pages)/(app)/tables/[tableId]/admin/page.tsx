@@ -17,7 +17,11 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 
-export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
+type TableAdminPageProps = Readonly<{
+    params: Promise<{ tableId: string }>;
+}>;
+
+export default async function TableAdminPage({ params }: TableAdminPageProps) {
     await requireAuth();
     const { tableId } = await params;
 
