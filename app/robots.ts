@@ -7,8 +7,10 @@ export default function robots(): MetadataRoute.Robots {
             {
                 userAgent: "*",
                 allow: "/",
+                disallow: ["/api/", "/tables/", "/mon-compte"],
             },
         ],
         sitemap: `${siteConfig.url}/sitemap.xml`,
+        host: siteConfig.url,
     };
 }
