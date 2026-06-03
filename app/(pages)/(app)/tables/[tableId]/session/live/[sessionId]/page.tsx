@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth/server";
 import { SessionService } from "@/lib/services/sessions/session-service";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
+import { LiveModuleSettingsService } from "@/lib/services/sessions/live-module-settings-service";
 import { redirect } from "next/navigation";
 import { LiveSessionHub } from "@/components/session/live-session-hub";
 import { PageShell } from "@/components/layout/app-shell";
@@ -28,10 +29,16 @@ export default async function TableLiveSessionPage({
 
     // 3. Récupérer le rôle
     const membership = await MembershipService.requireMembership(user.id, tableId);
+    const moduleSettings = await LiveModuleSettingsService.getSettings(user.id, sessionId);
 
     return (
         <PageShell>
-            <LiveSessionHub session={session} tableId={tableId} myRole={membership.role} />
+            <LiveSessionHub
+                session={session}
+                tableId={tableId}
+                myRole={membership.role}
+                moduleSettings={moduleSettings}
+            />
         </PageShell>
     );
 }

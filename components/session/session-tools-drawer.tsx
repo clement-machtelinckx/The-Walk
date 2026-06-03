@@ -14,8 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import type {
+    SessionLiveModuleSettings,
+    SessionLiveModuleSettingsValues,
+} from "@/types/live-module-settings";
 import { Crown, Dice5, ExternalLink, MessageSquare, Shield, Users, Wrench } from "lucide-react";
 import { DiceLogBlock } from "./dice-log-block";
+import { LiveModuleSettings } from "./live-module-settings";
 import { PlayerPresencePanel } from "./player-presence-panel";
 
 type SessionToolsDrawerProps = Readonly<{
@@ -23,6 +28,8 @@ type SessionToolsDrawerProps = Readonly<{
     tableId: string;
     context?: SessionToolsContext;
     sessionId?: string;
+    moduleSettings?: SessionLiveModuleSettings;
+    onModuleSettingsChange?: (settings: SessionLiveModuleSettingsValues) => void;
 }>;
 
 type SessionToolsContext = "table" | "pre-session" | "live";
@@ -138,6 +145,8 @@ export function SessionToolsDrawer({
     tableId,
     context = "live",
     sessionId,
+    moduleSettings,
+    onModuleSettingsChange,
 }: SessionToolsDrawerProps) {
     const [open, setOpen] = useState(false);
     const [activeTool, setActiveTool] = useState<SessionToolId>("players");
@@ -312,6 +321,13 @@ export function SessionToolsDrawer({
                                         title="MJ"
                                         description="Zone réservée aux outils de pilotage et ressources du meneur."
                                     >
+                                        {sessionId && (
+                                            <LiveModuleSettings
+                                                sessionId={sessionId}
+                                                initialSettings={moduleSettings}
+                                                onSettingsChange={onModuleSettingsChange}
+                                            />
+                                        )}
                                         <PlaceholderItem
                                             label="Ressources MJ"
                                             detail="Espace réservé aux ressources utiles au meneur."

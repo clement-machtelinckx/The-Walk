@@ -1,32 +1,85 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Session } from "@/types/session";
+import type {
+    SessionLiveModuleSettings,
+    SessionLiveModuleSettingsValues,
+} from "@/types/live-module-settings";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Loader2, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { LogOut, Loader2, FileText, ChevronDown, ChevronUp, Dice5, Swords } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
 import { PresenceBlock } from "./presence-block";
 import { LivechatBlock } from "./livechat-block";
-import { NotesHub } from "./notes/notes-hub";
+import { GroupNoteBlock } from "./notes/group-note-block";
 import { SessionToolsDrawer } from "./session-tools-drawer";
+import { DiceLogBlock } from "./dice-log-block";
 
 type LiveSessionHubProps = Readonly<{
     session: Session;
     tableId: string;
     myRole: string;
+    moduleSettings: SessionLiveModuleSettings;
 }>;
 
-export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps) {
+function toModuleValues(settings: SessionLiveModuleSettings): SessionLiveModuleSettingsValues {
+    return {
+        live_chat: settings.live_chat,
+        group_notes: settings.group_notes,
+        dice: settings.dice,
+        initiative: settings.initiative,
+        presence: settings.presence,
+    };
+}
+
+function InitiativeBlock() {
+    return (
+        <Card className="border-primary/10 bg-primary/5">
+            <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
+                    <Swords className="text-primary h-4 w-4" />
+                    Initiative
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground bg-background/60 rounded-md border border-dashed p-3 text-xs leading-relaxed">
+                    Le suivi d&apos;initiative n&apos;a pas encore de bloc dédié. Le module est
+                    branché à la configuration et pourra accueillir l&apos;outil d&apos;ordre de
+                    tour.
+                </p>
+            </CardContent>
+        </Card>
+    );
+}
+
+export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: LiveSessionHubProps) {
     const router = useRouter();
     const { endSession, isEndingSession, activeSessions, fetchActiveSession } = useSessionStore();
     const isGM = myRole === "gm";
 
     const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
+    const [liveModules, setLiveModules] = useState<SessionLiveModuleSettingsValues>(
+        toModuleValues(moduleSettings),
+    );
+
+    const currentModuleSettings = useMemo<SessionLiveModuleSettings>(
+        () => ({
+            ...moduleSettings,
+            ...liveModules,
+        }),
+        [liveModules, moduleSettings],
+    );
+
+    const hasVisibleMainModules =
+        liveModules.group_notes ||
+        liveModules.dice ||
+        liveModules.initiative ||
+        liveModules.live_chat;
 
     // Polling centralisé pour vérifier l'état de la session (toutes les 30s)
     const checkSessionStatus = useCallback(async () => {
@@ -38,6 +91,17 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
     }, [tableId, fetchActiveSession, activeSessions, router]);
 
     usePolling(checkSessionStatus, { interval: 30000 });
+
+    const refreshModuleSettings = useCallback(async () => {
+        const response = await fetch(`/api/sessions/${session.id}/modules`);
+        const data = await response.json();
+
+        if (response.ok && data.settings) {
+            setLiveModules(toModuleValues(data.settings));
+        }
+    }, [session.id]);
+
+    usePolling(refreshModuleSettings, { interval: 15000 });
 
     const handleEndSession = async () => {
         if (
@@ -59,6 +123,8 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                 tableId={tableId}
                 context="live"
                 sessionId={session.id}
+                moduleSettings={currentModuleSettings}
+                onModuleSettingsChange={setLiveModules}
             />
 
             {/* Header plus compact */}
@@ -78,7 +144,7 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <PresenceBlock sessionId={session.id} isGM={isGM} />
+                    {liveModules.presence && <PresenceBlock sessionId={session.id} isGM={isGM} />}
 
                     <Button
                         variant="ghost"
@@ -138,11 +204,41 @@ export function LiveSessionHub({ session, tableId, myRole }: LiveSessionHubProps
                     )}
                 </Card>
 
-                {/* Hub de Notes (Tabs) */}
-                <NotesHub sessionId={session.id} isGM={isGM} />
+                {liveModules.group_notes && <GroupNoteBlock sessionId={session.id} isGM={isGM} />}
 
-                {/* Chat (Repliable sur mobile géré dans LivechatBlock) */}
-                <LivechatBlock sessionId={session.id} />
+                {(liveModules.dice || liveModules.initiative) && (
+                    <div className="grid gap-6 lg:grid-cols-2">
+                        {liveModules.dice && (
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
+                                        <Dice5 className="text-primary h-4 w-4" />
+                                        Dés
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <DiceLogBlock tableId={tableId} sessionId={session.id} />
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {liveModules.initiative && <InitiativeBlock />}
+                    </div>
+                )}
+
+                {liveModules.live_chat && <LivechatBlock sessionId={session.id} />}
+
+                {!hasVisibleMainModules && (
+                    <Card className="border-dashed">
+                        <CardContent className="p-4">
+                            <p className="text-sm font-semibold">Aucun module principal affiché.</p>
+                            <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+                                Le noyau de session reste disponible. Le MJ peut réactiver des
+                                modules depuis les outils de session.
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </div>
     );
