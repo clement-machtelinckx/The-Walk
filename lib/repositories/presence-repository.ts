@@ -25,7 +25,7 @@ export const PresenceRepository = {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_presence")
-            .select("*, profiles!inner(id, display_name, avatar_url)")
+            .select("*, profiles!inner(id, display_name, avatar_url, avatar_key)")
             .eq("session_id", sessionId);
 
         handleDbError(error, "PresenceRepository.listBySession");

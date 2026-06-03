@@ -8,6 +8,7 @@ import { User, Users } from "lucide-react";
 interface NotesHubProps {
     sessionId: string;
     isGM: boolean;
+    showGroupNotes?: boolean;
 }
 
 /**
@@ -16,7 +17,11 @@ interface NotesHubProps {
  * Pour le MJ, l'onglet "Groupe" est ouvert par défaut.
  * Pour le Joueur, l'onglet "Perso" est ouvert par défaut.
  */
-export function NotesHub({ sessionId, isGM }: NotesHubProps) {
+export function NotesHub({ sessionId, isGM, showGroupNotes = true }: NotesHubProps) {
+    if (!showGroupNotes) {
+        return <PersonalNoteBlock sessionId={sessionId} />;
+    }
+
     return (
         <Tabs defaultValue={isGM ? "group" : "personal"} className="w-full">
             <TabsList className="bg-muted/50 grid w-full grid-cols-2 p-1">

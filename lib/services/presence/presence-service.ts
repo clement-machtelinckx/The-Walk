@@ -43,6 +43,7 @@ export const PresenceService = {
                 user_id: userId,
                 display_name: member.profiles.display_name,
                 avatar_url: member.profiles.avatar_url,
+                avatar_key: member.profiles.avatar_key,
                 status: status as PresenceStatus,
                 rsvp_status: rsvpStatus,
             };

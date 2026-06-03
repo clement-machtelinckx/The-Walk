@@ -12,6 +12,7 @@ interface TableState {
     createTable: (
         payload: CreateTableInput,
     ) => Promise<{ success: boolean; table?: Table; error?: string }>;
+    deleteTable: (tableId: string) => Promise<{ success: boolean; error?: string }>;
     fetchMembers: (tableId: string) => Promise<TableMemberDTO[]>;
     leaveTable: (tableId: string) => Promise<{ success: boolean; error?: string }>;
     removeMember: (
@@ -47,6 +48,31 @@ export const useTableStore = create<TableState>((set) => ({
                 set({ isLoading: false, error: data.error });
                 return { success: false, error: data.error };
             }
+        } catch {
+            set({ isLoading: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    deleteTable: async (tableId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await fetch(`/api/tables/${tableId}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+            if (res.ok) {
+                set((state) => ({
+                    isLoading: false,
+                    membersByTable: Object.fromEntries(
+                        Object.entries(state.membersByTable).filter(([id]) => id !== tableId),
+                    ),
+                }));
+                return { success: true };
+            }
+
+            set({ isLoading: false, error: data.error });
+            return { success: false, error: data.error };
         } catch {
             set({ isLoading: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };

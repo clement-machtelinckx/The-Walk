@@ -8,7 +8,7 @@ import { NextSessionEmptyState } from "./next-session-empty-state";
 import { ResponseBlock } from "./response-block";
 import { ResponseSummary } from "./response-summary";
 import { PrechatBlock } from "./prechat-block";
-import { Loader2, Play } from "lucide-react";
+import { AlertCircle, Loader2, Play } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { Button } from "@/components/ui/button";
@@ -32,9 +32,14 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         fetchActiveSession,
         startSession,
         isStartingSession,
+        cancelSession,
+        deleteSession,
+        isCancellingSession,
+        isDeletingSession,
     } = useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [actionError, setActionError] = useState<string | null>(null);
     const canManage = myRole === "gm";
 
     const session = nextSessions[tableId];
@@ -50,6 +55,7 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
     const handleSuccess = () => {
         setIsEditing(false);
         setIsCreating(false);
+        setActionError(null);
     };
 
     const handleStartSession = async () => {
@@ -59,7 +65,46 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
         const result = await startSession(session.id);
         if (result.success && result.session) {
             router.push(`/tables/${tableId}/session/live/${result.session.id}`);
+            return;
         }
+
+        setActionError(result.error || "Impossible de démarrer la session.");
+    };
+
+    const handleCancelSession = async () => {
+        if (!session?.id) return;
+        if (
+            !confirm(
+                "Annuler cette session ? Elle ne sera plus proposée comme prochaine session, mais restera visible dans l'historique.",
+            )
+        )
+            return;
+
+        const result = await cancelSession(session.id);
+        if (!result.success) {
+            setActionError(result.error || "Impossible d'annuler la session.");
+            return;
+        }
+
+        setActionError(null);
+    };
+
+    const handleDeleteSession = async () => {
+        if (!session?.id) return;
+        if (
+            !confirm(
+                "Supprimer définitivement cette session ? Cette action est réservée aux sessions créées par erreur et sans activité.",
+            )
+        )
+            return;
+
+        const result = await deleteSession(session.id);
+        if (!result.success) {
+            setActionError(result.error || "Impossible de supprimer la session.");
+            return;
+        }
+
+        setActionError(null);
     };
 
     if (
@@ -169,7 +214,18 @@ export function NextSessionContainer({ tableId, myRole }: NextSessionContainerPr
                     session={session!}
                     canEdit={canManage}
                     onEdit={() => setIsEditing(true)}
+                    onCancelSession={handleCancelSession}
+                    onDeleteSession={handleDeleteSession}
+                    isCancelling={isCancellingSession}
+                    isDeleting={isDeletingSession}
                 />
+
+                {actionError && (
+                    <div className="bg-destructive/10 text-destructive border-destructive/20 flex items-center gap-2 rounded-lg border p-3 text-sm font-medium">
+                        <AlertCircle size={16} />
+                        <span>{actionError}</span>
+                    </div>
+                )}
 
                 {/* MJ Primary Action */}
                 {canManage && (

@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Users, Loader2, Check, Clock, X, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PresenceStatus, PresenceSummary, RollCallMember } from "@/types/session";
+import { AvatarCircle } from "@/components/ui/avatar-circle";
 
 type PresenceBlockProps = Readonly<{
     sessionId: string;
@@ -186,11 +187,11 @@ export function PresenceRollCallDialog({
                                 className="space-y-3 border-b pb-4 last:border-0"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="bg-primary/10 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold">
-                                        {(member.display_name || "??")
-                                            .substring(0, 2)
-                                            .toUpperCase()}
-                                    </div>
+                                    <AvatarCircle
+                                        avatarKey={member.avatar_key}
+                                        name={member.display_name}
+                                        size="md"
+                                    />
                                     <div className="flex-grow">
                                         <p className="text-sm leading-none font-bold">
                                             {member.display_name || "Anonyme"}

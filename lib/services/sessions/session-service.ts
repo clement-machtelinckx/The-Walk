@@ -142,6 +142,56 @@ export const SessionService = {
     },
 
     /**
+     * Cancel a scheduled or active session without deleting its product history.
+     * Only GM can cancel sessions.
+     */
+    async cancelSession(userId: string, sessionId: string): Promise<Session> {
+        const session = await SessionRepository.getById(sessionId);
+        const membership = await MembershipService.requireMembership(userId, session.table_id);
+
+        if (membership.role !== "gm") {
+            throw new ForbiddenError("Seul le Maître du Jeu peut annuler la session.");
+        }
+
+        if (session.status !== "scheduled" && session.status !== "active") {
+            throw new ValidationError(
+                `Impossible d'annuler une session avec le statut : ${session.status}`,
+            );
+        }
+
+        return await SessionRepository.update(sessionId, {
+            status: "cancelled",
+            ended_at: new Date().toISOString(),
+        });
+    },
+
+    /**
+     * Delete only an empty scheduled session created by mistake.
+     * Sessions with any product activity must be cancelled instead.
+     */
+    async deleteSession(userId: string, sessionId: string): Promise<void> {
+        const session = await SessionRepository.getById(sessionId);
+        const membership = await MembershipService.requireMembership(userId, session.table_id);
+
+        if (membership.role !== "gm") {
+            throw new ForbiddenError("Seul le Maître du Jeu peut supprimer la session.");
+        }
+
+        if (session.status !== "scheduled") {
+            throw new ValidationError("Seule une session planifiée peut être supprimée.");
+        }
+
+        const hasActivity = await SessionRepository.hasActivity(sessionId);
+        if (hasActivity) {
+            throw new ValidationError(
+                "Cette session contient déjà des réponses, notes ou messages. Annulez-la plutôt que de la supprimer.",
+            );
+        }
+
+        await SessionRepository.delete(sessionId);
+    },
+
+    /**
      * Get the current active session for a table.
      * Must be a member of the table.
      */
@@ -155,7 +205,7 @@ export const SessionService = {
      */
     async getSessionHistory(userId: string, tableId: string): Promise<SessionHistoryItem[]> {
         await MembershipService.requireMembership(userId, tableId);
-        const sessions = await SessionRepository.getCompletedSessions(tableId);
+        const sessions = await SessionRepository.getHistoricalSessions(tableId);
 
         const history = await Promise.all(
             sessions.map(async (session) => {

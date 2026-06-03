@@ -9,14 +9,23 @@ import type {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Loader2, FileText, ChevronDown, ChevronUp, Dice5, Swords } from "lucide-react";
+import {
+    Ban,
+    LogOut,
+    Loader2,
+    FileText,
+    ChevronDown,
+    ChevronUp,
+    Dice5,
+    Swords,
+} from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
 import { PresenceBlock } from "./presence-block";
 import { LivechatBlock } from "./livechat-block";
-import { GroupNoteBlock } from "./notes/group-note-block";
+import { NotesHub } from "./notes/notes-hub";
 import { SessionToolsDrawer } from "./session-tools-drawer";
 import { DiceLogBlock } from "./dice-log-block";
 
@@ -59,7 +68,14 @@ function InitiativeBlock() {
 
 export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: LiveSessionHubProps) {
     const router = useRouter();
-    const { endSession, isEndingSession, activeSessions, fetchActiveSession } = useSessionStore();
+    const {
+        endSession,
+        cancelSession,
+        isEndingSession,
+        isCancellingSession,
+        activeSessions,
+        fetchActiveSession,
+    } = useSessionStore();
     const isGM = myRole === "gm";
 
     const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
@@ -116,6 +132,23 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
         }
     };
 
+    const handleCancelSession = async () => {
+        if (
+            !confirm(
+                "Annuler cette session live ? Elle sera clôturée comme annulée et restera visible dans l'historique.",
+            )
+        )
+            return;
+
+        const result = await cancelSession(session.id);
+        if (result.success) {
+            router.push(`/tables/${tableId}`);
+            return;
+        }
+
+        alert(result.error || "Impossible d'annuler la session.");
+    };
+
     return (
         <div className="space-y-6 py-2 md:py-4">
             <SessionToolsDrawer
@@ -157,21 +190,38 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                     </Button>
 
                     {isGM && (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleEndSession}
-                            disabled={isEndingSession}
-                            className="h-8 text-xs shadow-sm"
-                        >
-                            {isEndingSession ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                                <LogOut className="h-3 w-3 sm:mr-1.5" />
-                            )}
-                            <span className="hidden sm:inline">Clôturer</span>
-                            <span className="sm:hidden">Fin</span>
-                        </Button>
+                        <>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleCancelSession}
+                                disabled={isEndingSession || isCancellingSession}
+                                className="h-8 text-xs shadow-sm"
+                            >
+                                {isCancellingSession ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                    <Ban className="h-3 w-3 sm:mr-1.5" />
+                                )}
+                                <span className="hidden sm:inline">Annuler</span>
+                                <span className="sm:hidden">Annuler</span>
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleEndSession}
+                                disabled={isEndingSession || isCancellingSession}
+                                className="h-8 text-xs shadow-sm"
+                            >
+                                {isEndingSession ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                    <LogOut className="h-3 w-3 sm:mr-1.5" />
+                                )}
+                                <span className="hidden sm:inline">Clôturer</span>
+                                <span className="sm:hidden">Fin</span>
+                            </Button>
+                        </>
                     )}
                 </div>
             </header>
@@ -204,7 +254,11 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                     )}
                 </Card>
 
-                {liveModules.group_notes && <GroupNoteBlock sessionId={session.id} isGM={isGM} />}
+                <NotesHub
+                    sessionId={session.id}
+                    isGM={isGM}
+                    showGroupNotes={liveModules.group_notes}
+                />
 
                 {(liveModules.dice || liveModules.initiative) && (
                     <div className="grid gap-6 lg:grid-cols-2">

@@ -63,6 +63,7 @@ export const ResponseService = {
                 id: m.profiles.id,
                 display_name: m.profiles.display_name,
                 avatar_url: m.profiles.avatar_url,
+                avatar_key: m.profiles.avatar_key,
             }));
 
         summary.pending = non_responders.length;

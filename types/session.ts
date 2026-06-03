@@ -28,6 +28,7 @@ export interface SessionResponseWithProfile extends SessionResponse {
         id: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     };
 }
 
@@ -44,6 +45,7 @@ export interface SessionResponsesSummary {
         id: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     }>;
 }
 
@@ -60,6 +62,7 @@ export interface SessionPresenceWithProfile extends SessionPresence {
         id: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     };
 }
 
@@ -74,6 +77,7 @@ export interface RollCallMember {
     user_id: string;
     display_name: string | null;
     avatar_url: string | null;
+    avatar_key: string | null;
     status: PresenceStatus;
     rsvp_status?: ResponseStatus;
 }
@@ -88,6 +92,7 @@ export interface SessionMessage {
         id: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     };
 }
 
@@ -103,11 +108,13 @@ export interface TablePrivateMessage {
         id: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     };
     recipient_profile?: {
         id: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     };
 }
 

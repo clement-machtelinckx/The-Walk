@@ -36,11 +36,15 @@ describe("PresenceService", () => {
         vi.mocked(MembershipRepository.listByTable).mockResolvedValue([
             {
                 user_id: "user-b",
-                profiles: { display_name: "Zoé", avatar_url: null },
+                profiles: { display_name: "Zoé", avatar_url: null, avatar_key: null },
             },
             {
                 user_id: "user-a",
-                profiles: { display_name: "Alice", avatar_url: "alice.png" },
+                profiles: {
+                    display_name: "Alice",
+                    avatar_url: "alice.png",
+                    avatar_key: "mage_drow_dark",
+                },
             },
         ] as TableMembers);
         vi.mocked(PresenceRepository.listBySession).mockResolvedValue([
@@ -57,6 +61,7 @@ describe("PresenceService", () => {
                 user_id: "user-a",
                 display_name: "Alice",
                 avatar_url: "alice.png",
+                avatar_key: "mage_drow_dark",
                 status: "present",
                 rsvp_status: "going",
             },
@@ -64,6 +69,7 @@ describe("PresenceService", () => {
                 user_id: "user-b",
                 display_name: "Zoé",
                 avatar_url: null,
+                avatar_key: null,
                 status: "late",
                 rsvp_status: undefined,
             },
@@ -125,9 +131,21 @@ describe("PresenceService", () => {
 
     it("summarizes roll call statuses", async () => {
         vi.spyOn(PresenceService, "getRollCall").mockResolvedValue([
-            { user_id: "a", display_name: "A", avatar_url: null, status: "present" },
-            { user_id: "b", display_name: "B", avatar_url: null, status: "late" },
-            { user_id: "c", display_name: "C", avatar_url: null, status: "absent" },
+            {
+                user_id: "a",
+                display_name: "A",
+                avatar_url: null,
+                avatar_key: null,
+                status: "present",
+            },
+            { user_id: "b", display_name: "B", avatar_url: null, avatar_key: null, status: "late" },
+            {
+                user_id: "c",
+                display_name: "C",
+                avatar_url: null,
+                avatar_key: null,
+                status: "absent",
+            },
         ]);
 
         const summary = await PresenceService.getPresenceSummary(userId, sessionId);

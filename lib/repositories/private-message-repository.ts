@@ -19,7 +19,7 @@ export const PrivateMessageRepository = {
                 content: input.content,
             })
             .select(
-                "*, sender_profile:profiles!table_private_messages_sender_user_id_fkey(id, display_name, avatar_url), recipient_profile:profiles!table_private_messages_recipient_user_id_fkey(id, display_name, avatar_url)",
+                "*, sender_profile:profiles!table_private_messages_sender_user_id_fkey(id, display_name, avatar_url, avatar_key), recipient_profile:profiles!table_private_messages_recipient_user_id_fkey(id, display_name, avatar_url, avatar_key)",
             )
             .single();
 
@@ -47,7 +47,7 @@ export const PrivateMessageRepository = {
         let query = supabase
             .from("table_private_messages")
             .select(
-                "*, sender_profile:profiles!table_private_messages_sender_user_id_fkey(id, display_name, avatar_url), recipient_profile:profiles!table_private_messages_recipient_user_id_fkey(id, display_name, avatar_url)",
+                "*, sender_profile:profiles!table_private_messages_sender_user_id_fkey(id, display_name, avatar_url, avatar_key), recipient_profile:profiles!table_private_messages_recipient_user_id_fkey(id, display_name, avatar_url, avatar_key)",
             )
             .eq("table_id", tableId)
             .or(pairFilter);

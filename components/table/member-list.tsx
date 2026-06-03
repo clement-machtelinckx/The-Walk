@@ -17,6 +17,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useTableStore } from "@/store/table-store";
 import { TableRole } from "@/types/table";
+import { AvatarCircle } from "@/components/ui/avatar-circle";
 
 interface MemberListProps {
     tableId: string;
@@ -68,10 +69,6 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
             <CardContent>
                 <div className="space-y-3">
                     {members.map((member) => {
-                        const initials = member.profile.display_name
-                            ? member.profile.display_name.substring(0, 2).toUpperCase()
-                            : member.profile.email.substring(0, 2).toUpperCase();
-
                         const isMe = user?.id === member.userId;
                         const canBeManaged = myRole === "gm" && !isMe;
                         const canBeRemoved = canBeManaged && member.role !== "gm";
@@ -82,9 +79,12 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
                                 className="hover:bg-muted/50 flex items-center justify-between gap-3 rounded-lg p-2 transition-colors"
                             >
                                 <div className="flex min-w-0 items-center gap-3">
-                                    <div className="bg-primary/10 text-primary border-primary/20 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold">
-                                        {initials}
-                                    </div>
+                                    <AvatarCircle
+                                        avatarKey={member.profile.avatar_key}
+                                        name={member.profile.display_name}
+                                        email={member.profile.email}
+                                        size="md"
+                                    />
                                     <div className="flex min-w-0 flex-col">
                                         <span className="truncate text-sm leading-none font-medium">
                                             {member.profile.display_name || "Utilisateur"}

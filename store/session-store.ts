@@ -56,6 +56,8 @@ interface SessionState {
     isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
+    isCancellingSession: boolean;
+    isDeletingSession: boolean;
     isSavingPresence: boolean;
     isSavingPersonalNote: boolean;
     isSavingGroupNote: boolean;
@@ -109,6 +111,10 @@ interface SessionState {
     endSession: (
         sessionId: string,
     ) => Promise<{ success: boolean; session?: Session; error?: string }>;
+    cancelSession: (
+        sessionId: string,
+    ) => Promise<{ success: boolean; session?: Session; error?: string }>;
+    deleteSession: (sessionId: string) => Promise<{ success: boolean; error?: string }>;
 
     fetchPresence: (sessionId: string) => Promise<PresenceStateData | null>;
     savePresence: (
@@ -163,6 +169,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
+    isCancellingSession: false,
+    isDeletingSession: false,
     isSavingPresence: false,
     isSavingPersonalNote: false,
     isSavingGroupNote: false,
@@ -507,6 +515,84 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch {
             set({ isEndingSession: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    cancelSession: async (sessionId: string) => {
+        set({ isCancellingSession: true, error: null });
+        try {
+            const res = await fetch(`/api/sessions/${sessionId}/cancel`, {
+                method: "POST",
+            });
+            const data = await res.json();
+            if (res.ok) {
+                const session = data.session;
+                set((state) => ({
+                    activeSessions: {
+                        ...state.activeSessions,
+                        [session.table_id]:
+                            state.activeSessions[session.table_id]?.id === sessionId
+                                ? null
+                                : state.activeSessions[session.table_id],
+                    },
+                    nextSessions: {
+                        ...state.nextSessions,
+                        [session.table_id]:
+                            state.nextSessions[session.table_id]?.id === sessionId
+                                ? null
+                                : state.nextSessions[session.table_id],
+                    },
+                    isCancellingSession: false,
+                }));
+                await get().fetchNextSession(session.table_id);
+                await get().fetchActiveSession(session.table_id);
+                await get().fetchSessionHistory(session.table_id);
+                return { success: true, session };
+            } else {
+                set({ isCancellingSession: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch {
+            set({ isCancellingSession: false, error: "Erreur réseau" });
+            return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    deleteSession: async (sessionId: string) => {
+        set({ isDeletingSession: true, error: null });
+        try {
+            const sessionState = get();
+            const tableId = Object.entries(sessionState.nextSessions).find(
+                ([, session]) => session?.id === sessionId,
+            )?.[0];
+            const res = await fetch(`/api/sessions/${sessionId}`, {
+                method: "DELETE",
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                if (tableId) {
+                    set((state) => ({
+                        nextSessions: {
+                            ...state.nextSessions,
+                            [tableId]: null,
+                        },
+                        isDeletingSession: false,
+                    }));
+                    await get().fetchNextSession(tableId);
+                    await get().fetchSessionHistory(tableId);
+                } else {
+                    set({ isDeletingSession: false });
+                }
+
+                return { success: true };
+            } else {
+                set({ isDeletingSession: false, error: data.error });
+                return { success: false, error: data.error };
+            }
+        } catch {
+            set({ isDeletingSession: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

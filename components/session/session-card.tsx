@@ -1,7 +1,7 @@
 import { Session } from "@/types/session";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Edit, FileText } from "lucide-react";
+import { Ban, Calendar, Edit, FileText, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatFullDate } from "@/lib/utils/date";
 
@@ -9,6 +9,10 @@ interface SessionCardProps {
     session: Session;
     canEdit: boolean;
     onEdit?: () => void;
+    onCancelSession?: () => void;
+    onDeleteSession?: () => void;
+    isCancelling?: boolean;
+    isDeleting?: boolean;
 }
 
 const statusConfigs = {
@@ -18,8 +22,17 @@ const statusConfigs = {
     cancelled: { label: "Annulée", variant: "destructive" as const },
 };
 
-export function SessionCard({ session, canEdit, onEdit }: SessionCardProps) {
+export function SessionCard({
+    session,
+    canEdit,
+    onEdit,
+    onCancelSession,
+    onDeleteSession,
+    isCancelling,
+    isDeleting,
+}: SessionCardProps) {
     const statusConfig = statusConfigs[session.status];
+    const canManageScheduled = canEdit && session.status === "scheduled";
 
     return (
         <Card className="border-primary/20 bg-card/50 overflow-hidden shadow-sm">
@@ -61,8 +74,46 @@ export function SessionCard({ session, canEdit, onEdit }: SessionCardProps) {
             </CardContent>
 
             {canEdit && (
-                <CardFooter className="bg-muted/20 border-t py-3">
-                    <Button variant="outline" size="sm" onClick={onEdit} className="ml-auto">
+                <CardFooter className="bg-muted/20 flex flex-col gap-2 border-t py-3 sm:flex-row sm:justify-end">
+                    {canManageScheduled && onCancelSession && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={onCancelSession}
+                            disabled={isCancelling || isDeleting}
+                            className="w-full sm:w-auto"
+                        >
+                            {isCancelling ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Ban className="mr-2 h-4 w-4" />
+                            )}
+                            Annuler
+                        </Button>
+                    )}
+                    {canManageScheduled && onDeleteSession && (
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={onDeleteSession}
+                            disabled={isCancelling || isDeleting}
+                            className="w-full sm:w-auto"
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="mr-2 h-4 w-4" />
+                            )}
+                            Supprimer
+                        </Button>
+                    )}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onEdit}
+                        disabled={isCancelling || isDeleting}
+                        className="w-full sm:w-auto"
+                    >
                         <Edit className="mr-2 h-4 w-4" />
                         Modifier la session
                     </Button>

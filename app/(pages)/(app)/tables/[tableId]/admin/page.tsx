@@ -10,6 +10,7 @@ import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionAdminBlock } from "@/components/admin/next-session-admin-block";
 import { GroupInvitationPanel } from "@/components/admin/group-invitation-panel";
+import { DeleteTableDangerZone } from "@/components/admin/delete-table-danger-zone";
 import {
     Accordion,
     AccordionContent,
@@ -117,6 +118,8 @@ export default async function TableAdminPage({ params }: TableAdminPageProps) {
                                 </AccordionItem>
                             </Accordion>
                         </section>
+
+                        <DeleteTableDangerZone tableId={tableId} tableName={table.name} />
                     </div>
                 </div>
             </div>

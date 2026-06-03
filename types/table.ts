@@ -24,6 +24,7 @@ export interface TableMemberWithProfile extends TableMember {
         email: string;
         display_name: string | null;
         avatar_url: string | null;
+        avatar_key: string | null;
     };
 }
 
