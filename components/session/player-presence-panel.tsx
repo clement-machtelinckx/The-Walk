@@ -51,7 +51,11 @@ type PanelMember = RollCallMember & {
     hasSessionPresence: boolean;
 };
 
-function PlayerAvatar({ member }: { member: PanelMember }) {
+type PlayerAvatarProps = Readonly<{
+    member: PanelMember;
+}>;
+
+function PlayerAvatar({ member }: PlayerAvatarProps) {
     return (
         <AvatarCircle
             avatarKey={member.avatar_key}
@@ -78,11 +82,11 @@ export function PlayerPresencePanel({
     tableId,
     sessionId,
     isGM,
-}: {
+}: Readonly<{
     tableId: string;
     sessionId?: string;
     isGM: boolean;
-}) {
+}>) {
     const { presenceData, fetchPresence, isLoadingPresence } = useSessionStore();
     const { membersByTable, loadingMembersByTable, fetchMembers } = useTableStore();
     const { user } = useAuthStore();

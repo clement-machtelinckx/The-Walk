@@ -5,11 +5,11 @@ import { GroupNoteBlock } from "./group-note-block";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Users } from "lucide-react";
 
-interface NotesHubProps {
+type NotesHubProps = Readonly<{
     sessionId: string;
     isGM: boolean;
     showGroupNotes?: boolean;
-}
+}>;
 
 /**
  * Hub regroupant les notes personnelles et les notes de groupe.

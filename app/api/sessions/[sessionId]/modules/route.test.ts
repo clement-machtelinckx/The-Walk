@@ -14,7 +14,7 @@ describe("/api/sessions/[sessionId]/modules", () => {
     type AuthUser = Awaited<ReturnType<typeof requireAuth>>;
     type Settings = Awaited<ReturnType<typeof LiveModuleSettingsService.getSettings>>;
 
-    const settings = {
+    const settings: Settings = {
         session_id: sessionId,
         enabled_modules: ["live_chat", "dice"],
         is_configured: true,
@@ -23,7 +23,7 @@ describe("/api/sessions/[sessionId]/modules", () => {
         dice: true,
         initiative: false,
         presence: false,
-    } as Settings;
+    };
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -67,7 +67,7 @@ describe("/api/sessions/[sessionId]/modules", () => {
             ...settings,
             dice: false,
             enabled_modules: ["live_chat"],
-        } as Settings);
+        });
 
         const request = new Request(`http://localhost/api/sessions/${sessionId}/modules`, {
             method: "PATCH",
@@ -91,7 +91,7 @@ describe("/api/sessions/[sessionId]/modules", () => {
         vi.mocked(LiveModuleSettingsService.updateModule).mockResolvedValue({
             ...settings,
             enabled_modules: ["live_chat", "dice", "map"],
-        } as Settings);
+        });
 
         const request = new Request(`http://localhost/api/sessions/${sessionId}/modules`, {
             method: "PATCH",

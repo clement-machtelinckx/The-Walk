@@ -95,7 +95,7 @@ export function LiveModuleSettings({
     }, [onSettingsChange, sessionId]);
 
     useEffect(() => {
-        void fetchSettings();
+        fetchSettings();
     }, [fetchSettings]);
 
     const updateModule = async (module: SessionLiveModuleKey, enabled: boolean) => {
@@ -133,6 +133,70 @@ export function LiveModuleSettings({
         }
     };
 
+    let moduleSettingsContent = null;
+
+    if (isLoading) {
+        moduleSettingsContent = (
+            <div className="flex items-center justify-center py-8">
+                <Loader2 className="text-primary/60 h-5 w-5 animate-spin" />
+            </div>
+        );
+    } else if (settings) {
+        moduleSettingsContent = (
+            <div className="mt-4 space-y-2">
+                {MODULE_KEYS.map((module) => {
+                    const isEnabled = settings[module];
+                    const isSaving = savingModule === module;
+                    const moduleLabel = MODULE_LABELS[module];
+
+                    return (
+                        <div
+                            key={module}
+                            className="bg-background/70 flex items-center justify-between gap-3 rounded-md border p-3"
+                        >
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold">{moduleLabel.label}</p>
+                                <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">
+                                    {moduleLabel.description}
+                                </p>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                role="switch"
+                                aria-checked={isEnabled}
+                                aria-label={`${isEnabled ? "Désactiver" : "Activer"} ${moduleLabel.label}`}
+                                disabled={Boolean(savingModule)}
+                                onClick={() => updateModule(module, !isEnabled)}
+                                className="h-8 shrink-0 gap-2 px-1.5"
+                            >
+                                {isSaving && (
+                                    <Loader2 className="text-muted-foreground h-3 w-3 animate-spin" />
+                                )}
+                                <span
+                                    className={cn(
+                                        "flex h-6 w-11 items-center rounded-full border p-0.5 transition-colors",
+                                        isEnabled
+                                            ? "border-primary bg-primary"
+                                            : "border-border bg-muted",
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "bg-background h-4.5 w-4.5 rounded-full shadow-sm transition-transform",
+                                            isEnabled && "translate-x-5",
+                                        )}
+                                    />
+                                </span>
+                            </Button>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    }
+
     return (
         <section className="bg-muted/20 rounded-md border p-3">
             <div className="flex items-start justify-between gap-3">
@@ -150,63 +214,7 @@ export function LiveModuleSettings({
                 </Badge>
             </div>
 
-            {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                    <Loader2 className="text-primary/60 h-5 w-5 animate-spin" />
-                </div>
-            ) : settings ? (
-                <div className="mt-4 space-y-2">
-                    {MODULE_KEYS.map((module) => {
-                        const isEnabled = settings[module];
-                        const isSaving = savingModule === module;
-                        const moduleLabel = MODULE_LABELS[module];
-
-                        return (
-                            <div
-                                key={module}
-                                className="bg-background/70 flex items-center justify-between gap-3 rounded-md border p-3"
-                            >
-                                <div className="min-w-0">
-                                    <p className="text-sm font-semibold">{moduleLabel.label}</p>
-                                    <p className="text-muted-foreground mt-0.5 text-[11px] leading-relaxed">
-                                        {moduleLabel.description}
-                                    </p>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    role="switch"
-                                    aria-checked={isEnabled}
-                                    aria-label={`${isEnabled ? "Désactiver" : "Activer"} ${moduleLabel.label}`}
-                                    disabled={Boolean(savingModule)}
-                                    onClick={() => updateModule(module, !isEnabled)}
-                                    className="h-8 shrink-0 gap-2 px-1.5"
-                                >
-                                    {isSaving && (
-                                        <Loader2 className="text-muted-foreground h-3 w-3 animate-spin" />
-                                    )}
-                                    <span
-                                        className={cn(
-                                            "flex h-6 w-11 items-center rounded-full border p-0.5 transition-colors",
-                                            isEnabled
-                                                ? "border-primary bg-primary"
-                                                : "border-border bg-muted",
-                                        )}
-                                    >
-                                        <span
-                                            className={cn(
-                                                "bg-background h-4.5 w-4.5 rounded-full shadow-sm transition-transform",
-                                                isEnabled && "translate-x-5",
-                                            )}
-                                        />
-                                    </span>
-                                </Button>
-                            </div>
-                        );
-                    })}
-                </div>
-            ) : null}
+            {moduleSettingsContent}
 
             {(feedback || error) && (
                 <p

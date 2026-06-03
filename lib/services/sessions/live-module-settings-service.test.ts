@@ -20,13 +20,12 @@ describe("LiveModuleSettingsService", () => {
         ReturnType<typeof SessionLiveEnabledModuleRepository.listBySessionId>
     >[number];
 
-    const row = (moduleKey: string): EnabledModule =>
-        ({
-            id: `row-${moduleKey}`,
-            session_id: sessionId,
-            module_key: moduleKey,
-            created_at: new Date().toISOString(),
-        }) as EnabledModule;
+    const row = (moduleKey: string): EnabledModule => ({
+        id: `row-${moduleKey}`,
+        session_id: sessionId,
+        module_key: moduleKey,
+        created_at: new Date().toISOString(),
+    });
 
     beforeEach(() => {
         vi.clearAllMocks();

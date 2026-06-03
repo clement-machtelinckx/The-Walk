@@ -5,7 +5,7 @@ import { Ban, Calendar, Edit, FileText, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatFullDate } from "@/lib/utils/date";
 
-interface SessionCardProps {
+type SessionCardProps = Readonly<{
     session: Session;
     canEdit: boolean;
     onEdit?: () => void;
@@ -13,7 +13,7 @@ interface SessionCardProps {
     onDeleteSession?: () => void;
     isCancelling?: boolean;
     isDeleting?: boolean;
-}
+}>;
 
 const statusConfigs = {
     scheduled: { label: "Planifiée", variant: "default" as const },
