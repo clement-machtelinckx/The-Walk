@@ -4,7 +4,7 @@ import {
     GroupInvitationWithTable,
 } from "@/lib/services/invitations/group-invitation-service";
 import { PageShell } from "@/components/layout/app-shell";
-import { EmptyState } from "@/components/special/empty-state";
+import { PageErrorState } from "@/components/special/page-error-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, AlertCircle } from "lucide-react";
@@ -24,6 +24,7 @@ export default async function GroupInvitationPage({
 }) {
     const { token } = await params;
     const user = await getCurrentUser();
+    const invitationPath = `/group-invitation/${token}`;
 
     let invitation: GroupInvitationWithTable | null = null;
     let errorMessage: string | null = null;
@@ -40,15 +41,19 @@ export default async function GroupInvitationPage({
     if (errorMessage || !invitation) {
         return (
             <PageShell className="mx-auto max-w-md pt-12">
-                <EmptyState
-                    title="Lien invalide"
+                <PageErrorState
+                    title="Lien d'invitation indisponible"
                     description={errorMessage || "Ce lien d'invitation est introuvable."}
                     icon={AlertCircle}
-                >
-                    <Button asChild variant="outline" className="mt-4">
-                        <Link href="/">Retour à l&apos;accueil</Link>
-                    </Button>
-                </EmptyState>
+                    primaryAction={{
+                        label: "Réessayer",
+                        href: invitationPath,
+                    }}
+                    secondaryAction={{
+                        label: "Retour à l'accueil",
+                        href: "/",
+                    }}
+                />
             </PageShell>
         );
     }
@@ -95,12 +100,16 @@ export default async function GroupInvitationPage({
                             </div>
                             <div className="grid grid-cols-1 gap-3">
                                 <Button asChild size="lg" className="w-full">
-                                    <Link href={`/login?next=/group-invitation/${token}`}>
+                                    <Link
+                                        href={`/login?next=${encodeURIComponent(invitationPath)}`}
+                                    >
                                         Se connecter
                                     </Link>
                                 </Button>
                                 <Button asChild variant="outline" size="lg" className="w-full">
-                                    <Link href={`/register?next=/group-invitation/${token}`}>
+                                    <Link
+                                        href={`/register?next=${encodeURIComponent(invitationPath)}`}
+                                    >
                                         Créer un compte
                                     </Link>
                                 </Button>

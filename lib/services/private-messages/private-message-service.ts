@@ -2,6 +2,7 @@ import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
 import { PrivateMessageRepository } from "@/lib/repositories/private-message-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
+import { NotificationEventService } from "@/lib/services/notifications/notification-event-service";
 import { PaginationParams, PaginatedResult } from "@/lib/repositories/_shared/base";
 import { CreatePrivateMessageInput } from "@/lib/validators/private-message";
 import { TablePrivateMessage } from "@/types/session";
@@ -24,6 +25,14 @@ async function validateOptionalSessionContext(tableId: string, sessionId?: strin
     if (session.table_id !== tableId) {
         throw new ValidationError("La session ne correspond pas à cette table.");
     }
+}
+
+function notifyPrivateMessageLater(senderUserId: string, message: TablePrivateMessage) {
+    void NotificationEventService.notifyPrivateMessageReceived(senderUserId, message).catch(
+        (error) => {
+            console.error("[PRIVATE_MESSAGE_NOTIFICATION]", error);
+        },
+    );
 }
 
 export const PrivateMessageService = {
@@ -75,6 +84,9 @@ export const PrivateMessageService = {
 
         await validateOptionalSessionContext(input.table_id, input.session_id);
 
-        return await PrivateMessageRepository.create(input, userId);
+        const message = await PrivateMessageRepository.create(input, userId);
+        notifyPrivateMessageLater(userId, message);
+
+        return message;
     },
 };

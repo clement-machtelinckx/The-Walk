@@ -5,6 +5,7 @@ import { Container } from "./container";
 import { AppNav } from "./app-nav";
 import { siteConfig } from "@/config/site";
 import { useAuth } from "@/components/auth/auth-provider";
+import { NotificationCenter } from "@/components/notifications/notification-center";
 
 export function AppHeader() {
     const { user } = useAuth();
@@ -28,17 +29,20 @@ export function AppHeader() {
 
                     <div className="flex items-center gap-4">
                         {user ? (
-                            <Link
-                                href="/mon-compte"
-                                className="bg-muted/50 hover:bg-muted/80 flex items-center gap-2 rounded-full border py-1.5 pr-2 pl-3 transition-colors"
-                            >
-                                <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                                    {user.profile?.display_name || "Joueur"}
-                                </span>
-                                <div className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">
-                                    {initials}
-                                </div>
-                            </Link>
+                            <>
+                                <NotificationCenter />
+                                <Link
+                                    href="/mon-compte"
+                                    className="bg-muted/50 hover:bg-muted/80 flex items-center gap-2 rounded-full border py-1.5 pr-2 pl-3 transition-colors"
+                                >
+                                    <span className="text-muted-foreground hidden text-[10px] font-semibold tracking-wider uppercase sm:inline">
+                                        {user.profile?.display_name || "Joueur"}
+                                    </span>
+                                    <div className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">
+                                        {initials}
+                                    </div>
+                                </Link>
+                            </>
                         ) : (
                             <Link href="/login" className="text-sm font-medium hover:underline">
                                 Se connecter
