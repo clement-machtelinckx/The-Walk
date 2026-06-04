@@ -12,6 +12,7 @@ import type { PresenceStatus, ResponseStatus, RollCallMember } from "@/types/ses
 import { Check, Clock, Loader2, MoreHorizontal, Users, X } from "lucide-react";
 import { PresenceRollCallDialog } from "./presence-block";
 import { PrivateConversationPanel } from "./private-conversation-panel";
+import { AvatarCircle } from "@/components/ui/avatar-circle";
 
 const PRESENCE_META: Record<
     PresenceStatus,
@@ -50,11 +51,18 @@ type PanelMember = RollCallMember & {
     hasSessionPresence: boolean;
 };
 
-function PlayerInitials({ member }: { member: PanelMember }) {
+type PlayerAvatarProps = Readonly<{
+    member: PanelMember;
+}>;
+
+function PlayerAvatar({ member }: PlayerAvatarProps) {
     return (
-        <div className="bg-primary/10 text-primary border-primary/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border text-[11px] font-bold">
-            {(member.display_name || "??").substring(0, 2).toUpperCase()}
-        </div>
+        <AvatarCircle
+            avatarKey={member.avatar_key}
+            name={member.display_name}
+            size="lg"
+            className="rounded-md"
+        />
     );
 }
 
@@ -74,11 +82,11 @@ export function PlayerPresencePanel({
     tableId,
     sessionId,
     isGM,
-}: {
+}: Readonly<{
     tableId: string;
     sessionId?: string;
     isGM: boolean;
-}) {
+}>) {
     const { presenceData, fetchPresence, isLoadingPresence } = useSessionStore();
     const { membersByTable, loadingMembersByTable, fetchMembers } = useTableStore();
     const { user } = useAuthStore();
@@ -118,6 +126,7 @@ export function PlayerPresencePanel({
                     member.profile.email ||
                     "Utilisateur",
                 avatar_url: presence?.avatar_url || member.profile.avatar_url,
+                avatar_key: presence?.avatar_key || member.profile.avatar_key,
                 status: presence?.status || "absent",
                 rsvp_status: presence?.rsvp_status,
                 role: member.role,
@@ -234,7 +243,7 @@ export function PlayerPresencePanel({
                             )}
                             onClick={() => setSelectedUserId(member.user_id)}
                         >
-                            <PlayerInitials member={member} />
+                            <PlayerAvatar member={member} />
                             <span className="min-w-0 flex-1">
                                 <span className="block truncate text-sm font-bold">
                                     {member.display_name || "Anonyme"}
@@ -265,7 +274,7 @@ export function PlayerPresencePanel({
             {selectedMember && (
                 <div className="bg-muted/20 rounded-md border p-3">
                     <div className="flex items-center gap-3">
-                        <PlayerInitials member={selectedMember} />
+                        <PlayerAvatar member={selectedMember} />
                         <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-bold">
                                 {selectedMember.display_name || "Anonyme"}

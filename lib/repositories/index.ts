@@ -10,4 +10,5 @@ export * from "./private-message-repository";
 export * from "./email-delivery-repository";
 export * from "./notification-repository";
 export * from "./dice-repository";
+export * from "./session-live-enabled-module-repository";
 export * from "./_shared/base";

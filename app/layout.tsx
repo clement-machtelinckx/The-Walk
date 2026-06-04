@@ -24,12 +24,25 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+    applicationName: siteConfig.name,
     title: {
         default: siteConfig.name,
         template: `%s | ${siteConfig.name}`,
     },
     description: siteConfig.description,
     metadataBase: new URL(siteConfig.url),
+    authors: [{ name: siteConfig.name }],
+    creator: siteConfig.name,
+    publisher: siteConfig.name,
+    formatDetection: {
+        telephone: false,
+        email: false,
+        address: false,
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
     appleWebApp: {
         capable: true,
         statusBarStyle: "default",
@@ -41,10 +54,29 @@ export const metadata: Metadata = {
         siteName: siteConfig.name,
         title: siteConfig.name,
         description: siteConfig.description,
+        url: siteConfig.url,
+        images: [
+            {
+                url: siteConfig.ogImage,
+                width: 1200,
+                height: 630,
+                alt: `${siteConfig.name} — hub de session JDR`,
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: siteConfig.name,
+        description: siteConfig.description,
+        images: [siteConfig.ogImage],
     },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+type RootLayoutProps = Readonly<{
+    children: React.ReactNode;
+}>;
+
+export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html
             lang="fr"

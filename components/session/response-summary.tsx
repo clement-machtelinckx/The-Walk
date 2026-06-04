@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResponseStatus } from "@/types/session";
+import { AvatarCircle } from "@/components/ui/avatar-circle";
 
 interface ResponseSummaryProps {
     sessionId: string;
@@ -29,6 +30,7 @@ interface PersonDisplay {
     id: string;
     display_name: string | null;
     avatar_url: string | null;
+    avatar_key: string | null;
 }
 
 /**
@@ -98,6 +100,7 @@ export function ResponseSummary({
                 id: nr.id,
                 display_name: nr.display_name,
                 avatar_url: nr.avatar_url,
+                avatar_key: nr.avatar_key,
             })),
         },
     ];
@@ -162,8 +165,14 @@ export function ResponseSummary({
                                                 <Badge
                                                     key={person.id}
                                                     variant="secondary"
-                                                    className="border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium"
+                                                    className="gap-1.5 border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium"
                                                 >
+                                                    <AvatarCircle
+                                                        avatarKey={person.avatar_key}
+                                                        name={person.display_name}
+                                                        size="sm"
+                                                        className="h-4 w-4 border-none text-[7px]"
+                                                    />
                                                     {person.display_name || "Anonyme"}
                                                 </Badge>
                                             ))}

@@ -17,8 +17,14 @@ import { RoleBadge } from "@/components/special/role-badge";
 import { useInvitationStore } from "@/store/invitation-store";
 import { formatShortDate } from "@/lib/utils/date";
 
-interface InvitationManagerProps {
+type InvitationManagerProps = Readonly<{
     tableId: string;
+}>;
+
+function getInvitationStatusClass(status: string) {
+    if (status === "accepted") return "text-primary";
+    if (status === "expired") return "text-destructive";
+    return "";
 }
 
 export function InvitationManager({ tableId }: InvitationManagerProps) {
@@ -53,7 +59,7 @@ export function InvitationManager({ tableId }: InvitationManagerProps) {
     };
 
     const copyToClipboard = (token: string) => {
-        const url = `${window.location.origin}/invitation/${token}`;
+        const url = `${globalThis.location.origin}/invitation/${token}`;
         navigator.clipboard.writeText(url);
         setCopyToken(token);
         setTimeout(() => setCopyToken(null), 2000);
@@ -147,13 +153,7 @@ export function InvitationManager({ tableId }: InvitationManagerProps) {
                                                 Expire le {formatShortDate(invitation.expires_at)}
                                             </span>
                                             <span
-                                                className={`font-medium capitalize ${
-                                                    invitation.status === "accepted"
-                                                        ? "text-primary"
-                                                        : invitation.status === "expired"
-                                                          ? "text-destructive"
-                                                          : ""
-                                                }`}
+                                                className={`font-medium capitalize ${getInvitationStatusClass(invitation.status)}`}
                                             >
                                                 • {invitation.status}
                                             </span>

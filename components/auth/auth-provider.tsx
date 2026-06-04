@@ -10,6 +10,7 @@ interface AuthContextType extends AuthSession {
     register: AuthState["register"];
     logout: () => Promise<void>;
     refresh: () => Promise<void>;
+    updateProfile: AuthState["updateProfile"];
     changePassword: AuthState["changePassword"];
 }
 
@@ -19,7 +20,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * AuthProvider acts as a bridge between the initial server state/refresh
  * and the Zustand store. It keeps the same API as before for compatibility.
  */
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+type AuthProviderProps = Readonly<{
+    children: React.ReactNode;
+}>;
+
+export function AuthProvider({ children }: AuthProviderProps) {
     const store = useAuthStore();
     const router = useRouter();
 
@@ -44,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 register: store.register,
                 logout,
                 refresh: store.refreshUser,
+                updateProfile: store.updateProfile,
                 changePassword: store.changePassword,
             }}
         >

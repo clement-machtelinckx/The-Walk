@@ -20,7 +20,7 @@ export const MembershipRepository = {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("table_memberships")
-            .select("*, profiles!inner(id, email, display_name, avatar_url)")
+            .select("*, profiles!inner(id, email, display_name, avatar_url, avatar_key)")
             .eq("table_id", tableId);
 
         handleDbError(error, "MembershipRepository.listByTable");

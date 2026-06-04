@@ -10,6 +10,7 @@ import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionAdminBlock } from "@/components/admin/next-session-admin-block";
 import { GroupInvitationPanel } from "@/components/admin/group-invitation-panel";
+import { DeleteTableDangerZone } from "@/components/admin/delete-table-danger-zone";
 import {
     Accordion,
     AccordionContent,
@@ -17,8 +18,12 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 
-export default async function TableAdminPage({ params }: { params: Promise<{ tableId: string }> }) {
-    await requireAuth();
+type TableAdminPageProps = Readonly<{
+    params: Promise<{ tableId: string }>;
+}>;
+
+export default async function TableAdminPage({ params }: TableAdminPageProps) {
+    const user = await requireAuth();
     const { tableId } = await params;
 
     // Ensure user is GM
@@ -28,6 +33,7 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
         TableRepository.getById(tableId),
         MembershipService.listMembers(tableId),
     ]);
+    const isOwner = table.owner_id === user.id;
 
     return (
         <PageShell
@@ -113,6 +119,10 @@ export default async function TableAdminPage({ params }: { params: Promise<{ tab
                                 </AccordionItem>
                             </Accordion>
                         </section>
+
+                        {isOwner && (
+                            <DeleteTableDangerZone tableId={tableId} tableName={table.name} />
+                        )}
                     </div>
                 </div>
             </div>

@@ -6,13 +6,10 @@ import { AppNav } from "./app-nav";
 import { siteConfig } from "@/config/site";
 import { useAuth } from "@/components/auth/auth-provider";
 import { NotificationCenter } from "@/components/notifications/notification-center";
+import { AvatarCircle } from "@/components/ui/avatar-circle";
 
 export function AppHeader() {
     const { user } = useAuth();
-
-    const initials = user?.profile?.display_name
-        ? user.profile.display_name.substring(0, 2).toUpperCase()
-        : user?.email.substring(0, 2).toUpperCase() || "??";
 
     return (
         <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
@@ -38,9 +35,13 @@ export function AppHeader() {
                                     <span className="text-muted-foreground hidden text-[10px] font-semibold tracking-wider uppercase sm:inline">
                                         {user.profile?.display_name || "Joueur"}
                                     </span>
-                                    <div className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">
-                                        {initials}
-                                    </div>
+                                    <AvatarCircle
+                                        avatarKey={user.profile?.avatar_key}
+                                        name={user.profile?.display_name}
+                                        email={user.email}
+                                        size="sm"
+                                        className="bg-primary text-primary-foreground border-none"
+                                    />
                                 </Link>
                             </>
                         ) : (

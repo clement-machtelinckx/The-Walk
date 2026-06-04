@@ -7,6 +7,7 @@ export interface Profile {
     email: string;
     display_name: string | null;
     avatar_url: string | null;
+    avatar_key: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -52,7 +53,7 @@ export const ProfileRepository = {
 
     async update(
         id: string,
-        updates: Partial<Pick<Profile, "display_name" | "avatar_url">>,
+        updates: Partial<Pick<Profile, "display_name" | "avatar_url" | "avatar_key">>,
     ): Promise<Profile> {
         const supabase = await getServerClient();
         const { data, error } = await supabase

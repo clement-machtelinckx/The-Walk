@@ -1,7 +1,8 @@
 export const siteName = "The-Walk";
 export const domain = "the-walk.fr";
 export const url = `https://${domain}`;
-export const description = "Application métier pour la gestion de sessions de jeu de rôle (JDR).";
+export const description =
+    "The-Walk aide les tables de jeu de rôle à organiser leurs sessions, suivre les présences et jouer avec des outils de groupe simples.";
 export const locale = "fr_FR";
 
 export const siteConfig = {
@@ -10,6 +11,7 @@ export const siteConfig = {
     url,
     description,
     locale,
+    ogImage: "/opengraph-image",
     links: {
         crawl: process.env.THE_CRAWL_URL || "https://the-crawl.vercel.app/",
     },

@@ -41,6 +41,59 @@ export const SessionRepository = {
         return data;
     },
 
+    async delete(id: string): Promise<void> {
+        const supabase = await getServerClient();
+        const { error } = await supabase.from("sessions").delete().eq("id", id);
+
+        handleDbError(error, "SessionRepository.delete");
+    },
+
+    async hasActivity(id: string): Promise<boolean> {
+        const supabase = await getServerClient();
+        const activityChecks = [
+            supabase
+                .from("session_responses")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("session_presence")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("pre_session_messages")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("live_session_messages")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("personal_notes")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("group_notes")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("session_dice_rolls")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+            supabase
+                .from("table_private_messages")
+                .select("id", { count: "exact", head: true })
+                .eq("session_id", id),
+        ];
+
+        const results = await Promise.all(activityChecks);
+
+        results.forEach((result) => {
+            handleDbError(result.error, "SessionRepository.hasActivity");
+        });
+
+        return results.some((result) => (result.count || 0) > 0);
+    },
+
     async listByTable(
         tableId: string,
         params: PaginationParams = {},
@@ -103,16 +156,16 @@ export const SessionRepository = {
         return data;
     },
 
-    async getCompletedSessions(tableId: string): Promise<Session[]> {
+    async getHistoricalSessions(tableId: string): Promise<Session[]> {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("sessions")
             .select("*")
             .eq("table_id", tableId)
-            .eq("status", "completed")
+            .in("status", ["completed", "cancelled"])
             .order("ended_at", { ascending: false });
 
-        handleDbError(error, "SessionRepository.getCompletedSessions");
+        handleDbError(error, "SessionRepository.getHistoricalSessions");
         return data || [];
     },
 
@@ -145,7 +198,7 @@ export const SessionRepository = {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_responses")
-            .select("*, profiles!inner(id, display_name, avatar_url)")
+            .select("*, profiles!inner(id, display_name, avatar_url, avatar_key)")
             .eq("session_id", sessionId);
 
         handleDbError(error, "SessionRepository.listResponses");

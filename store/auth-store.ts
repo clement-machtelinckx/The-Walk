@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { PublicUser, AuthStatus } from "@/types/auth";
 import { PasswordChangeInput } from "@/lib/validators/auth";
+import type { ProfileUpdateInput } from "@/lib/validators/profile";
 
 export interface AuthState {
     user: PublicUser | null;
@@ -18,6 +19,7 @@ export interface AuthState {
     ) => Promise<{ success: boolean; error?: string; message?: string }>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
+    updateProfile: (data: ProfileUpdateInput) => Promise<{ success: boolean; error?: string }>;
     changePassword: (data: PasswordChangeInput) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -92,6 +94,27 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ user: null, status: "unauthenticated" });
         } catch (error) {
             console.error("Logout failed:", error);
+        }
+    },
+
+    updateProfile: async (data) => {
+        try {
+            const response = await fetch("/api/me", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                return { success: false, error: result.error || "Une erreur est survenue" };
+            }
+
+            set({ user: result.user, status: "authenticated" });
+            return { success: true };
+        } catch {
+            return { success: false, error: "Erreur reseau ou serveur" };
         }
     },
 

@@ -127,7 +127,7 @@ describe("NextSessionContainer", () => {
         const startSession = vi
             .fn()
             .mockResolvedValue({ success: true, session: { id: "sess-1" } });
-        window.confirm = vi.fn().mockReturnValue(true);
+        globalThis.confirm = vi.fn().mockReturnValue(true);
 
         vi.mocked(useSessionStore).mockReturnValue({
             ...defaultStore,

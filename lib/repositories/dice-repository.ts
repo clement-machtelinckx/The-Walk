@@ -24,7 +24,7 @@ export const DiceRepository = {
                 total,
                 roll_kind: input.roll_kind,
             })
-            .select("*, profiles!inner(id, display_name, avatar_url)")
+            .select("*, profiles!inner(id, display_name, avatar_url, avatar_key)")
             .single();
 
         handleDbError(error, "DiceRepository.create");
@@ -35,7 +35,7 @@ export const DiceRepository = {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("session_dice_rolls")
-            .select("*, profiles!inner(id, display_name, avatar_url)")
+            .select("*, profiles!inner(id, display_name, avatar_url, avatar_key)")
             .eq("table_id", tableId)
             .order("created_at", { ascending: false })
             .limit(limit);

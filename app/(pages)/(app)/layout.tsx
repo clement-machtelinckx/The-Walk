@@ -2,7 +2,11 @@ import { Container } from "@/components/layout/container";
 import { AppHeader } from "@/components/layout/app-header";
 import { MobileBottomNav } from "@/components/layout/app-nav";
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+type AppLayoutProps = Readonly<{
+    children: React.ReactNode;
+}>;
+
+export default function AppLayout({ children }: AppLayoutProps) {
     return (
         <div className="flex min-h-screen flex-col pb-16 md:pb-0">
             <AppHeader />

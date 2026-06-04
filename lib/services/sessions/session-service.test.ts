@@ -213,12 +213,110 @@ describe("SessionService", () => {
         });
     });
 
+    describe("cancelSession", () => {
+        it("cancels a scheduled session for GMs", async () => {
+            vi.mocked(SessionRepository.getById).mockResolvedValue({
+                id: mockSessionId,
+                table_id: mockTableId,
+                status: "scheduled",
+            } as SessionById);
+            vi.mocked(MembershipService.requireMembership).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+            vi.mocked(SessionRepository.update).mockResolvedValue({
+                id: mockSessionId,
+                status: "cancelled",
+            } as UpdatedSession);
+
+            await SessionService.cancelSession(mockUserId, mockSessionId);
+
+            expect(SessionRepository.update).toHaveBeenCalledWith(
+                mockSessionId,
+                expect.objectContaining({
+                    status: "cancelled",
+                    ended_at: expect.any(String),
+                }),
+            );
+        });
+
+        it("refuses cancelling completed sessions", async () => {
+            vi.mocked(SessionRepository.getById).mockResolvedValue({
+                id: mockSessionId,
+                table_id: mockTableId,
+                status: "completed",
+            } as SessionById);
+            vi.mocked(MembershipService.requireMembership).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+
+            await expect(SessionService.cancelSession(mockUserId, mockSessionId)).rejects.toThrow(
+                ValidationError,
+            );
+
+            expect(SessionRepository.update).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("deleteSession", () => {
+        it("deletes an empty scheduled session for GMs", async () => {
+            vi.mocked(SessionRepository.getById).mockResolvedValue({
+                id: mockSessionId,
+                table_id: mockTableId,
+                status: "scheduled",
+            } as SessionById);
+            vi.mocked(MembershipService.requireMembership).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+            vi.mocked(SessionRepository.hasActivity).mockResolvedValue(false);
+
+            await SessionService.deleteSession(mockUserId, mockSessionId);
+
+            expect(SessionRepository.delete).toHaveBeenCalledWith(mockSessionId);
+        });
+
+        it("refuses deleting scheduled sessions with product activity", async () => {
+            vi.mocked(SessionRepository.getById).mockResolvedValue({
+                id: mockSessionId,
+                table_id: mockTableId,
+                status: "scheduled",
+            } as SessionById);
+            vi.mocked(MembershipService.requireMembership).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+            vi.mocked(SessionRepository.hasActivity).mockResolvedValue(true);
+
+            await expect(SessionService.deleteSession(mockUserId, mockSessionId)).rejects.toThrow(
+                ValidationError,
+            );
+
+            expect(SessionRepository.delete).not.toHaveBeenCalled();
+        });
+
+        it("refuses deleting active sessions", async () => {
+            vi.mocked(SessionRepository.getById).mockResolvedValue({
+                id: mockSessionId,
+                table_id: mockTableId,
+                status: "active",
+            } as SessionById);
+            vi.mocked(MembershipService.requireMembership).mockResolvedValue({
+                role: "gm",
+            } as Membership);
+
+            await expect(SessionService.deleteSession(mockUserId, mockSessionId)).rejects.toThrow(
+                ValidationError,
+            );
+
+            expect(SessionRepository.hasActivity).not.toHaveBeenCalled();
+            expect(SessionRepository.delete).not.toHaveBeenCalled();
+        });
+    });
+
     describe("getSessionHistory", () => {
         it("keeps history even when a presence summary fails", async () => {
             vi.mocked(MembershipService.requireMembership).mockResolvedValue({
                 role: "player",
             } as Membership);
-            vi.mocked(SessionRepository.getCompletedSessions).mockResolvedValue([
+            vi.mocked(SessionRepository.getHistoricalSessions).mockResolvedValue([
                 {
                     id: mockSessionId,
                     table_id: mockTableId,

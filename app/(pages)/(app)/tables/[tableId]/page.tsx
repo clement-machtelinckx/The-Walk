@@ -10,18 +10,18 @@ import { Card } from "@/components/ui/card";
 import { formatShortDate } from "@/lib/utils/date";
 import { SessionToolsDrawer } from "@/components/session/session-tools-drawer";
 
-export async function generateMetadata({ params }: { params: Promise<{ tableId: string }> }) {
+type TableRouteProps = Readonly<{
+    params: Promise<{ tableId: string }>;
+}>;
+
+export async function generateMetadata({ params }: TableRouteProps) {
     const { tableId } = await params;
     return {
         title: `Table ${tableId}`,
     };
 }
 
-export default async function TableDetailPage({
-    params,
-}: {
-    params: Promise<{ tableId: string }>;
-}) {
+export default async function TableDetailPage({ params }: TableRouteProps) {
     const user = await requireAuth();
     const { tableId } = await params;
 

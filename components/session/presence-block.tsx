@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Users, Loader2, Check, Clock, X, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PresenceStatus, PresenceSummary, RollCallMember } from "@/types/session";
+import { AvatarCircle } from "@/components/ui/avatar-circle";
 
 type PresenceBlockProps = Readonly<{
     sessionId: string;
@@ -82,6 +83,18 @@ function PresenceSummaryInline({ summary }: { summary: PresenceSummary }) {
             </div>
         </div>
     );
+}
+
+function getPresenceStatusLabel(summary: PresenceSummary) {
+    if (summary.absent > 0) {
+        return `${summary.absent} absent${summary.absent > 1 ? "s" : ""}`;
+    }
+
+    if (summary.late > 0) {
+        return `${summary.late} retard${summary.late > 1 ? "s" : ""}`;
+    }
+
+    return "Tous présents";
 }
 
 export function PresenceRollCallDialog({
@@ -174,11 +187,11 @@ export function PresenceRollCallDialog({
                                 className="space-y-3 border-b pb-4 last:border-0"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="bg-primary/10 text-primary border-primary/20 flex h-8 w-8 items-center justify-center rounded-full border text-[10px] font-bold">
-                                        {(member.display_name || "??")
-                                            .substring(0, 2)
-                                            .toUpperCase()}
-                                    </div>
+                                    <AvatarCircle
+                                        avatarKey={member.avatar_key}
+                                        name={member.display_name}
+                                        size="md"
+                                    />
                                     <div className="flex-grow">
                                         <p className="text-sm leading-none font-bold">
                                             {member.display_name || "Anonyme"}
@@ -303,12 +316,7 @@ export function PresenceBlock({ sessionId, isGM }: PresenceBlockProps) {
         ) : null;
     }
 
-    const statusLabel =
-        summary.absent > 0
-            ? `${summary.absent} absent${summary.absent > 1 ? "s" : ""}`
-            : summary.late > 0
-              ? `${summary.late} retard${summary.late > 1 ? "s" : ""}`
-              : "Tous présents";
+    const statusLabel = getPresenceStatusLabel(summary);
 
     return (
         <div className="bg-muted/25 flex max-w-full flex-wrap items-center gap-2 rounded-md border px-2 py-1.5">

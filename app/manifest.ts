@@ -1,14 +1,15 @@
 import { MetadataRoute } from "next";
+import { siteConfig } from "@/config/site";
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: "The-Walk — JDR Manager",
-        short_name: "The-Walk",
-        description: "Application métier privée pour la gestion de sessions de jeu de rôle.",
+        name: `${siteConfig.name} — Hub de session JDR`,
+        short_name: siteConfig.name,
+        description: siteConfig.description,
         start_url: "/tables",
         display: "standalone",
         background_color: "#ffffff",
-        theme_color: "#1e4d3a", // Forest Green primary
+        theme_color: "#1e4d3a",
         icons: [
             {
                 src: "/favicon.ico",

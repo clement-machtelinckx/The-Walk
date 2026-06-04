@@ -69,9 +69,18 @@ describe("ResponseService", () => {
             ] as SessionResponses);
 
             vi.mocked(MembershipRepository.listByTable).mockResolvedValue([
-                { user_id: "u1", profiles: { id: "u1", display_name: "U1" } },
-                { user_id: "u2", profiles: { id: "u2", display_name: "U2" } },
-                { user_id: "u3", profiles: { id: "u3", display_name: "U3" } },
+                {
+                    user_id: "u1",
+                    profiles: { id: "u1", display_name: "U1", avatar_url: null, avatar_key: null },
+                },
+                {
+                    user_id: "u2",
+                    profiles: { id: "u2", display_name: "U2", avatar_url: null, avatar_key: null },
+                },
+                {
+                    user_id: "u3",
+                    profiles: { id: "u3", display_name: "U3", avatar_url: null, avatar_key: null },
+                },
             ] as TableMemberships);
 
             const result = await ResponseService.getSessionResponses(mockUserId, mockSessionId);

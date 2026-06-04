@@ -4,6 +4,7 @@ import { SessionRepository } from "@/lib/repositories/session-repository";
 import { Table, TableRole } from "@/types/table";
 import { CreateTableInput } from "@/lib/validators/table";
 import { Session } from "@/types/session";
+import { ForbiddenError, ValidationError } from "@/lib/errors";
 
 export interface TableSummaryDTO {
     id: string;
@@ -71,5 +72,27 @@ export const TableService = {
      */
     async createTable(userId: string, input: CreateTableInput): Promise<Table> {
         return await TableRepository.create(input, userId);
+    },
+
+    /**
+     * Delete a table and all table-scoped data through database cascades.
+     * Allowed for the owner only. Active sessions must be ended/cancelled first.
+     */
+    async deleteTable(userId: string, tableId: string): Promise<void> {
+        const table = await TableRepository.getById(tableId);
+
+        const canDelete = table.owner_id === userId;
+        if (!canDelete) {
+            throw new ForbiddenError("Seul le propriétaire peut supprimer cette table.");
+        }
+
+        const activeSession = await SessionRepository.getActiveSessionByTable(tableId);
+        if (activeSession) {
+            throw new ValidationError(
+                "Une session est en cours. Clôturez-la ou annulez-la avant de supprimer la table.",
+            );
+        }
+
+        await TableRepository.delete(tableId);
     },
 };

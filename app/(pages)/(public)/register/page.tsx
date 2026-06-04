@@ -26,7 +26,7 @@ export default async function RegisterPage({
                 <div className="space-y-2 text-center">
                     <h1 className="text-4xl font-bold tracking-tight">Rejoignez-nous</h1>
                     <p className="text-muted-foreground">
-                        Créez votre compte pour commencer l&apos;aventure.
+                        Créez votre compte pour gérer vos tables de jeu.
                     </p>
                 </div>
 

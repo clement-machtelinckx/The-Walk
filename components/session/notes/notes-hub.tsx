@@ -5,10 +5,11 @@ import { GroupNoteBlock } from "./group-note-block";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Users } from "lucide-react";
 
-interface NotesHubProps {
+type NotesHubProps = Readonly<{
     sessionId: string;
     isGM: boolean;
-}
+    showGroupNotes?: boolean;
+}>;
 
 /**
  * Hub regroupant les notes personnelles et les notes de groupe.
@@ -16,7 +17,11 @@ interface NotesHubProps {
  * Pour le MJ, l'onglet "Groupe" est ouvert par défaut.
  * Pour le Joueur, l'onglet "Perso" est ouvert par défaut.
  */
-export function NotesHub({ sessionId, isGM }: NotesHubProps) {
+export function NotesHub({ sessionId, isGM, showGroupNotes = true }: NotesHubProps) {
+    if (!showGroupNotes) {
+        return <PersonalNoteBlock sessionId={sessionId} />;
+    }
+
     return (
         <Tabs defaultValue={isGM ? "group" : "personal"} className="w-full">
             <TabsList className="bg-muted/50 grid w-full grid-cols-2 p-1">

@@ -61,8 +61,15 @@ export function SessionHistory({ tableId }: SessionHistoryProps) {
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
                                 <h3 className="font-bold tracking-tight">{item.session.title}</h3>
-                                <Badge variant="secondary" className="text-[10px] uppercase">
-                                    Terminée
+                                <Badge
+                                    variant={
+                                        item.session.status === "cancelled"
+                                            ? "destructive"
+                                            : "secondary"
+                                    }
+                                    className="text-[10px] uppercase"
+                                >
+                                    {item.session.status === "cancelled" ? "Annulée" : "Terminée"}
                                 </Badge>
                             </div>
                             <div className="text-muted-foreground flex items-center gap-2 text-xs">

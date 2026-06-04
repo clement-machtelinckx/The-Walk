@@ -4,7 +4,11 @@ import { updateSessionSchema } from "@/lib/validators/session";
 import { NextResponse } from "next/server";
 import { AppError } from "@/lib/errors";
 
-export async function GET(_req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
+type SessionRouteContext = Readonly<{
+    params: Promise<{ sessionId: string }>;
+}>;
+
+export async function GET(_req: Request, { params }: SessionRouteContext) {
     try {
         const user = await requireAuth();
         const { sessionId } = await params;
@@ -21,7 +25,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ session
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ sessionId: string }> }) {
+export async function PATCH(req: Request, { params }: SessionRouteContext) {
     try {
         const user = await requireAuth();
         const { sessionId } = await params;
@@ -40,6 +44,23 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ sessio
             return NextResponse.json({ error: "Données invalides" }, { status: 400 });
         }
         console.error("PATCH /api/sessions/[sessionId] error:", error);
+        return NextResponse.json({ error: "Une erreur est survenue" }, { status: 500 });
+    }
+}
+
+export async function DELETE(_req: Request, { params }: SessionRouteContext) {
+    try {
+        const user = await requireAuth();
+        const { sessionId } = await params;
+
+        await SessionService.deleteSession(user.id, sessionId);
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return NextResponse.json({ error: error.message }, { status: error.status });
+        }
+        console.error("DELETE /api/sessions/[sessionId] error:", error);
         return NextResponse.json({ error: "Une erreur est survenue" }, { status: 500 });
     }
 }
