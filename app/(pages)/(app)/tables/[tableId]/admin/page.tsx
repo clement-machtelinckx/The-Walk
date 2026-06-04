@@ -23,7 +23,7 @@ type TableAdminPageProps = Readonly<{
 }>;
 
 export default async function TableAdminPage({ params }: TableAdminPageProps) {
-    await requireAuth();
+    const user = await requireAuth();
     const { tableId } = await params;
 
     // Ensure user is GM
@@ -33,6 +33,7 @@ export default async function TableAdminPage({ params }: TableAdminPageProps) {
         TableRepository.getById(tableId),
         MembershipService.listMembers(tableId),
     ]);
+    const isOwner = table.owner_id === user.id;
 
     return (
         <PageShell
@@ -119,7 +120,9 @@ export default async function TableAdminPage({ params }: TableAdminPageProps) {
                             </Accordion>
                         </section>
 
-                        <DeleteTableDangerZone tableId={tableId} tableName={table.name} />
+                        {isOwner && (
+                            <DeleteTableDangerZone tableId={tableId} tableName={table.name} />
+                        )}
                     </div>
                 </div>
             </div>

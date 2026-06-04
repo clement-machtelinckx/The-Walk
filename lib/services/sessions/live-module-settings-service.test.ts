@@ -36,9 +36,7 @@ describe("LiveModuleSettingsService", () => {
         vi.mocked(MembershipService.requireMembership).mockResolvedValue({
             role: "gm",
         } as Membership);
-        vi.mocked(SessionLiveEnabledModuleRepository.enableModule).mockImplementation(
-            async (_sessionId, moduleKey) => row(moduleKey),
-        );
+        vi.mocked(SessionLiveEnabledModuleRepository.enableModule).mockResolvedValue(undefined);
         vi.mocked(SessionLiveEnabledModuleRepository.disableModule).mockResolvedValue(undefined);
     });
 

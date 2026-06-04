@@ -3,7 +3,7 @@ import { TableService } from "./table-service";
 import { TableRepository } from "@/lib/repositories/table-repository";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { SessionRepository } from "@/lib/repositories/session-repository";
-import { ValidationError } from "@/lib/errors";
+import { ForbiddenError, ValidationError } from "@/lib/errors";
 
 vi.mock("@/lib/repositories/table-repository");
 vi.mock("@/lib/repositories/session-repository");
@@ -36,19 +36,17 @@ describe("TableService", () => {
         expect(TableRepository.delete).toHaveBeenCalledWith(tableId);
     });
 
-    it("deletes a table for a GM", async () => {
+    it("refuses deletion for a non-owner GM", async () => {
         vi.mocked(TableRepository.getById).mockResolvedValue({
             id: tableId,
             owner_id: "another-user",
         } as TableById);
-        vi.mocked(MembershipService.requireMembership).mockResolvedValue({
-            role: "gm",
-        } as Membership);
-        vi.mocked(SessionRepository.getActiveSessionByTable).mockResolvedValue(null);
 
-        await TableService.deleteTable(userId, tableId);
+        await expect(TableService.deleteTable(userId, tableId)).rejects.toThrow(ForbiddenError);
 
-        expect(TableRepository.delete).toHaveBeenCalledWith(tableId);
+        expect(MembershipService.requireMembership).not.toHaveBeenCalled();
+        expect(SessionRepository.getActiveSessionByTable).not.toHaveBeenCalled();
+        expect(TableRepository.delete).not.toHaveBeenCalled();
     });
 
     it("refuses deletion while a session is active", async () => {

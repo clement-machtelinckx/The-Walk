@@ -15,22 +15,17 @@ export const SessionLiveEnabledModuleRepository = {
         return data || [];
     },
 
-    async enableModule(sessionId: string, moduleKey: string): Promise<SessionLiveEnabledModule> {
+    async enableModule(sessionId: string, moduleKey: string): Promise<void> {
         const supabase = await getServerClient();
-        const { data, error } = await supabase
-            .from("session_live_enabled_modules")
-            .upsert(
-                {
-                    session_id: sessionId,
-                    module_key: moduleKey,
-                },
-                { onConflict: "session_id,module_key" },
-            )
-            .select()
-            .single();
+        const { error } = await supabase.from("session_live_enabled_modules").upsert(
+            {
+                session_id: sessionId,
+                module_key: moduleKey,
+            },
+            { onConflict: "session_id,module_key", ignoreDuplicates: true },
+        );
 
         handleDbError(error, "SessionLiveEnabledModuleRepository.enableModule");
-        return data;
     },
 
     async disableModule(sessionId: string, moduleKey: string): Promise<void> {

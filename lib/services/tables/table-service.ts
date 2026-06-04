@@ -76,17 +76,14 @@ export const TableService = {
 
     /**
      * Delete a table and all table-scoped data through database cascades.
-     * Allowed for the owner or any GM. Active sessions must be ended/cancelled first.
+     * Allowed for the owner only. Active sessions must be ended/cancelled first.
      */
     async deleteTable(userId: string, tableId: string): Promise<void> {
-        const [table, membership] = await Promise.all([
-            TableRepository.getById(tableId),
-            MembershipService.requireMembership(userId, tableId),
-        ]);
+        const table = await TableRepository.getById(tableId);
 
-        const canDelete = table.owner_id === userId || membership.role === "gm";
+        const canDelete = table.owner_id === userId;
         if (!canDelete) {
-            throw new ForbiddenError("Seul le propriétaire ou un MJ peut supprimer cette table.");
+            throw new ForbiddenError("Seul le propriétaire peut supprimer cette table.");
         }
 
         const activeSession = await SessionRepository.getActiveSessionByTable(tableId);
