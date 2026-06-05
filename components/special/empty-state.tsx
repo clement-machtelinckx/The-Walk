@@ -1,14 +1,14 @@
 import { cn } from "@/lib/utils";
 import { Coffee, LucideIcon } from "lucide-react";
 
-interface EmptyStateProps {
+type EmptyStateProps = Readonly<{
     title: string;
     description?: string;
     icon?: LucideIcon;
     children?: React.ReactNode;
     className?: string;
     variant?: "default" | "compact" | "dashed";
-}
+}>;
 
 export function EmptyState({
     title,

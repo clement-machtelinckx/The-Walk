@@ -23,9 +23,9 @@ import { EmailUsageCard } from "@/components/profile/email-usage-card";
 import { AvatarPicker } from "@/components/profile/avatar-picker";
 import { AvatarCircle } from "@/components/ui/avatar-circle";
 
-interface ProfileContentProps {
+type ProfileContentProps = Readonly<{
     user: AppUser;
-}
+}>;
 
 export function ProfileContent({ user: serverUser }: ProfileContentProps) {
     const { logout, user: clientUser, changePassword } = useAuth();

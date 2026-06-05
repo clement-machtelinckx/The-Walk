@@ -3,12 +3,12 @@ import { TableRole } from "@/types/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface RoleBadgeProps {
+type RoleBadgeProps = Readonly<{
     role: TableRole;
     className?: string;
     showIcon?: boolean;
     size?: "default" | "sm";
-}
+}>;
 
 const roleConfigs = {
     gm: {

@@ -8,9 +8,9 @@ import { Check, X, HelpCircle, Loader2, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserResponseStatus } from "@/lib/validators/session";
 
-interface ResponseBlockProps {
+type ResponseBlockProps = Readonly<{
     sessionId: string;
-}
+}>;
 
 export function ResponseBlock({ sessionId }: ResponseBlockProps) {
     const { user } = useAuthStore();

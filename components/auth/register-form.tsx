@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 
-interface RegisterFormProps {
+type RegisterFormProps = Readonly<{
     nextPath?: string | null;
-}
+}>;
 
 export function RegisterForm({ nextPath }: RegisterFormProps) {
     const [email, setEmail] = useState("");

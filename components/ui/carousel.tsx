@@ -12,21 +12,22 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 type CarouselOptions = UseCarouselParameters[0];
 type CarouselPlugin = UseCarouselParameters[1];
 
-type CarouselProps = {
+type CarouselProps = Readonly<{
     opts?: CarouselOptions;
     plugins?: CarouselPlugin;
     orientation?: "horizontal" | "vertical";
     setApi?: (api: CarouselApi) => void;
-};
+}>;
 
-type CarouselContextProps = {
+type CarouselContextProps = Readonly<{
     carouselRef: ReturnType<typeof useEmblaCarousel>[0];
     api: ReturnType<typeof useEmblaCarousel>[1];
     scrollPrev: () => void;
     scrollNext: () => void;
     canScrollPrev: boolean;
     canScrollNext: boolean;
-} & CarouselProps;
+}> &
+    CarouselProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 

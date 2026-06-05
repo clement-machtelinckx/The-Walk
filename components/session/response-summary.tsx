@@ -20,11 +20,11 @@ import { cn } from "@/lib/utils";
 import { ResponseStatus } from "@/types/session";
 import { AvatarCircle } from "@/components/ui/avatar-circle";
 
-interface ResponseSummaryProps {
+type ResponseSummaryProps = Readonly<{
     sessionId: string;
     collapsible?: boolean;
     defaultExpanded?: boolean;
-}
+}>;
 
 interface PersonDisplay {
     id: string;

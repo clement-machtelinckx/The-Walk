@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2 } from "lucide-react";
 
-interface InvitationAcceptButtonProps {
+type InvitationAcceptButtonProps = Readonly<{
     token: string;
-}
+}>;
 
 export function InvitationAcceptButton({ token }: InvitationAcceptButtonProps) {
     const [isLoading, setIsLoading] = useState(false);

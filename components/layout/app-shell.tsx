@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
 import { Container } from "./container";
 
-interface PageShellProps {
+type PageShellProps = Readonly<{
     title?: string;
     description?: string;
     children: React.ReactNode;
     actions?: React.ReactNode;
     className?: string;
-}
+}>;
 
 export function PageShell({ title, description, children, actions, className }: PageShellProps) {
     return (
@@ -38,10 +38,10 @@ export function PageShell({ title, description, children, actions, className }: 
 export function ContentGrid({
     children,
     className,
-}: {
+}: Readonly<{
     children: React.ReactNode;
     className?: string;
-}) {
+}>) {
     return (
         <div className={cn("grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3", className)}>
             {children}
@@ -52,10 +52,10 @@ export function ContentGrid({
 export function StickyBar({
     children,
     className,
-}: {
+}: Readonly<{
     children: React.ReactNode;
     className?: string;
-}) {
+}>) {
     return (
         <div
             className={cn(

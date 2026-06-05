@@ -55,7 +55,7 @@ const STATUS_ITEMS: Array<{
     },
 ];
 
-function PresenceSummaryInline({ summary }: { summary: PresenceSummary }) {
+function PresenceSummaryInline({ summary }: Readonly<{ summary: PresenceSummary }>) {
     return (
         <div className="flex min-w-0 items-center gap-2 text-xs">
             <span className="text-foreground shrink-0 font-bold">
@@ -100,10 +100,10 @@ function getPresenceStatusLabel(summary: PresenceSummary) {
 export function PresenceRollCallDialog({
     sessionId,
     trigger,
-}: {
+}: Readonly<{
     sessionId: string;
     trigger: React.ReactNode;
-}) {
+}>) {
     const { presenceData, fetchPresence, savePresence, isLoadingPresence, isSavingPresence } =
         useSessionStore();
     const [isOpen, setIsOpen] = useState(false);

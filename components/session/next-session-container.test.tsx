@@ -4,17 +4,17 @@ import { NextSessionContainer } from "./next-session-container";
 import { useSessionStore } from "@/store/session-store";
 
 type SessionStoreSnapshot = ReturnType<typeof useSessionStore>;
-type SessionCardMockProps = {
+type SessionCardMockProps = Readonly<{
     onEdit: () => void;
     canEdit: boolean;
-};
-type SessionFormMockProps = {
+}>;
+type SessionFormMockProps = Readonly<{
     onCancel: () => void;
-};
-type EmptyStateMockProps = {
+}>;
+type EmptyStateMockProps = Readonly<{
     onCreate: () => void;
     canCreate: boolean;
-};
+}>;
 
 vi.mock("@/store/session-store");
 vi.mock("@/lib/hooks/use-polling", () => ({

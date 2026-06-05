@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
-interface NextSessionAdminBlockProps {
+type NextSessionAdminBlockProps = Readonly<{
     tableId: string;
-}
+}>;
 
 interface ReminderSummary {
     sent: number;
