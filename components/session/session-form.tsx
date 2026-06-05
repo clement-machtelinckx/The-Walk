@@ -21,12 +21,12 @@ import { Session } from "@/types/session";
 import { useSessionStore } from "@/store/session-store";
 import { formatForInput, inputToISO } from "@/lib/utils/date";
 
-interface SessionFormProps {
+type SessionFormProps = Readonly<{
     tableId: string;
     initialData?: Session;
     onSuccess: (session: Session) => void;
     onCancel: () => void;
-}
+}>;
 
 export function SessionForm({ tableId, initialData, onSuccess, onCancel }: SessionFormProps) {
     const [error, setError] = useState<string | null>(null);

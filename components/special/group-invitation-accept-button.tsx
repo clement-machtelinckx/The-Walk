@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check } from "lucide-react";
 
-interface GroupInvitationAcceptButtonProps {
+type GroupInvitationAcceptButtonProps = Readonly<{
     token: string;
-}
+}>;
 
 export function GroupInvitationAcceptButton({ token }: GroupInvitationAcceptButtonProps) {
     const [isLoading, setIsLoading] = useState(false);

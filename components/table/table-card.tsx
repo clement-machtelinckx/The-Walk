@@ -12,9 +12,9 @@ import { Calendar, ArrowRight, Play } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
 import { formatFullDate } from "@/lib/utils/date";
 
-interface TableCardProps {
+type TableCardProps = Readonly<{
     table: TableSummaryDTO;
-}
+}>;
 
 export function TableCard({ table }: TableCardProps) {
     return (

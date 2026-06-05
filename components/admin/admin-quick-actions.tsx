@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserPlus, Calendar, ExternalLink, Zap } from "lucide-react";
 import Link from "next/link";
 
-interface AdminQuickActionsProps {
+type AdminQuickActionsProps = Readonly<{
     tableId: string;
-}
+}>;
 
 /**
  * Bloc d'actions rapides pour le MJ dans l'espace Admin.

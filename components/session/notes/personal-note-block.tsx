@@ -7,9 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, User, Save, CheckCircle2 } from "lucide-react";
 import { debounce } from "@/lib/utils/debounce";
 
-interface PersonalNoteBlockProps {
+type PersonalNoteBlockProps = Readonly<{
     sessionId: string;
-}
+}>;
 
 export function PersonalNoteBlock({ sessionId }: PersonalNoteBlockProps) {
     const {

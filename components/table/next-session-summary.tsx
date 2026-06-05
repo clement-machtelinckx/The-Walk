@@ -7,11 +7,11 @@ import Link from "next/link";
 import { EmptyState } from "@/components/special/empty-state";
 import { formatFullDate } from "@/lib/utils/date";
 
-interface NextSessionSummaryProps {
+type NextSessionSummaryProps = Readonly<{
     tableId: string;
     session: Session | null;
     activeSession?: Session | null;
-}
+}>;
 
 /**
  * Résumé de la prochaine session sur la page Table.

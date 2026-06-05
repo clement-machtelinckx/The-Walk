@@ -7,7 +7,7 @@ function usePrefersReducedMotion() {
     const [reduced, setReduced] = React.useState(false);
 
     React.useEffect(() => {
-        const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const mq = globalThis.matchMedia("(prefers-reduced-motion: reduce)");
         const onChange = () => setReduced(mq.matches);
         onChange();
         mq.addEventListener?.("change", onChange);
@@ -17,7 +17,7 @@ function usePrefersReducedMotion() {
     return reduced;
 }
 
-type RevealProps = {
+type RevealProps = Readonly<{
     children: React.ReactNode;
     className?: string;
     /** ms */
@@ -27,7 +27,7 @@ type RevealProps = {
     /** px */
     y?: number;
     once?: boolean;
-};
+}>;
 
 export function Reveal({
     children,

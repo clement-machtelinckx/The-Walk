@@ -8,10 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, CheckCircle2, Clock3, Loader2, RefreshCw, Save, Users } from "lucide-react";
 
-interface GroupNoteBlockProps {
+type GroupNoteBlockProps = Readonly<{
     sessionId: string;
     isGM: boolean;
-}
+}>;
 
 type SaveStatus = "idle" | "dirty" | "saving" | "saved" | "conflict" | "error";
 

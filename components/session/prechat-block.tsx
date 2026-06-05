@@ -11,9 +11,9 @@ import { Loader2, Send, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/utils/date";
 
-interface PrechatBlockProps {
+type PrechatBlockProps = Readonly<{
     sessionId: string;
-}
+}>;
 
 export function PrechatBlock({ sessionId }: PrechatBlockProps) {
     const { user } = useAuthStore();

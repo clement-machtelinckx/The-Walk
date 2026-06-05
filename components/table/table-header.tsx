@@ -10,12 +10,12 @@ import { useRouter } from "next/navigation";
 import { useTableStore } from "@/store/table-store";
 import { useSessionStore } from "@/store/session-store";
 
-interface TableHeaderProps {
+type TableHeaderProps = Readonly<{
     tableId: string;
     name: string;
     description: string | null;
     myRole: TableRole;
-}
+}>;
 
 /**
  * En-tête de table.

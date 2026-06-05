@@ -11,9 +11,9 @@ import { Loader2, Send, MessageSquare, ChevronDown, ChevronUp } from "lucide-rea
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/utils/date";
 
-interface LivechatBlockProps {
+type LivechatBlockProps = Readonly<{
     sessionId: string;
-}
+}>;
 
 /**
  * Bloc de chat en direct pour la session.

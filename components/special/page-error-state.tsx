@@ -4,7 +4,7 @@ import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-interface PageErrorStateProps {
+type PageErrorStateProps = Readonly<{
     title: string;
     description: string;
     icon?: LucideIcon;
@@ -17,7 +17,7 @@ interface PageErrorStateProps {
         label: string;
         href: string;
     };
-}
+}>;
 
 export function PageErrorState({
     title,

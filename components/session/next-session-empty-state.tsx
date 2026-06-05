@@ -2,10 +2,10 @@ import { EmptyState } from "@/components/special/empty-state";
 import { Button } from "@/components/ui/button";
 import { Calendar, Plus } from "lucide-react";
 
-interface NextSessionEmptyStateProps {
+type NextSessionEmptyStateProps = Readonly<{
     canCreate: boolean;
     onCreate?: () => void;
-}
+}>;
 
 export function NextSessionEmptyState({ canCreate, onCreate }: NextSessionEmptyStateProps) {
     return (

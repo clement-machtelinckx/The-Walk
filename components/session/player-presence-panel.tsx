@@ -66,7 +66,7 @@ function PlayerAvatar({ member }: PlayerAvatarProps) {
     );
 }
 
-function PresenceBadge({ status }: { status: PresenceStatus }) {
+function PresenceBadge({ status }: Readonly<{ status: PresenceStatus }>) {
     const meta = PRESENCE_META[status];
     const Icon = meta.icon;
 

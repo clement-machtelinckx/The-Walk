@@ -7,9 +7,9 @@ import { Loader2, History, Calendar } from "lucide-react";
 import { formatShortDate } from "@/lib/utils/date";
 import { Badge } from "@/components/ui/badge";
 
-interface SessionHistoryProps {
+type SessionHistoryProps = Readonly<{
     tableId: string;
-}
+}>;
 
 export function SessionHistory({ tableId }: SessionHistoryProps) {
     const { sessionHistories, fetchSessionHistory, isLoadingHistory } = useSessionStore();

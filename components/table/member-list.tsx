@@ -19,11 +19,11 @@ import { useTableStore } from "@/store/table-store";
 import { TableRole } from "@/types/table";
 import { AvatarCircle } from "@/components/ui/avatar-circle";
 
-interface MemberListProps {
+type MemberListProps = Readonly<{
     tableId: string;
     members: TableMemberDTO[];
     myRole: string;
-}
+}>;
 
 export function MemberList({ tableId, members, myRole }: MemberListProps) {
     const { user } = useAuth();
