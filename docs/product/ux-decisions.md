@@ -1,0 +1,25 @@
+# Decisions UX et produit
+
+## Mobile-first pragmatique
+
+Les interfaces sont pensees pour rester utilisables sur mobile : navigation simple, panels, sheets et composants compacts.
+
+## Centre de notifications global
+
+Les evenements importants sont regroupes dans un centre accessible depuis l'en-tete, pour eviter de disperser les signaux dans chaque page.
+
+## Drawer d'outils session
+
+La session live regroupe les outils dans un drawer : joueurs/presence, jets de des, options avancees et outils MJ. Cela garde la page live lisible tout en conservant les outils disponibles.
+
+## Simplicite V1
+
+La V1 privilegie des flux explicites : table, membres, prochaine session, live session. Les automatisations restent limitees aux endroits utiles, comme notifications et emails non bloquants.
+
+## Securite invisible
+
+L'UI masque les actions selon le role, mais les decisions sensibles restent cote serveur. Cette approche evite de faire porter la securite aux composants client.
+
+## Soutenance
+
+Les parcours a montrer doivent rester courts : creation/administration de table, invitation, planification de session, demarrage live, outils de session, notifications.
