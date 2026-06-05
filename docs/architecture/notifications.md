@@ -35,3 +35,4 @@ Les notifications in-app sont stockees dans `notifications` :
 - Pas de temps reel WebSocket cote notification globale : le compteur est recupere via API.
 - Les creations d'evenements sont non bloquantes sur certains flux : une erreur de notification ne doit pas casser l'action principale.
 - Les types de notifications sont des chaines controlees par le code, pas encore une enum SQL stricte.
+- Les tests doivent encore couvrir plus largement les routes et evenements de notification.

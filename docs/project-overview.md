@@ -18,6 +18,8 @@ Le projet dispose deja d'une base fonctionnelle : authentification, tables, memb
 
 La logique sensible est principalement cote serveur via services, repositories, route handlers et politiques RLS Supabase.
 
+L'etat produit detaille est maintenu dans `docs/product/features.md`. La priorisation et les points a consolider sont dans `docs/product/roadmap.md`.
+
 ## Domaines fonctionnels
 
 - Authentification et profil utilisateur.
@@ -34,3 +36,10 @@ La logique sensible est principalement cote serveur via services, repositories, 
 ## Logique generale
 
 Les pages App Router affichent les vues publiques ou protegees. Les composants client appellent les endpoints `app/api/`. Les route handlers valident les entrees, recuperent l'utilisateur courant et deleguent aux services. Les services appliquent les regles metier et les permissions, puis utilisent les repositories pour acceder a Supabase.
+
+## Limites actuelles
+
+- Les parcours critiques ne sont pas encore couverts par des tests end-to-end.
+- Le live est mobile-first, mais doit encore etre valide sur appareil reel.
+- Les notifications in-app ne sont pas encore en temps reel global.
+- La documentation d'exploitation/deploiement reste a produire si le projet vise une livraison production.

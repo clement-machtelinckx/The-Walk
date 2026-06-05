@@ -1,5 +1,7 @@
 # Fonctionnalites actuelles
 
+Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorites sont suivies dans `roadmap.md`.
+
 ## Compte et profil
 
 - Inscription, connexion, deconnexion.
@@ -42,6 +44,7 @@
 - Journal de jets de des.
 - Modules live activables par session.
 - Drawer d'outils de session.
+- Presence compacte dans le live et panneau joueurs dans le drawer.
 
 ## Notifications et emails
 
@@ -49,3 +52,10 @@
 - Notifications pour invitation, session planifiee, message prive et session live.
 - Emails transactionnels pour invitation, confirmation d'inscription et rappel de session.
 - Logs et quota email.
+
+## Qualite et documentation
+
+- Pages globales d'erreur et de ressource introuvable.
+- Tests unitaires sur plusieurs services, repositories, validators, routes et composants.
+- Documentation projet dans `docs/`.
+- Devlog mensuel dans `docs/devlog/`.

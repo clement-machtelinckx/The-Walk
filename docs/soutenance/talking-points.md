@@ -28,4 +28,10 @@ Le socle couvre les tables, les membres, les invitations, les sessions, le live,
 - Consolider les tests sur les parcours critiques.
 - Ameliorer l'experience mobile live.
 - Documenter les audits au fil de l'eau.
-- Ajouter plus tard un devlog automatise.
+- Enrichir les outils live avances sans basculer vers un VTT complet.
+
+## Points a assumer
+
+- Le decoupage entre version stabilisee et phase suivante n'est pas encore fige.
+- Le drawing collaboratif est une piste forte, mais la phase suivante couvre plus largement les outils de jeu et l'enrichissement du live.
+- Le role `observer`, les tests end-to-end et l'exploitation production restent a consolider.

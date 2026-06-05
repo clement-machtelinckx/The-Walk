@@ -36,3 +36,10 @@
 - Ce qui fonctionne.
 - Ce qui reste a consolider.
 - Evolutions possibles.
+
+## Documents d'appui
+
+- Etat actuel : `docs/product/features.md`.
+- Roadmap et statuts : `docs/product/roadmap.md`.
+- Historique recent : `docs/devlog/2026-06.md`.
+- Architecture : `docs/architecture/`.

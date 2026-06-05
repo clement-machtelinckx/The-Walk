@@ -14,7 +14,7 @@
 
 - `app/(pages)/(public)/` : accueil, about, FAQ, login, register, acceptation d'invitation.
 - `app/(pages)/(app)/` : espace connecte, compte, liste des tables, detail table, admin table, prochaine session et live session.
-- `app/api/` : endpoints auth, tables, sessions, invitations, notifications, emails, messages, notes, presence et des.
+- `app/api/` : endpoints auth, tables, sessions, invitations, notifications, emails, messages, notes, presence, modules live et des.
 
 ## Composants
 
@@ -30,6 +30,12 @@
 - `lib/validators/` : schemas Zod pour les payloads.
 - `lib/email/` et `lib/services/email/` : templates, providers et service transactionnel.
 - `lib/supabase/` et `lib/db/` : clients Supabase selon contexte.
+
+## Tests
+
+- Les tests sont proches des domaines concernes : services, repositories, route handlers, stores et composants.
+- Le script `npm run test:coverage` existe pour produire un rapport de couverture.
+- Les tests end-to-end ne sont pas encore en place.
 
 ## Principes
 

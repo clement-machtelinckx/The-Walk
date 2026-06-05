@@ -30,3 +30,4 @@ Objectif : montrer un parcours produit coherent en peu de temps.
 - Avoir un compte MJ et si possible un compte joueur.
 - Preparer une session planifiee.
 - Verifier les variables email seulement si l'envoi doit etre montre.
+- Garder un scenario court : le but est de montrer le flux complet, pas toutes les options.

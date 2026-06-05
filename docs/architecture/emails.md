@@ -38,3 +38,9 @@ Le quota est verifie avant envoi pour les emails rattaches a un `senderUserId`.
 - `invitation` : invitation ciblee a rejoindre une table.
 - `signup_confirmation` : confirmation apres inscription.
 - `session_reminder` : rappel de session envoye par un MJ aux membres.
+
+## Limites actuelles
+
+- Les envois dependent de la configuration d'environnement et des providers externes.
+- Le quota est une protection produit simple, pas une solution anti-abus complete.
+- Les emails doivent rester non bloquants quand l'action principale peut continuer sans eux.

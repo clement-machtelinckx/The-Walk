@@ -23,3 +23,7 @@ L'UI masque les actions selon le role, mais les decisions sensibles restent cote
 ## Soutenance
 
 Les parcours a montrer doivent rester courts : creation/administration de table, invitation, planification de session, demarrage live, outils de session, notifications.
+
+## Roadmap non figee
+
+La roadmap distingue l'existant, la consolidation et les extensions futures. Le drawing collaboratif reste une piste d'outil live avance, pas le seul axe d'une phase suivante.

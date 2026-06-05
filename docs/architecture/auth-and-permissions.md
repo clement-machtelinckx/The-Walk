@@ -29,9 +29,15 @@ Les services utilisent aussi `MembershipService.requireMembership()` pour centra
 
 - `gm` : Maître du Jeu. Peut administrer les invitations, membres, sessions et modules live selon les services.
 - `player` : joueur membre de la table.
-- `observer` : observateur membre, avec acces plus limite cote produit.
+- `observer` : observateur membre. Le role existe dans le modele, mais ses limites produit exactes restent a consolider.
 - `owner_id` : proprietaire/createur de table. Ce n'est pas une valeur de l'enum `table_role`, mais un champ de `tables` utilise notamment pour certains droits de suppression.
 
 ## Principe de securite
 
 Les controles importants doivent rester cote serveur : route handlers, services et RLS Supabase. L'interface peut masquer des actions, mais ne doit jamais etre consideree comme une barriere de securite.
+
+## Points a consolider
+
+- Revue systematique des permissions par route sensible.
+- Clarification des droits `observer`.
+- Verification des politiques RLS apres chaque migration structurante.

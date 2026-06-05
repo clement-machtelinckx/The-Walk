@@ -7,6 +7,8 @@ description: Use this project skill when implementing a significant feature, imp
 
 This skill keeps a short, factual project memory in `docs/devlog/`. Use it at the end of a meaningful change to decide whether the devlog should be updated.
 
+The devlog is not a changelog and not a task tracker. It records durable milestones that will help future takeover, project defense, or technical audit.
+
 ## When to Add an Entry
 
 Add one entry when the work has real project value:
@@ -36,6 +38,7 @@ If unsure, prefer no entry unless the change would be useful to explain later du
 - Monthly file format: `docs/devlog/YYYY-MM.md`.
 - Current project file on 2026-06-05: `docs/devlog/2026-06.md`.
 - If the monthly file does not exist, create it with the same short header and format.
+- If an entry is reconstructed after the fact, mark it explicitly with `(approx., entree retrospective)`.
 
 ## Entry Format
 
@@ -70,6 +73,8 @@ Known limitation, follow-up, or `Aucune vigilance particuliere.`
 - Avoid long explanations and implementation dumps.
 - Mention verification only if it matters to understand confidence.
 - Keep entries readable months later by someone resuming the project.
+- Do not invent exact dates, commit boundaries, metrics, or technical details that are not visible from the repo or supplied context.
+- Prefer grouping related work into one useful milestone over writing many tiny entries.
 
 ## Suggested Prompt Usage
 

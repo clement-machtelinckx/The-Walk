@@ -21,3 +21,4 @@ Ce dossier regroupe les audits du projet : technique, UX, accessibilite, perform
 - Garder les audits factuels et relies a des fichiers, commandes ou observations.
 - Distinguer les problemes prouves des hypotheses.
 - Ajouter ici les futures revues avant merge, soutenance ou livraison.
+- Les sujets prioritaires sont : securite/RLS, accessibilite, mobile live, coverage et performance des parcours table/session.
