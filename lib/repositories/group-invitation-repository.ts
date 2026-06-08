@@ -1,7 +1,8 @@
-import { getServerClient } from "@/lib/db";
+import { getServerClient, getServiceRoleClient } from "@/lib/db";
 import { handleDbError } from "./_shared/base";
-import { GroupInvitation, TableRole } from "@/types/table";
+import { GroupInvitation, Table, TableRole } from "@/types/table";
 import { randomUUID } from "crypto";
+import { NotFoundError } from "@/lib/errors";
 
 export const GroupInvitationRepository = {
     async create(
@@ -30,7 +31,7 @@ export const GroupInvitationRepository = {
     },
 
     async getByToken(token: string): Promise<GroupInvitation | null> {
-        const supabase = await getServerClient();
+        const supabase = getServiceRoleClient();
         const { data, error } = await supabase
             .from("table_group_invitations")
             .select("*")
@@ -38,6 +39,21 @@ export const GroupInvitationRepository = {
             .maybeSingle();
 
         handleDbError(error, "GroupInvitationRepository.getByToken");
+        return data;
+    },
+
+    async getTableInfoForInvitation(tableId: string): Promise<Pick<Table, "name" | "description">> {
+        const supabase = getServiceRoleClient();
+        const { data, error } = await supabase
+            .from("tables")
+            .select("name, description")
+            .eq("id", tableId)
+            .single();
+
+        handleDbError(error, "GroupInvitationRepository.getTableInfoForInvitation");
+        if (!data) {
+            throw new NotFoundError("Table", tableId);
+        }
         return data;
     },
 
