@@ -35,7 +35,7 @@ export const InvitationRepository = {
     },
 
     async getByToken(token: string): Promise<Invitation> {
-        const supabase = await getServerClient();
+        const supabase = getServiceRoleClient();
         const { data, error } = await supabase
             .from("invitations")
             .select("*")
@@ -50,7 +50,7 @@ export const InvitationRepository = {
     },
 
     async updateStatus(id: string, status: Invitation["status"]): Promise<void> {
-        const supabase = await getServerClient();
+        const supabase = getServiceRoleClient();
         const { error } = await supabase.from("invitations").update({ status }).eq("id", id);
 
         handleDbError(error, "InvitationRepository.updateStatus");

@@ -1,4 +1,4 @@
-import { getServerClient } from "@/lib/db";
+import { getServerClient, getServiceRoleClient } from "@/lib/db";
 import { handleDbError } from "./_shared/base";
 import { TableMember, TableRole, TableMemberWithProfile } from "@/types/table";
 
@@ -47,6 +47,22 @@ export const MembershipRepository = {
             .single();
 
         handleDbError(error, "MembershipRepository.create");
+        return data;
+    },
+
+    async createFromServerInvitation(
+        tableId: string,
+        userId: string,
+        role: TableRole,
+    ): Promise<TableMember> {
+        const supabase = getServiceRoleClient();
+        const { data, error } = await supabase
+            .from("table_memberships")
+            .insert({ table_id: tableId, user_id: userId, role })
+            .select()
+            .single();
+
+        handleDbError(error, "MembershipRepository.createFromServerInvitation");
         return data;
     },
 

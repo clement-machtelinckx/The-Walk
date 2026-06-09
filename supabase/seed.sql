@@ -1,589 +1,221 @@
--- -- Seed data for The-Walk local development.
--- -- Password for all seeded users: "1234AZER$"
--- -- Intended to be replayed after `npx supabase db reset`.
+-- Minimal local seed for The-Walk
+-- 3 users only, no tables, no sessions.
+-- Password for all users: 1234AZER$
 --
--- -- =========================================================
--- -- 1. Auth users
--- -- =========================================================
---
--- insert into auth.users (
---     id,
---     instance_id,
---     aud,
---     role,
---     email,
---     encrypted_password,
---     email_confirmed_at,
---     confirmed_at,
---     raw_app_meta_data,
---     raw_user_meta_data,
---     created_at,
---     updated_at
--- )
--- values
---     (
---         '00000000-0000-0000-0000-000000000001',
---         '00000000-0000-0000-0000-000000000000',
---         'authenticated',
---         'authenticated',
---         'mj@the-walk.local',
---         crypt('1234AZER$', gen_salt('bf')),
---         now(),
---         now(),
---         '{"provider":"email","providers":["email"]}',
---         '{"display_name":"Ariane MJ"}',
---         now() - interval '20 days',
---         now()
---     ),
---     (
---         '00000000-0000-0000-0000-000000000002',
---         '00000000-0000-0000-0000-000000000000',
---         'authenticated',
---         'authenticated',
---         'bruno@the-walk.local',
---         crypt('1234AZER$', gen_salt('bf')),
---         now(),
---         now(),
---         '{"provider":"email","providers":["email"]}',
---         '{"display_name":"Bruno"}',
---         now() - interval '18 days',
---         now()
---     ),
---     (
---         '00000000-0000-0000-0000-000000000003',
---         '00000000-0000-0000-0000-000000000000',
---         'authenticated',
---         'authenticated',
---         'clara@the-walk.local',
---         crypt('1234AZER$', gen_salt('bf')),
---         now(),
---         now(),
---         '{"provider":"email","providers":["email"]}',
---         '{"display_name":"Clara"}',
---         now() - interval '16 days',
---         now()
---     ),
---     (
---         '00000000-0000-0000-0000-000000000004',
---         '00000000-0000-0000-0000-000000000000',
---         'authenticated',
---         'authenticated',
---         'noam@the-walk.local',
---         crypt('1234AZER$', gen_salt('bf')),
---         now(),
---         now(),
---         '{"provider":"email","providers":["email"]}',
---         '{"display_name":"Noam Observateur"}',
---         now() - interval '14 days',
---         now()
---     ),
---     (
---         '00000000-0000-0000-0000-000000000005',
---         '00000000-0000-0000-0000-000000000000',
---         'authenticated',
---         'authenticated',
---         'eve@the-walk.local',
---         crypt('1234AZER$', gen_salt('bf')),
---         now(),
---         now(),
---         '{"provider":"email","providers":["email"]}',
---         '{"display_name":"Eve Invitée"}',
---         now() - interval '2 days',
---         now()
---     );
---
--- insert into auth.identities (
---     id,
---     user_id,
---     identity_data,
---     provider,
---     provider_id,
---     last_sign_in_at,
---     created_at,
---     updated_at
--- )
--- values
---     (
---         '10000000-0000-0000-0000-000000000001',
---         '00000000-0000-0000-0000-000000000001',
---         jsonb_build_object(
---             'sub', '00000000-0000-0000-0000-000000000001',
---             'email', 'mj@the-walk.local',
---             'email_verified', true
---         ),
---         'email',
---         'mj@the-walk.local',
---         now() - interval '1 day',
---         now() - interval '20 days',
---         now()
---     ),
---     (
---         '10000000-0000-0000-0000-000000000002',
---         '00000000-0000-0000-0000-000000000002',
---         jsonb_build_object(
---             'sub', '00000000-0000-0000-0000-000000000002',
---             'email', 'bruno@the-walk.local',
---             'email_verified', true
---         ),
---         'email',
---         'bruno@the-walk.local',
---         now() - interval '2 days',
---         now() - interval '18 days',
---         now()
---     ),
---     (
---         '10000000-0000-0000-0000-000000000003',
---         '00000000-0000-0000-0000-000000000003',
---         jsonb_build_object(
---             'sub', '00000000-0000-0000-0000-000000000003',
---             'email', 'clara@the-walk.local',
---             'email_verified', true
---         ),
---         'email',
---         'clara@the-walk.local',
---         now() - interval '3 days',
---         now() - interval '16 days',
---         now()
---     ),
---     (
---         '10000000-0000-0000-0000-000000000004',
---         '00000000-0000-0000-0000-000000000004',
---         jsonb_build_object(
---             'sub', '00000000-0000-0000-0000-000000000004',
---             'email', 'noam@the-walk.local',
---             'email_verified', true
---         ),
---         'email',
---         'noam@the-walk.local',
---         now() - interval '5 days',
---         now() - interval '14 days',
---         now()
---     ),
---     (
---         '10000000-0000-0000-0000-000000000005',
---         '00000000-0000-0000-0000-000000000005',
---         jsonb_build_object(
---             'sub', '00000000-0000-0000-0000-000000000005',
---             'email', 'eve@the-walk.local',
---             'email_verified', true
---         ),
---         'email',
---         'eve@the-walk.local',
---         null,
---         now() - interval '2 days',
---         now()
---     );
---
--- -- Ensure profile display names stay stable even if the auth trigger evolves.
--- insert into public.profiles (id, email, display_name, avatar_url, created_at, updated_at)
--- values
---     ('00000000-0000-0000-0000-000000000001', 'mj@the-walk.local', 'Ariane MJ', null, now() - interval '20 days', now()),
---     ('00000000-0000-0000-0000-000000000002', 'bruno@the-walk.local', 'Bruno', null, now() - interval '18 days', now()),
---     ('00000000-0000-0000-0000-000000000003', 'clara@the-walk.local', 'Clara', null, now() - interval '16 days', now()),
---     ('00000000-0000-0000-0000-000000000004', 'noam@the-walk.local', 'Noam Observateur', null, now() - interval '14 days', now()),
---     ('00000000-0000-0000-0000-000000000005', 'eve@the-walk.local', 'Eve Invitée', null, now() - interval '2 days', now())
--- on conflict (id) do update
--- set
---     email = excluded.email,
---     display_name = excluded.display_name,
---     avatar_url = excluded.avatar_url,
---     updated_at = excluded.updated_at;
---
--- -- =========================================================
--- -- 2. Tables and memberships
--- -- =========================================================
---
--- insert into public.tables (id, name, description, owner_id, created_at, updated_at)
--- values
---     (
---         '11111111-1111-1111-1111-111111111111',
---         'Les Brumes de Valombre',
---         'Campagne principale de test pour les flows table, préparation et live.',
---         '00000000-0000-0000-0000-000000000001',
---         now() - interval '12 days',
---         now()
---     ),
---     (
---         '22222222-2222-2222-2222-222222222222',
---         'One-shot des Archives',
---         'Table secondaire légère pour tester les listes et rôles multiples.',
---         '00000000-0000-0000-0000-000000000002',
---         now() - interval '8 days',
---         now()
---     );
---
--- insert into public.table_memberships (table_id, user_id, role, joined_at)
--- values
---     ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001', 'gm', now() - interval '12 days'),
---     ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000002', 'player', now() - interval '11 days'),
---     ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000003', 'player', now() - interval '10 days'),
---     ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000004', 'observer', now() - interval '9 days'),
---     ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000002', 'gm', now() - interval '8 days'),
---     ('22222222-2222-2222-2222-222222222222', '00000000-0000-0000-0000-000000000001', 'player', now() - interval '7 days');
---
--- -- =========================================================
--- -- 3. Invitations
--- -- =========================================================
---
--- insert into public.invitations (
---     id,
---     table_id,
---     inviter_id,
---     email,
---     role,
---     status,
---     token,
---     expires_at,
---     created_at,
---     updated_at
--- )
--- values
---     (
---         '66666666-6666-6666-6666-666666666001',
---         '11111111-1111-1111-1111-111111111111',
---         '00000000-0000-0000-0000-000000000001',
---         'eve@the-walk.local',
---         'player',
---         'pending',
---         'local-targeted-eve',
---         now() + interval '7 days',
---         now() - interval '1 day',
---         now()
---     ),
---     (
---         '66666666-6666-6666-6666-666666666002',
---         '11111111-1111-1111-1111-111111111111',
---         '00000000-0000-0000-0000-000000000001',
---         'external-player@example.com',
---         'observer',
---         'pending',
---         'local-targeted-external',
---         now() + interval '5 days',
---         now() - interval '2 hours',
---         now()
---     );
---
--- insert into public.table_group_invitations (
---     id,
---     table_id,
---     role,
---     token,
---     created_by,
---     expires_at,
---     created_at,
---     updated_at
--- )
--- values
---     (
---         '77777777-7777-7777-7777-777777777001',
---         '11111111-1111-1111-1111-111111111111',
---         'player',
---         'local-group-valombre',
---         '00000000-0000-0000-0000-000000000001',
---         now() + interval '10 days',
---         now() - interval '3 hours',
---         now()
---     );
---
--- -- =========================================================
--- -- 4. Sessions, responses and presence
--- -- =========================================================
---
--- insert into public.sessions (
---     id,
---     table_id,
---     title,
---     description,
---     status,
---     scheduled_at,
---     started_at,
---     ended_at,
---     created_at,
---     updated_at
--- )
--- values
---     (
---         '33333333-3333-3333-3333-333333333333',
---         '11111111-1111-1111-1111-111111111111',
---         'Session 4 : La porte sous la brume',
---         'Prochaine session planifiée pour tester la préparation, les RSVP et le rappel email.',
---         'scheduled',
---         now() + interval '2 days',
---         null,
---         null,
---         now() - interval '5 days',
---         now()
---     ),
---     (
---         '44444444-4444-4444-4444-444444444444',
---         '11111111-1111-1111-1111-111111111111',
---         'Session live : Le guet de nuit',
---         'Session active de test pour le live, la présence, le chat et les dés.',
---         'active',
---         now() - interval '1 hour',
---         now() - interval '50 minutes',
---         null,
---         now() - interval '2 days',
---         now()
---     ),
---     (
---         '55555555-5555-5555-5555-555555555555',
---         '11111111-1111-1111-1111-111111111111',
---         'Session 3 : Les ruines basses',
---         'Session terminée pour tester l’historique.',
---         'completed',
---         now() - interval '5 days',
---         now() - interval '5 days',
---         now() - interval '5 days' + interval '3 hours',
---         now() - interval '8 days',
---         now() - interval '5 days'
---     );
---
--- insert into public.session_responses (id, session_id, user_id, status, updated_at)
--- values
---     ('88888888-8888-8888-8888-888888888001', '33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000001', 'going', now() - interval '1 day'),
---     ('88888888-8888-8888-8888-888888888002', '33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000002', 'going', now() - interval '1 day'),
---     ('88888888-8888-8888-8888-888888888003', '33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000003', 'maybe', now() - interval '12 hours'),
---     ('88888888-8888-8888-8888-888888888004', '33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000004', 'declined', now() - interval '10 hours');
---
--- insert into public.session_presence (id, session_id, user_id, status, last_seen_at)
--- values
---     ('99999999-9999-9999-9999-999999999001', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000001', 'present', now() - interval '2 minutes'),
---     ('99999999-9999-9999-9999-999999999002', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000002', 'present', now() - interval '4 minutes'),
---     ('99999999-9999-9999-9999-999999999003', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000003', 'late', now() - interval '15 minutes'),
---     ('99999999-9999-9999-9999-999999999004', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000004', 'absent', now() - interval '30 minutes');
---
--- -- =========================================================
--- -- 5. Messages, notes and dice
--- -- =========================================================
---
--- insert into public.pre_session_messages (id, session_id, user_id, content, created_at)
--- values
---     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa001', '33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000001', 'Pensez à préparer vos actions pour l’entrée dans les souterrains.', now() - interval '22 hours'),
---     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaa002', '33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000002', 'Je ramène le plan griffonné de la dernière fois.', now() - interval '20 hours');
---
--- insert into public.live_session_messages (id, session_id, user_id, content, created_at)
--- values
---     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb001', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000001', 'La cloche sonne au loin. Que faites-vous ?', now() - interval '45 minutes'),
---     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb002', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000002', 'Je vérifie la herse avant d’avancer.', now() - interval '42 minutes'),
---     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbb003', '44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000003', 'Je reste en retrait avec la lanterne.', now() - interval '39 minutes');
---
--- insert into public.personal_notes (id, user_id, table_id, session_id, content, created_at, updated_at)
--- values
---     (
---         'cccccccc-cccc-cccc-cccc-ccccccccc001',
---         '00000000-0000-0000-0000-000000000002',
---         '11111111-1111-1111-1111-111111111111',
---         null,
---         'Objectif personnel : retrouver le sceau de famille avant Clara.',
---         now() - interval '3 days',
---         now()
---     );
---
--- insert into public.group_notes (id, table_id, session_id, content, created_at, updated_at)
--- values
---     (
---         'dddddddd-dddd-dddd-dddd-ddddddddd001',
---         '11111111-1111-1111-1111-111111111111',
---         null,
---         'Résumé groupe : le groupe a négocié avec le veilleur et obtenu une clé rouillée.',
---         now() - interval '2 days',
---         now()
---     );
---
--- insert into public.session_dice_rolls (
---     id,
---     table_id,
---     session_id,
---     user_id,
---     dice_type,
---     quantity,
---     modifier,
---     rolls,
---     total,
---     roll_kind,
---     created_at
--- )
--- values
---     (
---         'eeeeeeee-eeee-eeee-eeee-eeeeeeeee001',
---         '11111111-1111-1111-1111-111111111111',
---         '44444444-4444-4444-4444-444444444444',
---         '00000000-0000-0000-0000-000000000002',
---         20,
---         1,
---         3,
---         array[14],
---         17,
---         'standard',
---         now() - interval '35 minutes'
---     ),
---     (
---         'eeeeeeee-eeee-eeee-eeee-eeeeeeeee002',
---         '11111111-1111-1111-1111-111111111111',
---         '44444444-4444-4444-4444-444444444444',
---         '00000000-0000-0000-0000-000000000003',
---         6,
---         2,
---         0,
---         array[4, 2],
---         6,
---         'damage',
---         now() - interval '28 minutes'
---     );
---
--- -- =========================================================
--- -- 6. Private messages
--- -- =========================================================
---
--- insert into public.table_private_messages (
---     id,
---     table_id,
---     session_id,
---     sender_user_id,
---     recipient_user_id,
---     content,
---     created_at
--- )
--- values
---     (
---         'abababab-abab-abab-abab-ababababa001',
---         '11111111-1111-1111-1111-111111111111',
---         null,
---         '00000000-0000-0000-0000-000000000002',
---         '00000000-0000-0000-0000-000000000001',
---         'Je voudrais tenter une approche discrète avant le combat.',
---         now() - interval '1 day'
---     ),
---     (
---         'abababab-abab-abab-abab-ababababa002',
---         '11111111-1111-1111-1111-111111111111',
---         null,
---         '00000000-0000-0000-0000-000000000001',
---         '00000000-0000-0000-0000-000000000002',
---         'OK, je te donnerai un signal au début de la scène.',
---         now() - interval '23 hours'
---     ),
---     (
---         'abababab-abab-abab-abab-ababababa003',
---         '11111111-1111-1111-1111-111111111111',
---         '44444444-4444-4444-4444-444444444444',
---         '00000000-0000-0000-0000-000000000003',
---         '00000000-0000-0000-0000-000000000002',
---         'Je peux couvrir ton personnage pendant l’inspection.',
---         now() - interval '30 minutes'
---     );
---
--- -- =========================================================
--- -- 7. Notifications and email logs
--- -- =========================================================
---
--- insert into public.notifications (
---     id,
---     user_id,
---     type,
---     title,
---     body,
---     resource_type,
---     resource_id,
---     href,
---     data,
---     is_read,
---     created_at,
---     read_at
--- )
--- values
---     (
---         '12121212-1212-1212-1212-121212120001',
---         '00000000-0000-0000-0000-000000000005',
---         'table_invitation_received',
---         'Invitation reçue',
---         'Vous êtes invité à rejoindre la table Les Brumes de Valombre.',
---         'invitation',
---         '66666666-6666-6666-6666-666666666001',
---         '/invitation/local-targeted-eve',
---         '{"tableId":"11111111-1111-1111-1111-111111111111","role":"player"}',
---         false,
---         now() - interval '1 day',
---         null
---     ),
---     (
---         '12121212-1212-1212-1212-121212120002',
---         '00000000-0000-0000-0000-000000000002',
---         'private_message_received',
---         'Nouveau message privé',
---         'Ariane MJ vous a répondu.',
---         'private_message',
---         'abababab-abab-abab-abab-ababababa002',
---         '/tables/11111111-1111-1111-1111-111111111111',
---         '{"tableId":"11111111-1111-1111-1111-111111111111","senderUserId":"00000000-0000-0000-0000-000000000001"}',
---         false,
---         now() - interval '23 hours',
---         null
---     ),
---     (
---         '12121212-1212-1212-1212-121212120003',
---         '00000000-0000-0000-0000-000000000003',
---         'session_live_started',
---         'Session live démarrée',
---         'Les Brumes de Valombre : Le guet de nuit.',
---         'session',
---         '44444444-4444-4444-4444-444444444444',
---         '/tables/11111111-1111-1111-1111-111111111111/session/live/44444444-4444-4444-4444-444444444444',
---         '{"tableId":"11111111-1111-1111-1111-111111111111"}',
---         false,
---         now() - interval '50 minutes',
---         null
---     ),
---     (
---         '12121212-1212-1212-1212-121212120004',
---         '00000000-0000-0000-0000-000000000004',
---         'session_scheduled',
---         'Prochaine session planifiée',
---         'Les Brumes de Valombre : La porte sous la brume.',
---         'session',
---         '33333333-3333-3333-3333-333333333333',
---         '/tables/11111111-1111-1111-1111-111111111111/session/next',
---         '{"tableId":"11111111-1111-1111-1111-111111111111"}',
---         true,
---         now() - interval '2 days',
---         now() - interval '1 day'
---     );
---
--- insert into public.email_delivery_logs (
---     id,
---     email_type,
---     recipient_email,
---     sender_user_id,
---     status,
---     provider,
---     provider_message_id,
---     error_message,
---     metadata,
---     created_at
--- )
--- values
---     (
---         '34343434-3434-3434-3434-343434340001',
---         'invitation',
---         'eve@the-walk.local',
---         '00000000-0000-0000-0000-000000000001',
---         'sent',
---         'mailtrap',
---         'local-mailtrap-001',
---         null,
---         '{"tableId":"11111111-1111-1111-1111-111111111111","invitationId":"66666666-6666-6666-6666-666666666001"}',
---         now() - interval '1 day'
---     ),
---     (
---         '34343434-3434-3434-3434-343434340002',
---         'session_reminder',
---         'bruno@the-walk.local',
---         '00000000-0000-0000-0000-000000000001',
---         'sent',
---         'mailtrap',
---         'local-mailtrap-002',
---         null,
---         '{"tableId":"11111111-1111-1111-1111-111111111111","sessionId":"33333333-3333-3333-3333-333333333333"}',
---         now() - interval '3 hours'
---     );
+-- Intended for Supabase local `npx supabase db reset`
+
+delete from auth.identities
+where user_id in (
+                  '11111111-1111-4111-8111-111111111111',
+                  '22222222-2222-4222-8222-222222222222',
+                  '33333333-3333-4333-8333-333333333333'
+    );
+
+delete from auth.users
+where id in (
+             '11111111-1111-4111-8111-111111111111',
+             '22222222-2222-4222-8222-222222222222',
+             '33333333-3333-4333-8333-333333333333'
+    );
+
+insert into auth.users (
+    instance_id,
+    id,
+    aud,
+    role,
+    email,
+    encrypted_password,
+    email_confirmed_at,
+    invited_at,
+    confirmation_token,
+    confirmation_sent_at,
+    recovery_token,
+    recovery_sent_at,
+    email_change_token_new,
+    email_change,
+    email_change_sent_at,
+    last_sign_in_at,
+    raw_app_meta_data,
+    raw_user_meta_data,
+    is_super_admin,
+    created_at,
+    updated_at,
+    phone,
+    phone_confirmed_at,
+    phone_change,
+    phone_change_token,
+    phone_change_sent_at,
+    email_change_token_current,
+    email_change_confirm_status,
+    banned_until,
+    reauthentication_token,
+    reauthentication_sent_at,
+    is_sso_user,
+    deleted_at,
+    is_anonymous
+)
+values
+    (
+        '00000000-0000-0000-0000-000000000000',
+        '11111111-1111-4111-8111-111111111111',
+        'authenticated',
+        'authenticated',
+        'admin@email.com',
+        crypt('1234AZER$', gen_salt('bf')),
+        now(),
+        null,
+        '',
+        null,
+        '',
+        null,
+        '',
+        '',
+        null,
+        null,
+        '{"provider":"email","providers":["email"]}',
+        '{"display_name":"Admin"}',
+        false,
+        now(),
+        now(),
+        null,
+        null,
+        '',
+        '',
+        null,
+        '',
+        0,
+        null,
+        '',
+        null,
+        false,
+        null,
+        false
+    ),
+    (
+        '00000000-0000-0000-0000-000000000000',
+        '22222222-2222-4222-8222-222222222222',
+        'authenticated',
+        'authenticated',
+        'user1@email.com',
+        crypt('1234AZER$', gen_salt('bf')),
+        now(),
+        null,
+        '',
+        null,
+        '',
+        null,
+        '',
+        '',
+        null,
+        null,
+        '{"provider":"email","providers":["email"]}',
+        '{"display_name":"User 1"}',
+        false,
+        now(),
+        now(),
+        null,
+        null,
+        '',
+        '',
+        null,
+        '',
+        0,
+        null,
+        '',
+        null,
+        false,
+        null,
+        false
+    ),
+    (
+        '00000000-0000-0000-0000-000000000000',
+        '33333333-3333-4333-8333-333333333333',
+        'authenticated',
+        'authenticated',
+        'user2@email.com',
+        crypt('1234AZER$', gen_salt('bf')),
+        now(),
+        null,
+        '',
+        null,
+        '',
+        null,
+        '',
+        '',
+        null,
+        null,
+        '{"provider":"email","providers":["email"]}',
+        '{"display_name":"User 2"}',
+        false,
+        now(),
+        now(),
+        null,
+        null,
+        '',
+        '',
+        null,
+        '',
+        0,
+        null,
+        '',
+        null,
+        false,
+        null,
+        false
+    );
+
+insert into auth.identities (
+    id,
+    user_id,
+    identity_data,
+    provider,
+    provider_id,
+    last_sign_in_at,
+    created_at,
+    updated_at
+)
+values
+    (
+        'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        '11111111-1111-4111-8111-111111111111',
+        jsonb_build_object(
+                'sub', '11111111-1111-4111-8111-111111111111',
+                'email', 'admin@email.com',
+                'email_verified', true
+        ),
+        'email',
+        'admin@email.com',
+        now(),
+        now(),
+        now()
+    ),
+    (
+        'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        '22222222-2222-4222-8222-222222222222',
+        jsonb_build_object(
+                'sub', '22222222-2222-4222-8222-222222222222',
+                'email', 'user1@email.com',
+                'email_verified', true
+        ),
+        'email',
+        'user1@email.com',
+        now(),
+        now(),
+        now()
+    ),
+    (
+        'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        '33333333-3333-4333-8333-333333333333',
+        jsonb_build_object(
+                'sub', '33333333-3333-4333-8333-333333333333',
+                'email', 'user2@email.com',
+                'email_verified', true
+        ),
+        'email',
+        'user2@email.com',
+        now(),
+        now(),
+        now()
+    );
+
+-- The profile rows should be created automatically by the auth trigger.

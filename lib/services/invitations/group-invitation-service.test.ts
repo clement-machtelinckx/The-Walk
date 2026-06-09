@@ -61,7 +61,7 @@ describe("GroupInvitationService", () => {
 
             await GroupInvitationService.accept(mockUserId, mockToken);
 
-            expect(MembershipRepository.create).toHaveBeenCalledWith(
+            expect(MembershipRepository.createFromServerInvitation).toHaveBeenCalledWith(
                 mockTableId,
                 mockUserId,
                 "player",
@@ -79,7 +79,7 @@ describe("GroupInvitationService", () => {
             await expect(GroupInvitationService.accept(mockUserId, mockToken)).rejects.toThrow(
                 ValidationError,
             );
-            expect(MembershipRepository.create).not.toHaveBeenCalled();
+            expect(MembershipRepository.createFromServerInvitation).not.toHaveBeenCalled();
         });
 
         it("should return tableId without creating new membership if user is already a member", async () => {
@@ -98,7 +98,7 @@ describe("GroupInvitationService", () => {
             const result = await GroupInvitationService.accept(mockUserId, mockToken);
 
             expect(result.tableId).toBe(mockTableId);
-            expect(MembershipRepository.create).not.toHaveBeenCalled();
+            expect(MembershipRepository.createFromServerInvitation).not.toHaveBeenCalled();
         });
     });
 });

@@ -1,6 +1,5 @@
 import { GroupInvitationRepository } from "@/lib/repositories/group-invitation-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
-import { TableRepository } from "@/lib/repositories/table-repository";
 import { GroupInvitation, Table, TableRole } from "@/types/table";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
 
@@ -52,7 +51,9 @@ export const GroupInvitationService = {
         }
 
         // Fetch table details
-        const table = await TableRepository.getById(invitation.table_id);
+        const table = await GroupInvitationRepository.getTableInfoForInvitation(
+            invitation.table_id,
+        );
 
         return {
             ...invitation,
@@ -89,7 +90,11 @@ export const GroupInvitationService = {
         }
 
         // 3. Create membership
-        await MembershipRepository.create(invitation.table_id, userId, invitation.role);
+        await MembershipRepository.createFromServerInvitation(
+            invitation.table_id,
+            userId,
+            invitation.role,
+        );
 
         return { tableId: invitation.table_id };
     },

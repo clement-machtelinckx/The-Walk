@@ -8,6 +8,8 @@ import { SessionToolsDrawer } from "@/components/session/session-tools-drawer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ForbiddenError } from "@/lib/errors";
 
 export default async function NextSessionPage({
     params,
@@ -17,7 +19,16 @@ export default async function NextSessionPage({
     const user = await requireAuth();
     const { tableId } = await params;
 
-    const membership = await MembershipService.requireMembership(user.id, tableId);
+    let membership;
+    try {
+        membership = await MembershipService.requireMembership(user.id, tableId);
+    } catch (error) {
+        if (error instanceof ForbiddenError) {
+            notFound();
+        }
+        throw error;
+    }
+
     const table = await TableRepository.getById(tableId);
     const nextSession = await SessionRepository.getNextSession(tableId);
     const activeSession = await SessionRepository.getActiveSessionByTable(tableId);

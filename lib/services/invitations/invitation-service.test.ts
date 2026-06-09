@@ -193,7 +193,7 @@ describe("InvitationService", () => {
 
             await InvitationService.accept(mockUserId, mockToken);
 
-            expect(MembershipRepository.create).toHaveBeenCalledWith(
+            expect(MembershipRepository.createFromServerInvitation).toHaveBeenCalledWith(
                 mockTableId,
                 mockUserId,
                 "player",
@@ -227,7 +227,7 @@ describe("InvitationService", () => {
             await expect(InvitationService.accept(mockUserId, mockToken)).rejects.toThrow(
                 ValidationError,
             );
-            expect(MembershipRepository.create).not.toHaveBeenCalled();
+            expect(MembershipRepository.createFromServerInvitation).not.toHaveBeenCalled();
         });
 
         it("should throw ForbiddenError if not logged in", async () => {

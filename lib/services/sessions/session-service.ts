@@ -181,14 +181,12 @@ export const SessionService = {
             throw new ValidationError("Seule une session planifiée peut être supprimée.");
         }
 
-        const hasActivity = await SessionRepository.hasActivity(sessionId);
-        if (hasActivity) {
+        const wasDeleted = await SessionRepository.deleteIfEmptyScheduled(sessionId);
+        if (!wasDeleted) {
             throw new ValidationError(
                 "Cette session contient déjà des réponses, notes ou messages. Annulez-la plutôt que de la supprimer.",
             );
         }
-
-        await SessionRepository.delete(sessionId);
     },
 
     /**

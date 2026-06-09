@@ -51,10 +51,7 @@ export const ProfileRepository = {
         return data;
     },
 
-    async update(
-        id: string,
-        updates: Partial<Pick<Profile, "display_name" | "avatar_url" | "avatar_key">>,
-    ): Promise<Profile> {
+    async update(id: string, updates: Partial<Pick<Profile, "avatar_key">>): Promise<Profile> {
         const supabase = await getServerClient();
         const { data, error } = await supabase
             .from("profiles")

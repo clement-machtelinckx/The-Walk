@@ -267,11 +267,11 @@ describe("SessionService", () => {
             vi.mocked(MembershipService.requireMembership).mockResolvedValue({
                 role: "gm",
             } as Membership);
-            vi.mocked(SessionRepository.hasActivity).mockResolvedValue(false);
+            vi.mocked(SessionRepository.deleteIfEmptyScheduled).mockResolvedValue(true);
 
             await SessionService.deleteSession(mockUserId, mockSessionId);
 
-            expect(SessionRepository.delete).toHaveBeenCalledWith(mockSessionId);
+            expect(SessionRepository.deleteIfEmptyScheduled).toHaveBeenCalledWith(mockSessionId);
         });
 
         it("refuses deleting scheduled sessions with product activity", async () => {
@@ -283,13 +283,13 @@ describe("SessionService", () => {
             vi.mocked(MembershipService.requireMembership).mockResolvedValue({
                 role: "gm",
             } as Membership);
-            vi.mocked(SessionRepository.hasActivity).mockResolvedValue(true);
+            vi.mocked(SessionRepository.deleteIfEmptyScheduled).mockResolvedValue(false);
 
             await expect(SessionService.deleteSession(mockUserId, mockSessionId)).rejects.toThrow(
                 ValidationError,
             );
 
-            expect(SessionRepository.delete).not.toHaveBeenCalled();
+            expect(SessionRepository.deleteIfEmptyScheduled).toHaveBeenCalledWith(mockSessionId);
         });
 
         it("refuses deleting active sessions", async () => {
@@ -306,8 +306,7 @@ describe("SessionService", () => {
                 ValidationError,
             );
 
-            expect(SessionRepository.hasActivity).not.toHaveBeenCalled();
-            expect(SessionRepository.delete).not.toHaveBeenCalled();
+            expect(SessionRepository.deleteIfEmptyScheduled).not.toHaveBeenCalled();
         });
     });
 

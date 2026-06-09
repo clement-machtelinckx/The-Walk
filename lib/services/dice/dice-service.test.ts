@@ -87,10 +87,33 @@ describe("DiceService", () => {
         expect(DiceRepository.create).not.toHaveBeenCalled();
     });
 
-    it("lists only the latest table rolls through the repository limit", async () => {
+    it("rejects a session that belongs to another table", async () => {
         vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
             id: "membership-1",
         } as Membership);
+        vi.mocked(SessionRepository.getById).mockResolvedValue({
+            id: mockSessionId,
+            table_id: "another-table",
+        });
+
+        await expect(
+            DiceService.createRoll(mockUserId, {
+                table_id: mockTableId,
+                session_id: mockSessionId,
+                dice_type: 20,
+                quantity: 1,
+                modifier: 0,
+                roll_kind: "standard",
+            }),
+        ).rejects.toThrow("Cette session n'appartient pas à cette table.");
+
+        expect(DiceRepository.create).not.toHaveBeenCalled();
+    });
+
+    it("lists only the latest table rolls through the repository limit", async () => {
+        vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
+            id: "membership-1",
+        });
         vi.mocked(DiceRepository.listByTable).mockResolvedValue([]);
 
         await DiceService.listRolls(mockUserId, mockTableId);

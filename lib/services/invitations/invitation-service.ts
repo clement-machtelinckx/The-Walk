@@ -130,7 +130,11 @@ export const InvitationService = {
         }
 
         // 4. Create membership
-        await MembershipRepository.create(invitation.table_id, userId, invitation.role);
+        await MembershipRepository.createFromServerInvitation(
+            invitation.table_id,
+            userId,
+            invitation.role,
+        );
 
         // 5. Mark invitation as accepted
         await InvitationRepository.updateStatus(invitation.id, "accepted");
