@@ -177,7 +177,10 @@ set search_path = ''
 as $$
 begin
     if new.table_id is distinct from old.table_id
-        or new.inviter_id is distinct from old.inviter_id
+        or (
+            new.inviter_id is distinct from old.inviter_id
+            and not (old.inviter_id is not null and new.inviter_id is null)
+        )
         or new.email is distinct from old.email
         or new.token is distinct from old.token
     then
@@ -202,7 +205,10 @@ set search_path = ''
 as $$
 begin
     if new.table_id is distinct from old.table_id
-        or new.created_by is distinct from old.created_by
+        or (
+            new.created_by is distinct from old.created_by
+            and not (old.created_by is not null and new.created_by is null)
+        )
         or new.token is distinct from old.token
     then
         raise exception 'Group invitation table_id, created_by and token cannot be changed'
