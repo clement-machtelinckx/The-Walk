@@ -94,7 +94,7 @@ describe("DiceService", () => {
         vi.mocked(SessionRepository.getById).mockResolvedValue({
             id: mockSessionId,
             table_id: "another-table",
-        } as SessionById);
+        });
 
         await expect(
             DiceService.createRoll(mockUserId, {
@@ -113,7 +113,7 @@ describe("DiceService", () => {
     it("lists only the latest table rolls through the repository limit", async () => {
         vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
             id: "membership-1",
-        } as Membership);
+        });
         vi.mocked(DiceRepository.listByTable).mockResolvedValue([]);
 
         await DiceService.listRolls(mockUserId, mockTableId);

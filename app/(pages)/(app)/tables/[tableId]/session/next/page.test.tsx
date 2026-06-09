@@ -19,17 +19,13 @@ vi.mock("next/navigation", () => ({
 
 describe("/tables/[tableId]/session/next page", () => {
     const tableId = "table-123";
-    type AuthUser = Awaited<ReturnType<typeof requireAuth>>;
-    type Membership = Awaited<ReturnType<typeof MembershipService.requireMembership>>;
-    type Table = Awaited<ReturnType<typeof TableRepository.getById>>;
-
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(requireAuth).mockResolvedValue({ id: "user-123" } as AuthUser);
+        vi.mocked(requireAuth).mockResolvedValue({ id: "user-123" });
         vi.mocked(TableRepository.getById).mockResolvedValue({
             id: tableId,
             name: "Test table",
-        } as Table);
+        });
         vi.mocked(SessionRepository.getNextSession).mockResolvedValue(null);
         vi.mocked(SessionRepository.getActiveSessionByTable).mockResolvedValue(null);
     });
@@ -39,7 +35,7 @@ describe("/tables/[tableId]/session/next page", () => {
         async (role) => {
             vi.mocked(MembershipService.requireMembership).mockResolvedValue({
                 role,
-            } as Membership);
+            });
 
             await expect(
                 NextSessionPage({ params: Promise.resolve({ tableId }) }),

@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select extensions.plan(17);
+select extensions.plan(40);
 
 insert into public.tables (id, name, owner_id)
 values
@@ -32,6 +32,16 @@ values
     (
         'a1000000-0000-4000-8000-000000000002',
         '33333333-3333-4333-8333-333333333333',
+        'gm'
+    ),
+    (
+        'a1000000-0000-4000-8000-000000000002',
+        '22222222-2222-4222-8222-222222222222',
+        'player'
+    ),
+    (
+        'a1000000-0000-4000-8000-000000000002',
+        '11111111-1111-4111-8111-111111111111',
         'gm'
     );
 
@@ -63,6 +73,56 @@ values (
     'a1000000-0000-4000-8000-000000000001',
     'a2000000-0000-4000-8000-000000000001',
     'Private player note'
+);
+
+insert into public.group_notes (id, table_id, session_id, content)
+values (
+    'a5000000-0000-4000-8000-000000000001',
+    'a1000000-0000-4000-8000-000000000001',
+    null,
+    'Shared table note'
+);
+
+insert into public.session_responses (id, session_id, user_id, status)
+values (
+    'a6000000-0000-4000-8000-000000000001',
+    'a2000000-0000-4000-8000-000000000001',
+    '22222222-2222-4222-8222-222222222222',
+    'going'
+);
+
+insert into public.session_presence (id, session_id, user_id, status)
+values (
+    'a7000000-0000-4000-8000-000000000001',
+    'a2000000-0000-4000-8000-000000000001',
+    '22222222-2222-4222-8222-222222222222',
+    'present'
+);
+
+insert into public.invitations (
+    id, table_id, inviter_id, email, role, status, token, expires_at
+)
+values (
+    'a8000000-0000-4000-8000-000000000001',
+    'a1000000-0000-4000-8000-000000000001',
+    '11111111-1111-4111-8111-111111111111',
+    'invitee@example.com',
+    'player',
+    'pending',
+    'targeted-invitation-token',
+    now() + interval '7 days'
+);
+
+insert into public.table_group_invitations (
+    id, table_id, role, token, created_by, expires_at
+)
+values (
+    'a9000000-0000-4000-8000-000000000001',
+    'a1000000-0000-4000-8000-000000000001',
+    'player',
+    'group-invitation-token',
+    '11111111-1111-4111-8111-111111111111',
+    now() + interval '7 days'
 );
 
 insert into public.notifications (id, user_id, type, title, body, href, data)
@@ -168,6 +228,115 @@ select extensions.throws_ok(
     'members cannot associate a dice roll with a session from another table'
 );
 
+select extensions.lives_ok(
+    $$update public.group_notes
+      set content = 'Updated shared table note'
+      where id = 'a5000000-0000-4000-8000-000000000001'$$,
+    'table members can still update group note content'
+);
+
+select extensions.throws_ok(
+    $$update public.group_notes
+      set table_id = 'a1000000-0000-4000-8000-000000000002'
+      where id = 'a5000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Group note table_id and session_id cannot be changed',
+    'members of two tables cannot move a group note between them'
+);
+
+select extensions.throws_ok(
+    $$update public.group_notes
+      set session_id = 'a2000000-0000-4000-8000-000000000001'
+      where id = 'a5000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Group note table_id and session_id cannot be changed',
+    'table members cannot change a group note session context'
+);
+
+select extensions.throws_ok(
+    $$insert into public.group_notes (table_id, session_id, content)
+      values (
+          'a1000000-0000-4000-8000-000000000002',
+          'a2000000-0000-4000-8000-000000000001',
+          'Cross-table group note'
+      )$$,
+    '23514',
+    'Group note session_id must belong to table_id',
+    'members of two tables cannot create a group note with a cross-table session'
+);
+
+select extensions.lives_ok(
+    $$update public.personal_notes
+      set content = 'Updated private player note'
+      where id = 'a4000000-0000-4000-8000-000000000001'$$,
+    'users can still update their personal note content'
+);
+
+select extensions.throws_ok(
+    $$update public.personal_notes
+      set table_id = 'a1000000-0000-4000-8000-000000000002'
+      where id = 'a4000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Personal note user_id, table_id and session_id cannot be changed',
+    'users cannot move a personal note between tables'
+);
+
+select extensions.throws_ok(
+    $$update public.personal_notes
+      set session_id = 'a2000000-0000-4000-8000-000000000002'
+      where id = 'a4000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Personal note user_id, table_id and session_id cannot be changed',
+    'users cannot move a personal note between sessions'
+);
+
+select extensions.throws_ok(
+    $$update public.personal_notes
+      set user_id = '33333333-3333-4333-8333-333333333333'
+      where id = 'a4000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Personal note user_id, table_id and session_id cannot be changed',
+    'users cannot transfer a personal note to another user'
+);
+
+select extensions.throws_ok(
+    $$insert into public.personal_notes (user_id, table_id, session_id, content)
+      values (
+          '22222222-2222-4222-8222-222222222222',
+          'a1000000-0000-4000-8000-000000000002',
+          'a2000000-0000-4000-8000-000000000001',
+          'Cross-table private note'
+      )$$,
+    '23514',
+    'Personal note session_id must belong to table_id',
+    'users cannot create a personal note with a cross-table session'
+);
+
+select extensions.lives_ok(
+    $$update public.session_responses
+      set status = 'maybe'
+      where id = 'a6000000-0000-4000-8000-000000000001'$$,
+    'users can still update their RSVP status'
+);
+
+select extensions.throws_ok(
+    $$update public.session_responses
+      set session_id = 'a2000000-0000-4000-8000-000000000002'
+      where id = 'a6000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Session response session_id and user_id cannot be changed',
+    'users cannot move an RSVP between sessions'
+);
+
+select extensions.throws_ok(
+    $$update public.session_responses
+      set user_id = '33333333-3333-4333-8333-333333333333'
+      where id = 'a6000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Session response session_id and user_id cannot be changed',
+    'users cannot transfer an RSVP to another user'
+);
+
 reset role;
 set local role authenticated;
 select set_config(
@@ -213,6 +382,102 @@ select set_config(
     'request.jwt.claim.sub',
     '11111111-1111-4111-8111-111111111111',
     true
+);
+
+select extensions.lives_ok(
+    $$update public.sessions
+      set title = 'Updated RLS test session'
+      where id = 'a2000000-0000-4000-8000-000000000001'$$,
+    'GMs can still update session business fields'
+);
+
+select extensions.throws_ok(
+    $$update public.sessions
+      set table_id = 'a1000000-0000-4000-8000-000000000002'
+      where id = 'a2000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Session table_id cannot be changed',
+    'GMs of two tables cannot move a session between them'
+);
+
+select extensions.lives_ok(
+    $$update public.session_presence
+      set status = 'late'
+      where id = 'a7000000-0000-4000-8000-000000000001'$$,
+    'GMs can still update attendance status'
+);
+
+select extensions.throws_ok(
+    $$update public.session_presence
+      set session_id = 'a2000000-0000-4000-8000-000000000002'
+      where id = 'a7000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Session presence session_id and user_id cannot be changed',
+    'GMs of two tables cannot move attendance between sessions'
+);
+
+select extensions.throws_ok(
+    $$update public.session_presence
+      set user_id = '33333333-3333-4333-8333-333333333333'
+      where id = 'a7000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Session presence session_id and user_id cannot be changed',
+    'GMs cannot transfer attendance to another user'
+);
+
+select extensions.throws_ok(
+    $$insert into public.session_presence (session_id, user_id, status)
+      values (
+          'a2000000-0000-4000-8000-000000000001',
+          '33333333-3333-4333-8333-333333333333',
+          'present'
+      )$$,
+    '23514',
+    'Session presence user_id must belong to session table',
+    'GMs cannot create attendance for a user outside the session table'
+);
+
+select extensions.lives_ok(
+    $$update public.invitations
+      set status = 'expired'
+      where id = 'a8000000-0000-4000-8000-000000000001'$$,
+    'GMs can still update invitation lifecycle fields'
+);
+
+select extensions.throws_ok(
+    $$update public.invitations
+      set table_id = 'a1000000-0000-4000-8000-000000000002'
+      where id = 'a8000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Invitation table_id, inviter_id, email and token cannot be changed',
+    'GMs of two tables cannot move a targeted invitation between them'
+);
+
+select extensions.throws_ok(
+    $$update public.invitations
+      set email = 'other-target@example.com'
+      where id = 'a8000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Invitation table_id, inviter_id, email and token cannot be changed',
+    'GMs cannot retarget an existing invitation'
+);
+
+select extensions.throws_ok(
+    $$update public.table_group_invitations
+      set table_id = 'a1000000-0000-4000-8000-000000000002'
+      where id = 'a9000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Group invitation table_id, created_by and token cannot be changed',
+    'GMs of two tables cannot move a group invitation between them'
+);
+
+select extensions.throws_ok(
+    $$update public.table_group_invitations
+      set created_by = '33333333-3333-4333-8333-333333333333'
+      where id = 'a9000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Group invitation table_id, created_by and token cannot be changed',
+    'GMs cannot transfer group invitation authorship'
 );
 
 select extensions.is_empty(
