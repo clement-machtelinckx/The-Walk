@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select extensions.plan(9);
+select extensions.plan(17);
 
 insert into public.tables (id, name, owner_id)
 values
@@ -48,7 +48,22 @@ values
         'a1000000-0000-4000-8000-000000000002',
         'Other RLS test session',
         'scheduled'
+    ),
+    (
+        'a2000000-0000-4000-8000-000000000003',
+        'a1000000-0000-4000-8000-000000000001',
+        'Empty deletable session',
+        'scheduled'
     );
+
+insert into public.personal_notes (id, user_id, table_id, session_id, content)
+values (
+    'a4000000-0000-4000-8000-000000000001',
+    '22222222-2222-4222-8222-222222222222',
+    'a1000000-0000-4000-8000-000000000001',
+    'a2000000-0000-4000-8000-000000000001',
+    'Private player note'
+);
 
 insert into public.notifications (id, user_id, type, title, body, href, data)
 values
@@ -173,6 +188,88 @@ select extensions.throws_ok(
     '42501',
     'new row violates row-level security policy for table "session_dice_rolls"',
     'non-members cannot insert dice rolls'
+);
+
+reset role;
+set local role authenticated;
+select set_config(
+    'request.jwt.claim.sub',
+    '22222222-2222-4222-8222-222222222222',
+    true
+);
+
+select extensions.throws_ok(
+    $$select public.delete_empty_scheduled_session(
+          'a2000000-0000-4000-8000-000000000003'
+      )$$,
+    '42501',
+    'Only table GMs can delete sessions',
+    'players cannot use the guarded session deletion function'
+);
+
+reset role;
+set local role authenticated;
+select set_config(
+    'request.jwt.claim.sub',
+    '11111111-1111-4111-8111-111111111111',
+    true
+);
+
+select extensions.is_empty(
+    $$select id
+      from public.personal_notes
+      where session_id = 'a2000000-0000-4000-8000-000000000001'$$,
+    'GMs still cannot read another user personal note'
+);
+
+select extensions.is_empty(
+    $$delete from public.sessions
+      where id = 'a2000000-0000-4000-8000-000000000003'
+      returning id$$,
+    'GMs cannot bypass the guarded deletion function with a direct delete'
+);
+
+select extensions.is(
+    public.delete_empty_scheduled_session('a2000000-0000-4000-8000-000000000001'),
+    false,
+    'a private note owned by another user blocks session deletion'
+);
+
+select extensions.results_eq(
+    $$select id
+      from public.sessions
+      where id = 'a2000000-0000-4000-8000-000000000001'$$,
+    $$values ('a2000000-0000-4000-8000-000000000001'::uuid)$$,
+    'the session containing the private note remains intact'
+);
+
+reset role;
+select extensions.results_eq(
+    $$select id
+      from public.personal_notes
+      where id = 'a4000000-0000-4000-8000-000000000001'$$,
+    $$values ('a4000000-0000-4000-8000-000000000001'::uuid)$$,
+    'the blocked deletion does not cascade-delete the private note'
+);
+
+set local role authenticated;
+select set_config(
+    'request.jwt.claim.sub',
+    '11111111-1111-4111-8111-111111111111',
+    true
+);
+
+select extensions.is(
+    public.delete_empty_scheduled_session('a2000000-0000-4000-8000-000000000003'),
+    true,
+    'an empty scheduled session remains deletable by its GM'
+);
+
+select extensions.is_empty(
+    $$select id
+      from public.sessions
+      where id = 'a2000000-0000-4000-8000-000000000003'$$,
+    'the guarded function deletes the empty session'
 );
 
 select extensions.finish();

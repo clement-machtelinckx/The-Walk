@@ -41,57 +41,14 @@ export const SessionRepository = {
         return data;
     },
 
-    async delete(id: string): Promise<void> {
+    async deleteIfEmptyScheduled(id: string): Promise<boolean> {
         const supabase = await getServerClient();
-        const { error } = await supabase.from("sessions").delete().eq("id", id);
-
-        handleDbError(error, "SessionRepository.delete");
-    },
-
-    async hasActivity(id: string): Promise<boolean> {
-        const supabase = await getServerClient();
-        const activityChecks = [
-            supabase
-                .from("session_responses")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("session_presence")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("pre_session_messages")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("live_session_messages")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("personal_notes")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("group_notes")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("session_dice_rolls")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-            supabase
-                .from("table_private_messages")
-                .select("id", { count: "exact", head: true })
-                .eq("session_id", id),
-        ];
-
-        const results = await Promise.all(activityChecks);
-
-        results.forEach((result) => {
-            handleDbError(result.error, "SessionRepository.hasActivity");
+        const { data, error } = await supabase.rpc("delete_empty_scheduled_session", {
+            target_session_id: id,
         });
 
-        return results.some((result) => (result.count || 0) > 0);
+        handleDbError(error, "SessionRepository.deleteIfEmptyScheduled");
+        return data === true;
     },
 
     async listByTable(
