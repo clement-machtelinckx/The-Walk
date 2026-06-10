@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { TableRole } from "@/types/table";
 import { Button } from "@/components/ui/button";
-import { Settings, Calendar, Play, LogOut, Loader2 } from "lucide-react";
+import { Settings, Play, LogOut, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { RoleBadge } from "@/components/special/role-badge";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,7 @@ type TableHeaderProps = Readonly<{
 
 /**
  * En-tête de table.
- * Rôle : Navigation principale (Admin / Préparation).
+ * Rôle : Navigation structurelle (Admin / Live).
  * Bouton LIVE uniquement si une session est active.
  */
 export function TableHeader({ tableId, name, description, myRole }: TableHeaderProps) {
@@ -80,14 +80,6 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                             </Link>
                         </Button>
                     )}
-
-                    {/* ACCÈS PRÉPARATION : Lieu principal du planning / RSVP / démarrage */}
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href={`/tables/${tableId}/session/next`}>
-                            <Calendar className="mr-2 h-4 w-4" />
-                            Préparation
-                        </Link>
-                    </Button>
 
                     {/* LIVE : Navigation vers la session active SEULEMENT si déjà démarrée */}
                     {activeSession && (

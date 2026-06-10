@@ -43,7 +43,9 @@ export function PublicAccessActions({ compact = false, className }: PublicAccess
     }
 
     return (
-        <div className={cn("flex items-center gap-2", !compact && "flex-col sm:flex-row", className)}>
+        <div
+            className={cn("flex items-center gap-2", !compact && "flex-col sm:flex-row", className)}
+        >
             <Button
                 className={cn(!compact && "h-12 w-full px-6 sm:w-auto")}
                 size={compact ? "sm" : "lg"}

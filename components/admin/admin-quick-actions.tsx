@@ -33,9 +33,9 @@ export function AdminQuickActions({ tableId }: AdminQuickActionsProps) {
                     </Button>
 
                     <Button variant="outline" className="h-12 w-full text-sm font-medium" asChild>
-                        <Link href={`/tables/${tableId}/session/next`}>
+                        <Link href={`/tables/${tableId}`}>
                             <Calendar size={18} className="mr-2" />
-                            Gérer la préparation
+                            Session suivante
                         </Link>
                     </Button>
 

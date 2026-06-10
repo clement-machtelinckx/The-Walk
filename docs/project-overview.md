@@ -27,7 +27,7 @@ L'etat produit detaille est maintenu dans `docs/product/features.md`. La prioris
 - Membres, roles et invitations.
 - Sessions planifiees, actives, terminees ou annulees.
 - Session live avec modules activables.
-- Messages de pre-session, live chat et messages prives.
+- Preparation et discussion avant-session integrees a la page table, live chat et messages prives.
 - Notes personnelles et notes de groupe.
 - Journal de jets de des.
 - Centre de notifications global.
