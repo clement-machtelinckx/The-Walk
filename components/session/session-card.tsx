@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Ban, Calendar, Edit, FileText, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatFullDate } from "@/lib/utils/date";
+import { formatFullDate, isPastDate } from "@/lib/utils/date";
 
 type SessionCardProps = Readonly<{
     session: Session;
@@ -33,6 +33,7 @@ export function SessionCard({
 }: SessionCardProps) {
     const statusConfig = statusConfigs[session.status];
     const canManageScheduled = canEdit && session.status === "scheduled";
+    const isOverdue = session.status === "scheduled" && isPastDate(session.scheduled_at);
 
     return (
         <Card className="border-primary/20 bg-card/50 overflow-hidden shadow-sm">
@@ -44,7 +45,9 @@ export function SessionCard({
                     </div>
                     <CardTitle className="text-2xl font-bold">{session.title}</CardTitle>
                 </div>
-                <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+                <Badge variant={statusConfig.variant}>
+                    {isOverdue ? "Horaire dépassé" : statusConfig.label}
+                </Badge>
             </CardHeader>
 
             <CardContent className="space-y-6 pt-6">

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { EmptyState } from "@/components/special/empty-state";
-import { formatFullDate } from "@/lib/utils/date";
+import { formatFullDate, isPastDate } from "@/lib/utils/date";
 
 type NextSessionSummaryProps = Readonly<{
     tableId: string;
@@ -76,13 +76,18 @@ export function NextSessionSummary({ tableId, session, activeSession }: NextSess
         );
     }
 
+    const isOverdue = isPastDate(session.scheduled_at);
+
     return (
         <Card className="border-primary/20 bg-card/50">
             <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                    <Calendar size={18} className="text-primary" />
-                    Prochaine Session
-                </CardTitle>
+                <div className="flex items-center justify-between gap-3">
+                    <CardTitle className="flex items-center gap-2 text-lg font-bold">
+                        <Calendar size={18} className="text-primary" />
+                        Prochaine Session
+                    </CardTitle>
+                    {isOverdue && <Badge variant="outline">Horaire dépassé</Badge>}
+                </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">

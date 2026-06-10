@@ -8,7 +8,7 @@ type AppLayoutProps = Readonly<{
 
 export default function AppLayout({ children }: AppLayoutProps) {
     return (
-        <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+        <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
             <AppHeader />
 
             <main className="flex-1 py-6 md:py-8">
