@@ -83,14 +83,14 @@ export const SessionRepository = {
 
     async getNextSession(tableId: string): Promise<Session | null> {
         const supabase = await getServerClient();
-        const now = new Date().toISOString();
 
         const { data, error } = await supabase
             .from("sessions")
             .select("*")
             .eq("table_id", tableId)
             .eq("status", "scheduled")
-            .gte("scheduled_at", now)
+            // A scheduled session stays pending until an explicit status transition,
+            // even when its planned start time has passed.
             .order("scheduled_at", { ascending: true })
             .limit(1)
             .maybeSingle();

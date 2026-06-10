@@ -2,6 +2,18 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 
 /**
+ * Indique si une date ISO est passée, sans déduire de changement de statut métier.
+ */
+export function isPastDate(
+    date: string | Date | null | undefined,
+    referenceDate: Date = new Date(),
+): boolean {
+    if (!date) return false;
+    const dateObj = typeof date === "string" ? parseISO(date) : date;
+    return !isNaN(dateObj.getTime()) && dateObj.getTime() < referenceDate.getTime();
+}
+
+/**
  * Formate une date (ISO string ou Date object) en format lisible par l'utilisateur (Français).
  * @example "Lundi 15 avril 2026 à 10:27"
  */

@@ -162,9 +162,15 @@ export function SessionToolsDrawer({
         <>
             {!open && (
                 <div
-                    className="fixed top-1/2 right-0 z-40 flex -translate-y-1/2 flex-col gap-1.5"
+                    className="border-primary/20 bg-background/95 fixed top-1/2 right-2 z-40 flex -translate-y-1/2 flex-col items-center gap-1 rounded-lg border p-1 shadow-lg backdrop-blur sm:right-0 sm:rounded-r-none sm:border-r-0"
                     aria-label="Accès rapide aux outils de session"
                 >
+                    <span
+                        aria-hidden="true"
+                        className="text-primary px-1 py-0.5 text-[9px] font-bold tracking-wider uppercase"
+                    >
+                        Outils
+                    </span>
                     {visibleTools.map((tool) => {
                         const Icon = tool.icon;
 
@@ -174,7 +180,7 @@ export function SessionToolsDrawer({
                                 type="button"
                                 variant="secondary"
                                 size="icon"
-                                className="border-border/70 bg-background/95 hover:bg-primary hover:text-primary-foreground h-12 w-12 translate-x-3 rounded-l-md rounded-r-none border border-r-0 shadow-md backdrop-blur transition-transform hover:translate-x-0 focus-visible:translate-x-0"
+                                className="border-border/70 bg-background hover:bg-primary hover:text-primary-foreground h-11 w-11 border shadow-sm"
                                 onClick={() => openTool(tool.id)}
                                 title={tool.title}
                                 aria-label={`Ouvrir ${tool.title}`}
@@ -189,7 +195,7 @@ export function SessionToolsDrawer({
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetContent
                     side="right"
-                    className="w-[94vw] gap-0 overflow-hidden p-0 sm:max-w-lg"
+                    className="border-primary/30 w-[94vw] gap-0 overflow-hidden p-0 shadow-2xl sm:max-w-lg"
                 >
                     <SheetHeader className="border-b pr-12">
                         <SheetTitle className="flex items-center gap-2">

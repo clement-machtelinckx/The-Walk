@@ -47,7 +47,10 @@ export function MobileBottomNav() {
     const pathname = usePathname();
 
     return (
-        <nav className="bg-background/80 fixed right-0 bottom-0 left-0 z-50 flex h-16 items-center justify-around border-t px-4 backdrop-blur md:hidden">
+        <nav
+            aria-label="Navigation principale mobile"
+            className="bg-background/95 fixed right-0 bottom-0 left-0 z-50 flex min-h-16 items-start justify-around border-t px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_12px_rgba(0,0,0,0.06)] backdrop-blur md:hidden"
+        >
             {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname.startsWith(item.href) && !item.external;
@@ -59,7 +62,7 @@ export function MobileBottomNav() {
                         target={item.external ? "_blank" : undefined}
                         rel={item.external ? "noopener noreferrer" : undefined}
                         className={cn(
-                            "flex flex-col items-center justify-center gap-1 transition-colors",
+                            "flex h-16 min-w-16 flex-1 touch-manipulation flex-col items-center justify-center gap-1 rounded-md transition-colors",
                             isActive ? "text-primary" : "text-muted-foreground",
                         )}
                     >
