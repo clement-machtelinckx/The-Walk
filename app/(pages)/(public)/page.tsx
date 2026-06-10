@@ -2,105 +2,100 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
     ArrowRight,
-    BookOpen,
-    CalendarDays,
-    Mail,
-    MessageSquare,
-    ShieldCheck,
+    BookOpenCheck,
+    CalendarClock,
+    Check,
+    Dice5,
+    FileImage,
+    Map,
+    PencilRuler,
+    Sparkles,
     Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/layout/container";
-import { siteConfig } from "@/config/site";
+import { PublicAccessActions } from "@/components/layout/public-access-actions";
 
 export const metadata: Metadata = {
-    title: "Organiser une table de jeu de rôle",
+    title: "Préparer moins, jouer plus",
     description:
-        "The-Walk centralise les invitations, la préparation, les messages et les outils utiles pendant une session de jeu de rôle.",
+        "The-Walk aide les groupes de jeu de rôle à créer leurs tables, préparer leurs sessions et retrouver les outils utiles pour jouer.",
     alternates: {
         canonical: "/",
     },
     openGraph: {
-        title: "The-Walk — organiser une table de jeu de rôle",
+        title: "The-Walk — préparer moins, jouer plus",
         description:
-            "Un espace web pour gérer vos tables JDR, préparer les sessions et garder les échanges du groupe au même endroit.",
+            "Un espace clair pour organiser une table JDR et passer plus vite de la préparation à la partie.",
         url: "/",
     },
 };
 
-const coreFeatures = [
+const currentFeatures = [
     {
-        title: "Tables et invitations",
-        description:
-            "Créez une table, ajoutez les membres, gérez les rôles et envoyez des invitations ciblées ou partageables.",
+        title: "Crée ta table",
+        description: "Rassemble tes amis, attribue les rôles et partage une invitation au groupe.",
         icon: Users,
     },
     {
-        title: "Préparation de session",
+        title: "Planifie les sessions",
         description:
-            "Annoncez une date, récupérez les réponses RSVP et gardez le résumé de la prochaine session accessible.",
-        icon: CalendarDays,
+            "Prépare la prochaine date, suis les réponses et envoie des rappels par mail aux aventuriers.",
+        icon: CalendarClock,
     },
     {
-        title: "Messages de table",
+        title: "Joue avec les bons outils",
         description:
-            "Échangez avant la session, pendant la partie et en privé entre membres lorsque le groupe a besoin de se coordonner.",
-        icon: MessageSquare,
-    },
-    {
-        title: "Notes et outils de session",
-        description:
-            "Centralisez les notes personnelles ou de groupe, les présences, les dés et les modules utiles à la partie.",
-        icon: BookOpen,
+            "Retrouve les dés, les notes, les présences et les échanges privés ou publics au même endroit.",
+        icon: Dice5,
     },
 ];
 
-const useCases = [
-    "Savoir qui vient à la prochaine session.",
-    "Retrouver les notes et décisions du groupe.",
-    "Donner au MJ un espace clair pour piloter la session.",
-    "Éviter que les infos importantes se perdent dans plusieurs canaux.",
+const roadmapItems = [
+    { label: "Plus de composants utiles pendant la partie", icon: Sparkles },
+    { label: "Un espace de dessin pour vivre l’aventure en live", icon: PencilRuler },
+    { label: "Une aide aux règles pour plusieurs jeux de rôle", icon: BookOpenCheck },
+    { label: "L’import d’images et de documents de campagne", icon: FileImage },
 ];
 
-function ProductSnapshot() {
+const firstSteps = [
+    {
+        title: "Entre dans The-Walk",
+        description: "Crée ton compte ou connecte-toi pour retrouver directement tes tables.",
+    },
+    {
+        title: "Rejoins ton groupe",
+        description: "Crée une table en tant que MJ ou accepte l’invitation reçue de ton groupe.",
+    },
+    {
+        title: "Prépare, réunis, joue",
+        description: "Planifie la session, rassemble tes potes et passe rapidement à la partie.",
+    },
+    {
+        title: "Clôture sans perdre le fil",
+        description: "Termine la session puis retrouve son historique et les informations utiles.",
+    },
+];
+
+function VisualPlaceholder({
+    title,
+    description,
+    className,
+}: Readonly<{ title: string; description: string; className?: string }>) {
     return (
-        <div className="bg-card rounded-lg border p-4 text-left shadow-sm">
-            <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <p className="text-primary text-xs font-bold tracking-widest uppercase">
-                        Espace de table
-                    </p>
-                    <p className="mt-1 text-lg font-bold">Les Veilleurs du Nord</p>
-                </div>
-                <div className="bg-muted/40 rounded-md border px-3 py-2 text-xs font-semibold">
-                    Prochaine session · 4 réponses
-                </div>
-            </div>
-
-            <div className="grid gap-3 pt-4 md:grid-cols-3">
-                <div className="rounded-md border p-3">
-                    <Mail className="text-primary h-4 w-4" />
-                    <p className="mt-3 text-sm font-bold">Avant la session</p>
-                    <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                        Messages de préparation et réponses RSVP.
-                    </p>
-                </div>
-                <div className="rounded-md border p-3">
-                    <MessageSquare className="text-primary h-4 w-4" />
-                    <p className="mt-3 text-sm font-bold">Pendant la partie</p>
-                    <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                        Messages de session, présence et outils utiles.
-                    </p>
-                </div>
-                <div className="rounded-md border p-3">
-                    <ShieldCheck className="text-primary h-4 w-4" />
-                    <p className="mt-3 text-sm font-bold">Messages privés</p>
-                    <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                        Échanges directs entre membres de la table.
-                    </p>
-                </div>
-            </div>
+        <div
+            className={`border-primary/20 bg-primary/5 flex min-h-52 flex-col items-center justify-center rounded-xl border border-dashed p-6 text-center ${className ?? ""}`}
+        >
+            <Map className="text-primary/60 h-8 w-8" />
+            <p className="mt-4 font-bold">{title}</p>
+            <p className="text-muted-foreground mt-1 max-w-xs text-sm leading-relaxed">
+                {description}
+            </p>
+            <Badge variant="outline" className="mt-4 bg-background">
+                Capture à venir
+            </Badge>
         </div>
     );
 }
@@ -109,59 +104,64 @@ export default function HomePage() {
     return (
         <>
             <section className="bg-muted/30 border-b">
-                <Container className="grid gap-10 py-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:py-20">
-                    <div className="max-w-2xl space-y-6">
-                        <p className="text-primary text-sm font-bold tracking-widest uppercase">
-                            Organisation de tables JDR
-                        </p>
+                <Container className="grid gap-10 py-12 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-20">
+                    <div className="max-w-2xl space-y-7">
+                        <Badge variant="secondary">Pour les tables de jeu de rôle</Badge>
                         <div className="space-y-4">
                             <h1 className="text-4xl leading-tight font-extrabold tracking-tight md:text-6xl">
-                                Un espace clair pour préparer et jouer vos sessions.
+                                Moins d’over-prep.
+                                <span className="text-primary block">Plus de jeu immédiat.</span>
                             </h1>
                             <p className="text-muted-foreground max-w-xl text-lg leading-relaxed">
-                                {siteConfig.name} aide un groupe de jeu de rôle à gérer ses tables,
-                                ses invitations, ses échanges et les outils utiles pendant la
-                                partie.
+                                The-Walk réunit la préparation, le groupe et les outils de session
+                                dans une app claire, pour passer moins de temps à tout organiser et
+                                plus de temps à jouer.
                             </p>
                         </div>
-                        <div className="flex flex-col gap-3 sm:flex-row">
-                            <Button size="lg" className="h-12 px-6" asChild>
-                                <Link href="/register">
-                                    Créer un compte
-                                    <ArrowRight className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                            <Button size="lg" variant="outline" className="h-12 px-6" asChild>
-                                <Link href="/login">Se connecter</Link>
-                            </Button>
-                        </div>
+                        <PublicAccessActions />
+                        <Link
+                            href="#premiers-pas"
+                            className="text-muted-foreground hover:text-primary inline-flex items-center gap-2 text-sm font-semibold transition-colors"
+                        >
+                            Voir comment commencer
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
                     </div>
-                    <ProductSnapshot />
+
+                    <VisualPlaceholder
+                        title="Aperçu de la table"
+                        description="Emplacement prévu pour une future capture de la vue table et de la prochaine session."
+                        className="min-h-80"
+                    />
                 </Container>
             </section>
 
-            <Container className="space-y-14 py-14 md:py-18">
-                <section className="space-y-6">
+            <Container className="space-y-20 py-14 md:py-20">
+                <section className="space-y-8">
                     <div className="max-w-2xl space-y-3">
-                        <h2 className="text-3xl font-bold tracking-tight">
-                            Ce que The-Walk centralise
+                        <p className="text-primary text-xs font-bold tracking-widest uppercase">
+                            Disponible aujourd’hui
+                        </p>
+                        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            Tout ce qu’il faut pour tester une partie organisée
                         </h2>
                         <p className="text-muted-foreground leading-relaxed">
-                            La V1 reste volontairement ciblée : aider une table à s’organiser sans
-                            remplacer vos règles, vos cartes ou vos habitudes de jeu.
+                            Commence simplement : crée le groupe, prépare la prochaine session et
+                            garde les outils utiles à portée de main.
                         </p>
                     </div>
-                    <div className="grid gap-5 md:grid-cols-2">
-                        {coreFeatures.map((feature) => {
+
+                    <div className="grid gap-5 md:grid-cols-3">
+                        {currentFeatures.map((feature) => {
                             const Icon = feature.icon;
 
                             return (
-                                <Card key={feature.title} className="rounded-lg">
+                                <Card key={feature.title} className="gap-4 rounded-xl">
                                     <CardHeader>
-                                        <div className="bg-primary/10 text-primary mb-2 w-fit rounded-md p-3">
+                                        <div className="bg-primary/10 text-primary mb-2 w-fit rounded-lg p-3">
                                             <Icon className="h-5 w-5" />
                                         </div>
-                                        <CardTitle className="text-lg">{feature.title}</CardTitle>
+                                        <CardTitle className="text-xl">{feature.title}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-muted-foreground text-sm leading-relaxed">
@@ -172,36 +172,99 @@ export default function HomePage() {
                             );
                         })}
                     </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <VisualPlaceholder
+                            title="Préparation de session"
+                            description="Future capture des réponses, rappels et informations de la prochaine session."
+                        />
+                        <VisualPlaceholder
+                            title="Outils pendant la partie"
+                            description="Future capture des dés, messages et composants accessibles en session."
+                        />
+                    </div>
                 </section>
 
-                <section className="grid gap-8 border-t pt-12 lg:grid-cols-[0.8fr_1fr]">
-                    <div className="space-y-3">
-                        <h2 className="text-3xl font-bold tracking-tight">Pour quels usages ?</h2>
+                <section className="bg-card grid gap-8 rounded-xl border p-6 md:p-10 lg:grid-cols-[0.75fr_1fr]">
+                    <div className="space-y-4">
+                        <Badge variant="outline">À venir</Badge>
+                        <h2 className="text-3xl font-bold tracking-tight">
+                            La suite reste tournée vers la partie
+                        </h2>
                         <p className="text-muted-foreground leading-relaxed">
-                            The-Walk sert surtout à réduire les oublis et à garder les informations
-                            de table au même endroit.
+                            The-Walk évolue progressivement avec de nouveaux outils pour accompagner
+                            le jeu, sans alourdir l’expérience actuelle.
                         </p>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                        {useCases.map((useCase) => (
-                            <div key={useCase} className="bg-card rounded-md border p-4">
-                                <p className="text-sm font-medium">{useCase}</p>
-                            </div>
-                        ))}
+                        {roadmapItems.map((item) => {
+                            const Icon = item.icon;
+
+                            return (
+                                <div
+                                    key={item.label}
+                                    className="bg-muted/30 flex items-start gap-3 rounded-lg border p-4"
+                                >
+                                    <Icon className="text-primary mt-0.5 h-5 w-5 shrink-0" />
+                                    <p className="text-sm font-medium leading-relaxed">{item.label}</p>
+                                </div>
+                            );
+                        })}
+                        <div className="text-muted-foreground flex items-center gap-3 rounded-lg border border-dashed p-4 text-sm">
+                            <Check className="text-primary h-5 w-5 shrink-0" />
+                            Et d’autres améliorations guidées par les usages des tables.
+                        </div>
                     </div>
                 </section>
 
-                <section className="bg-card rounded-lg border p-6 md:p-8">
+                <section id="premiers-pas" className="scroll-mt-24 space-y-8">
+                    <div className="max-w-2xl space-y-3">
+                        <p className="text-primary text-xs font-bold tracking-widest uppercase">
+                            Premiers pas
+                        </p>
+                        <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            De la découverte à la fin de session
+                        </h2>
+                        <p className="text-muted-foreground leading-relaxed">
+                            Quatre étapes simples suffisent pour commencer à utiliser The-Walk avec
+                            ton groupe.
+                        </p>
+                    </div>
+
+                    <ol className="grid gap-4 md:grid-cols-2">
+                        {firstSteps.map((step, index) => (
+                            <li key={step.title} className="bg-card rounded-xl border p-5 shadow-sm">
+                                <div className="flex items-start gap-4">
+                                    <span className="bg-primary text-primary-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold">
+                                        {index + 1}
+                                    </span>
+                                    <div className="space-y-2">
+                                        <h3 className="font-bold">{step.title}</h3>
+                                        <p className="text-muted-foreground text-sm leading-relaxed">
+                                            {step.description}
+                                        </p>
+                                        {index === 0 && <PublicAccessActions className="pt-2" />}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+
+                <section className="bg-primary text-primary-foreground rounded-xl p-7 md:p-10">
                     <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-bold">Découvrir le périmètre V1</h2>
-                            <p className="text-muted-foreground leading-relaxed">
-                                L’outil est pensé pour les tables qui veulent une organisation plus
-                                fiable, pas une plateforme complète de jeu en ligne.
+                            <h2 className="text-2xl font-bold">Prêt à préparer moins lourdement ?</h2>
+                            <p className="text-primary-foreground/80 max-w-xl leading-relaxed">
+                                Ouvre l’app pour retrouver tes tables, ou crée ton compte pour lancer
+                                la première session du groupe.
                             </p>
                         </div>
-                        <Button variant="outline" asChild>
-                            <Link href="/about">Découvrir The-Walk</Link>
+                        <Button variant="secondary" size="lg" asChild>
+                            <Link href="/tables">
+                                Accéder à The-Walk
+                                <ArrowRight />
+                            </Link>
                         </Button>
                     </div>
                 </section>
