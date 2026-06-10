@@ -17,6 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/layout/container";
 import { PublicAccessActions } from "@/components/layout/public-access-actions";
+import Image from "next/image";
+import { getAvatarImagePath } from "@/config/avatars";
 
 export const metadata: Metadata = {
     title: "Préparer moins, jouer plus",
@@ -128,11 +130,17 @@ export default function HomePage() {
                         </Link>
                     </div>
 
-                    <VisualPlaceholder
-                        title="Aperçu de la table"
-                        description="Emplacement prévu pour une future capture de la vue table et de la prochaine session."
-                        className="min-h-80"
-                    />
+                    <div className="border-primary/15 bg-background/70 relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border p-2 shadow-xl shadow-black/10 lg:mx-0">
+                        <Image
+                            src="/images/hero_image.webp"
+                            alt="Quatre amis réunis autour d’une table de jeu de rôle fantasy, accompagnés par leur téléphone"
+                            width={1200}
+                            height={900}
+                            priority
+                            sizes="(min-width: 1024px) 42vw, 100vw"
+                            className="aspect-[4/3] w-full rounded-xl object-cover"
+                        />
+                    </div>
                 </Container>
             </section>
 
