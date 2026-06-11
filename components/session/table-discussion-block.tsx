@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useSessionStore } from "@/store/session-store";
+import { useDiscussionStore } from "@/store/discussion-store";
 import { useAuthStore } from "@/store/auth-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export function TableDiscussionBlock({
         sendDiscussionMessage,
         isLoadingDiscussion,
         isSendingDiscussionMessage,
-    } = useSessionStore();
+    } = useDiscussionStore();
 
     const discussion = discussions[tableId];
     const messages = useMemo(

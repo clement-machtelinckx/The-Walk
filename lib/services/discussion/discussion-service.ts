@@ -4,7 +4,7 @@ import { MessageRepository } from "@/lib/repositories/message-repository";
 import { PaginationParams, PaginatedResult } from "@/lib/repositories/_shared/base";
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import { CreateMessageInput } from "@/lib/validators/message";
-import { TableMessage } from "@/types/session";
+import { TableMessage } from "@/types/discussion";
 
 async function requireTableMember(userId: string, tableId: string) {
     const membership = await MembershipRepository.getByUserAndTable(userId, tableId);

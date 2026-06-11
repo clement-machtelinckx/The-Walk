@@ -1,6 +1,6 @@
 import { getServerClient } from "@/lib/db";
 import { handleDbError, applyPagination, PaginationParams, PaginatedResult } from "./_shared/base";
-import { TableMessage } from "@/types/session";
+import { TableMessage } from "@/types/discussion";
 import { CreateMessageInput } from "@/lib/validators/message";
 
 export const MessageRepository = {

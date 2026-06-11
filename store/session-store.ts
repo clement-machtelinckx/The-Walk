@@ -2,7 +2,6 @@ import { create } from "zustand";
 import {
     Session,
     SessionResponsesSummary,
-    TableDiscussionData,
     RollCallMember,
     PresenceSummary,
     TablePrivateMessageData,
@@ -31,7 +30,6 @@ interface SessionState {
     activeSessions: Record<string, Session | null>;
     sessionHistories: Record<string, SessionHistoryItem[]>;
     responses: Record<string, SessionResponsesSummary | null>;
-    discussions: Record<string, TableDiscussionData | null>;
     privateMessages: Record<string, TablePrivateMessageData | null>;
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
@@ -42,13 +40,11 @@ interface SessionState {
     isLoadingActiveSession: boolean;
     isLoadingHistory: boolean;
     isLoadingResponses: boolean;
-    isLoadingDiscussion: boolean;
     isLoadingPrivateMessages: boolean;
     isLoadingPresence: boolean;
     isLoadingPersonalNote: boolean;
     isLoadingGroupNote: boolean;
     isResponding: boolean;
-    isSendingDiscussionMessage: boolean;
     isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
@@ -78,12 +74,6 @@ interface SessionState {
         payload: SessionResponseInput,
     ) => Promise<{ success: boolean; error?: string }>;
 
-    fetchDiscussionMessages: (tableId: string, page?: number) => Promise<void>;
-    sendDiscussionMessage: (
-        tableId: string,
-        content: string,
-        sessionId?: string,
-    ) => Promise<{ success: boolean; error?: string }>;
     fetchPrivateMessages: (
         tableId: string,
         recipientUserId: string,
@@ -138,7 +128,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     activeSessions: {},
     sessionHistories: {},
     responses: {},
-    discussions: {},
     privateMessages: {},
     presenceData: {},
     personalNotes: {},
@@ -147,13 +136,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isLoadingActiveSession: false,
     isLoadingHistory: false,
     isLoadingResponses: false,
-    isLoadingDiscussion: false,
     isLoadingPrivateMessages: false,
     isLoadingPresence: false,
     isLoadingPersonalNote: false,
     isLoadingGroupNote: false,
     isResponding: false,
-    isSendingDiscussionMessage: false,
     isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
@@ -343,56 +330,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch {
             set({ isResponding: false, error: "Erreur réseau" });
-            return { success: false, error: "Erreur réseau" };
-        }
-    },
-
-    fetchDiscussionMessages: async (tableId: string, page = 1) => {
-        set({ isLoadingDiscussion: true, error: null });
-        try {
-            const res = await fetch(`/api/tables/${tableId}/discussion?page=${page}`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    discussions: {
-                        ...state.discussions,
-                        [tableId]: data,
-                    },
-                    isLoadingDiscussion: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingDiscussion: false,
-                });
-            }
-        } catch {
-            set({ error: "Erreur réseau", isLoadingDiscussion: false });
-        }
-    },
-
-    sendDiscussionMessage: async (tableId: string, content: string, sessionId?: string) => {
-        set({ isSendingDiscussionMessage: true, error: null });
-        try {
-            const res = await fetch(`/api/tables/${tableId}/discussion`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content, session_id: sessionId || null }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                await get().fetchDiscussionMessages(tableId);
-                set({ isSendingDiscussionMessage: false });
-                return { success: true };
-            } else {
-                set({ isSendingDiscussionMessage: false, error: data.error });
-                return {
-                    success: false,
-                    error: data.error || "Erreur lors de l'envoi du message",
-                };
-            }
-        } catch {
-            set({ isSendingDiscussionMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

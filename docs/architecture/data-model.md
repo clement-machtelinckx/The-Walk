@@ -38,3 +38,5 @@ Cette page resume les principales entites metier. Le schema exact reste dans `su
 - Les roles sont stockes dans `table_memberships`.
 - `tables.owner_id` identifie le createur/proprietaire, mais l'administration courante passe surtout par le role `gm`.
 - Les migrations hardening ajoutent des politiques RLS pour limiter les acces directs en base.
+- La discussion publique est adressee par `table_id` dans l'API et l'etat client ; `session_id`
+  qualifie seulement le contexte d'emission d'un message.

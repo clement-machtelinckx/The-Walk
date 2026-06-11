@@ -11,7 +11,7 @@ export interface SessionLiveModuleSettingsValues {
 
 export interface SessionLiveModuleSettings extends SessionLiveModuleSettingsValues {
     session_id: string;
-    enabled_modules: string[];
+    enabled_modules: SessionLiveModuleKey[];
     is_configured: boolean;
 }
 

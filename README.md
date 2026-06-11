@@ -91,7 +91,8 @@ Helpers serveur liés à l'authentification et aux permissions de base :
 
 ### `store/`
 
-Stores Zustand pour certains états client : auth, tables, invitations, sessions.
+Stores Zustand pour certains états client : auth, tables, invitations, sessions et discussion
+publique de table.
 
 Ces stores restent côté client. Ils ne remplacent pas les validations serveur ni les contrôles de permissions.
 

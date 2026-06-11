@@ -1,5 +1,5 @@
 -- Migration: Unify public table messages
--- Description: Merge both public session chats into one permanent table discussion.
+-- Description: Replace both legacy public chats with one permanent table discussion.
 
 create table public.table_messages (
     id uuid default gen_random_uuid() primary key,
@@ -14,16 +14,6 @@ create index idx_table_messages_table_created_at
     on public.table_messages(table_id, created_at);
 create index idx_table_messages_session
     on public.table_messages(session_id);
-
-insert into public.table_messages (id, table_id, session_id, user_id, content, created_at)
-select message.id, session_row.table_id, message.session_id, message.user_id, message.content, message.created_at
-from public.pre_session_messages message
-join public.sessions session_row on session_row.id = message.session_id;
-
-insert into public.table_messages (id, table_id, session_id, user_id, content, created_at)
-select message.id, session_row.table_id, message.session_id, message.user_id, message.content, message.created_at
-from public.live_session_messages message
-join public.sessions session_row on session_row.id = message.session_id;
 
 alter table public.table_messages enable row level security;
 
@@ -75,6 +65,7 @@ on public.table_messages
 for each row
 execute function public.validate_table_message_session();
 
+-- Legacy public chat data is intentionally discarded.
 drop table public.pre_session_messages;
 drop table public.live_session_messages;
 

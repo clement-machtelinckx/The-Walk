@@ -2,7 +2,32 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select extensions.plan(47);
+select extensions.plan(51);
+
+select extensions.has_table(
+    'public',
+    'table_messages',
+    'the permanent public table discussion exists'
+);
+
+select extensions.hasnt_table(
+    'public',
+    'pre_session_messages',
+    'the legacy pre-session public chat table is removed'
+);
+
+select extensions.hasnt_table(
+    'public',
+    'live_session_messages',
+    'the legacy live public chat table is removed'
+);
+
+select extensions.is_empty(
+    $$select module_key
+      from public.session_live_enabled_modules
+      where module_key = 'live_chat'$$,
+    'the retired live chat module has no persisted rows'
+);
 
 insert into public.tables (id, name, owner_id)
 values

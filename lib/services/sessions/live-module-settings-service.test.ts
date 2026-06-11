@@ -189,40 +189,21 @@ describe("LiveModuleSettingsService", () => {
         });
     });
 
-    it("preserves future module keys when updating the known V1 projection", async () => {
+    it("removes unrecognized persisted module keys when updating settings", async () => {
         vi.mocked(SessionLiveEnabledModuleRepository.listBySessionId).mockResolvedValue([
             row("__configured"),
-            row("map"),
+            row("unknown_module"),
             row("dice"),
         ]);
 
         const settings = await LiveModuleSettingsService.updateSettings(userId, sessionId, {
-            dice: false,
+            dice: true,
         });
 
+        expect(settings.enabled_modules).toEqual(["dice"]);
         expect(SessionLiveEnabledModuleRepository.disableModule).toHaveBeenCalledWith(
             sessionId,
-            "dice",
+            "unknown_module",
         );
-        expect(SessionLiveEnabledModuleRepository.disableModule).not.toHaveBeenCalledWith(
-            sessionId,
-            "map",
-        );
-        expect(settings.enabled_modules).toContain("map");
-    });
-
-    it("ignores and rejects the retired live chat module", async () => {
-        vi.mocked(SessionLiveEnabledModuleRepository.listBySessionId).mockResolvedValue([
-            row("__configured"),
-            row("live_chat"),
-            row("dice"),
-        ]);
-
-        const settings = await LiveModuleSettingsService.getSettings(userId, sessionId);
-
-        expect(settings.enabled_modules).toEqual(["dice"]);
-        await expect(
-            LiveModuleSettingsService.updateModule(userId, sessionId, "live_chat", true),
-        ).rejects.toThrow("La discussion principale n'est pas un module live.");
     });
 });

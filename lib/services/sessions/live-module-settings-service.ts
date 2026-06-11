@@ -1,16 +1,16 @@
-import { ForbiddenError, ValidationError } from "@/lib/errors";
+import { ForbiddenError } from "@/lib/errors";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { SessionLiveEnabledModuleRepository } from "@/lib/repositories/session-live-enabled-module-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import {
     SESSION_LIVE_MODULE_KEYS,
+    SessionLiveModuleKey,
     SessionLiveModuleSettings,
     SessionLiveModuleSettingsValues,
     UpdateSessionLiveModuleSettingsInput,
 } from "@/types/live-module-settings";
 
 const CONFIGURED_MARKER_MODULE_KEY = "__configured";
-const RETIRED_MODULE_KEYS = new Set(["live_chat"]);
 
 export const DEFAULT_SESSION_LIVE_MODULE_SETTINGS: SessionLiveModuleSettingsValues = {
     group_notes: true,
@@ -19,7 +19,7 @@ export const DEFAULT_SESSION_LIVE_MODULE_SETTINGS: SessionLiveModuleSettingsValu
     presence: true,
 };
 
-function toEnabledModuleKeys(settings: SessionLiveModuleSettingsValues): string[] {
+function toEnabledModuleKeys(settings: SessionLiveModuleSettingsValues): SessionLiveModuleKey[] {
     return SESSION_LIVE_MODULE_KEYS.filter((moduleKey) => settings[moduleKey]);
 }
 
@@ -37,19 +37,15 @@ function buildSettings(
     enabledModuleKeys: string[],
     isConfigured: boolean,
 ): SessionLiveModuleSettings {
-    const exposedModuleKeys = enabledModuleKeys.filter(
-        (moduleKey) =>
-            moduleKey !== CONFIGURED_MARKER_MODULE_KEY && !RETIRED_MODULE_KEYS.has(moduleKey),
-    );
+    const enabledModules = new Set(enabledModuleKeys);
     const values = isConfigured
-        ? toSettingsValues(new Set(exposedModuleKeys))
+        ? toSettingsValues(enabledModules)
         : DEFAULT_SESSION_LIVE_MODULE_SETTINGS;
+    const exposedModuleKeys = toEnabledModuleKeys(values);
 
     return {
         session_id: sessionId,
-        enabled_modules: isConfigured
-            ? exposedModuleKeys
-            : toEnabledModuleKeys(DEFAULT_SESSION_LIVE_MODULE_SETTINGS),
+        enabled_modules: exposedModuleKeys,
         is_configured: isConfigured,
         ...values,
     };
@@ -92,17 +88,7 @@ export const LiveModuleSettingsService = {
             ...updates,
         };
 
-        const knownModuleKeys = new Set<string>(SESSION_LIVE_MODULE_KEYS);
-        const existingFutureModuleKeys = currentKeys.filter(
-            (moduleKey) =>
-                moduleKey !== CONFIGURED_MARKER_MODULE_KEY &&
-                !knownModuleKeys.has(moduleKey) &&
-                !RETIRED_MODULE_KEYS.has(moduleKey),
-        );
-        const nextEnabledModuleKeys = [
-            ...toEnabledModuleKeys(nextSettings),
-            ...existingFutureModuleKeys,
-        ];
+        const nextEnabledModuleKeys = toEnabledModuleKeys(nextSettings);
         const keysToEnable = new Set([...nextEnabledModuleKeys, CONFIGURED_MARKER_MODULE_KEY]);
         const currentPersistedKeys = new Set(currentKeys);
 
@@ -128,16 +114,9 @@ export const LiveModuleSettingsService = {
     async updateModule(
         userId: string,
         sessionId: string,
-        moduleKey: string,
+        moduleKey: SessionLiveModuleKey,
         enabled: boolean,
     ): Promise<SessionLiveModuleSettings> {
-        if (moduleKey.startsWith("__")) {
-            throw new ValidationError("Cette clé de module est réservée au système.");
-        }
-        if (RETIRED_MODULE_KEYS.has(moduleKey)) {
-            throw new ValidationError("La discussion principale n'est pas un module live.");
-        }
-
         await requireSessionGm(userId, sessionId);
 
         const currentRows = await SessionLiveEnabledModuleRepository.listBySessionId(sessionId);

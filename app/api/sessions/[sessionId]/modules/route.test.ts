@@ -89,24 +89,24 @@ describe("/api/sessions/[sessionId]/modules", () => {
         vi.mocked(requireAuth).mockResolvedValue(user as AuthUser);
         vi.mocked(LiveModuleSettingsService.updateModule).mockResolvedValue({
             ...settings,
-            enabled_modules: ["dice", "map"],
+            enabled_modules: ["dice", "initiative"],
         });
 
         const request = new Request(`http://localhost/api/sessions/${sessionId}/modules`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ module_key: "map", enabled: true }),
+            body: JSON.stringify({ module_key: "initiative", enabled: true }),
         });
 
         const response = await PATCH(request, { params });
         const body = await response.json();
 
         expect(response.status).toBe(200);
-        expect(body.settings.enabled_modules).toContain("map");
+        expect(body.settings.enabled_modules).toContain("initiative");
         expect(LiveModuleSettingsService.updateModule).toHaveBeenCalledWith(
             user.id,
             sessionId,
-            "map",
+            "initiative",
             true,
         );
     });
@@ -126,6 +126,21 @@ describe("/api/sessions/[sessionId]/modules", () => {
         expect(response.status).toBe(400);
         expect(body.error).toBe("Données invalides");
         expect(LiveModuleSettingsService.updateSettings).not.toHaveBeenCalled();
+        expect(LiveModuleSettingsService.updateModule).not.toHaveBeenCalled();
+    });
+
+    it("PATCH rejects undeclared module keys", async () => {
+        vi.mocked(requireAuth).mockResolvedValue(user as AuthUser);
+
+        const request = new Request(`http://localhost/api/sessions/${sessionId}/modules`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ module_key: "unknown_module", enabled: true }),
+        });
+
+        const response = await PATCH(request, { params });
+
+        expect(response.status).toBe(400);
         expect(LiveModuleSettingsService.updateModule).not.toHaveBeenCalled();
     });
 

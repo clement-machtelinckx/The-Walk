@@ -22,11 +22,7 @@ export type UpdateSessionLiveModuleSettingsInput = z.infer<
     typeof updateSessionLiveModuleSettingsSchema
 >;
 
-export const sessionLiveModuleKeySchema = z
-    .string()
-    .regex(/^[a-z][a-z0-9_]*$/, "Clé de module invalide");
-
-export const knownSessionLiveModuleKeySchema = z.enum(SESSION_LIVE_MODULE_KEYS);
+export const sessionLiveModuleKeySchema = z.enum(SESSION_LIVE_MODULE_KEYS);
 
 export const updateSessionLiveModuleToggleSchema = z
     .object({
