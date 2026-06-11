@@ -39,14 +39,14 @@ export const MessageRepository = {
             .select("*, profiles(*)")
             .eq("table_id", tableId);
 
-        query = applyPagination(query, params, "created_at");
+        query = applyPagination(query, { ...params, ascending: false }, "created_at");
 
         const { data, error } = await query;
         handleDbError(error, "MessageRepository.listTableMessages");
 
         const limit = params.limit || 50;
         return {
-            data: data || [],
+            data: data ? [...data].reverse() : [],
             total: count || 0,
             page: params.page || 1,
             limit,
