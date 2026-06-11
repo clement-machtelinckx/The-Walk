@@ -22,7 +22,7 @@ interface ReminderSummary {
 /**
  * Bloc d'information sur la prochaine session dans l'espace Admin.
  * Rôle : Structural / Informatif uniquement.
- * N'est PAS le cockpit de préparation (RSVP/Prechat/Start sont sur la page Préparation).
+ * N'est PAS le hub avant-session (RSVP/discussion/démarrage sont sur la page table).
  */
 export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
     const { nextSessions, isLoadingSession, fetchNextSession } = useSessionStore();
@@ -85,9 +85,7 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
                         Aucune session planifiée pour le moment.
                     </p>
                     <Button variant="outline" size="sm" asChild>
-                        <Link href={`/tables/${tableId}/session/next`}>
-                            Accéder à la préparation
-                        </Link>
+                        <Link href={`/tables/${tableId}`}>Planifier la session suivante</Link>
                     </Button>
                 </CardContent>
             </Card>
@@ -133,8 +131,8 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
                             </Button>
                         )}
                         <Button variant="outline" size="sm" className="shrink-0" asChild>
-                            <Link href={`/tables/${tableId}/session/next`}>
-                                Gérer la préparation
+                            <Link href={`/tables/${tableId}`}>
+                                Ouvrir la session suivante
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>

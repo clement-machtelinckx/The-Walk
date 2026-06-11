@@ -52,6 +52,7 @@ export default async function TableDetailPage({ params }: TableRouteProps) {
                             tableId={tableId}
                             session={details.nextSession}
                             activeSession={details.activeSession}
+                            myRole={details.myRole}
                         />
 
                         <SessionHistory tableId={tableId} />

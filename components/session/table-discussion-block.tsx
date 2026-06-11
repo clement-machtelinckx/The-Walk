@@ -4,18 +4,18 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSessionStore } from "@/store/session-store";
 import { useAuthStore } from "@/store/auth-store";
 import { usePolling } from "@/lib/hooks/use-polling";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, MessageSquare } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/utils/date";
 
-type PrechatBlockProps = Readonly<{
+type TableDiscussionBlockProps = Readonly<{
     sessionId: string;
 }>;
 
-export function PrechatBlock({ sessionId }: PrechatBlockProps) {
+export function TableDiscussionBlock({ sessionId }: TableDiscussionBlockProps) {
     const { user } = useAuthStore();
     const {
         prechats,
@@ -55,14 +55,7 @@ export function PrechatBlock({ sessionId }: PrechatBlockProps) {
     };
 
     return (
-        <Card className="border-primary/20 flex h-[500px] w-full flex-col shadow-sm">
-            <CardHeader className="bg-primary/5 border-b pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                    <MessageSquare size={18} className="text-primary" />
-                    Discussion de préparation
-                </CardTitle>
-            </CardHeader>
-
+        <Card className="border-primary/20 flex h-[420px] w-full flex-col shadow-sm sm:h-[500px]">
             <CardContent className="flex flex-grow flex-col overflow-hidden p-0">
                 {/* Liste des messages */}
                 <div
@@ -75,7 +68,7 @@ export function PrechatBlock({ sessionId }: PrechatBlockProps) {
                         </div>
                     ) : messages.length === 0 ? (
                         <div className="text-muted-foreground py-10 text-center text-sm italic">
-                            Aucun message pour le moment. Lancez la discussion !
+                            Aucun message pour le moment. Échangez ici avant la session.
                         </div>
                     ) : (
                         messages.map((msg) => {

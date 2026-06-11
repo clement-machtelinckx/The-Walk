@@ -60,7 +60,7 @@ export const NotificationEventService = {
                         body: `${table.name} : ${session.title}`,
                         resource_type: "session",
                         resource_id: session.id,
-                        href: `/tables/${session.table_id}/session/next`,
+                        href: `/tables/${session.table_id}`,
                         data: {
                             tableId: session.table_id,
                             scheduledAt: session.scheduled_at,

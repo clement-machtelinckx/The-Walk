@@ -32,7 +32,7 @@ type SessionToolsDrawerProps = Readonly<{
     onModuleSettingsChange?: (settings: SessionLiveModuleSettingsValues) => void;
 }>;
 
-type SessionToolsContext = "table" | "pre-session" | "live";
+type SessionToolsContext = "table" | "live";
 type SessionToolId = "players" | "rolls" | "advanced" | "gm";
 
 const SESSION_TOOLS: Array<{
@@ -69,8 +69,6 @@ const SESSION_TOOLS: Array<{
 
 const CONTEXT_DESCRIPTION: Record<SessionToolsContext, string> = {
     table: "Outils de table. Les fonctions strictement live restent visibles mais indiquent leur contexte.",
-    "pre-session":
-        "Outils de préparation. Les fonctions strictement live restent visibles mais inactives.",
     live: "Outils secondaires du live. Les modules futurs restent regroupés hors du noyau de session.",
 };
 
@@ -241,7 +239,7 @@ export function SessionToolsDrawer({
                                 >
                                     <PlaceholderItem
                                         label="Messages privés de table"
-                                        detail="Espace prévu pour rester accessible depuis la table, la préparation et le live."
+                                        detail="Espace prévu pour rester accessible depuis la table, la session suivante et le live."
                                         state="future"
                                     />
                                     <PlayerPresencePanel

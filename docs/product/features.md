@@ -29,6 +29,7 @@ Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorite
 ## Sessions
 
 - Creation et modification de prochaine session par MJ.
+- Bloc Prochaine session de la page table regroupant planification, RSVP, synthese et discussion.
 - RSVP des membres.
 - Demarrage, fin, annulation et suppression controlee.
 - Historique des sessions.
@@ -38,7 +39,6 @@ Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorite
 
 - Page de session live.
 - Chat live.
-- Messages de pre-session.
 - Notes personnelles et notes de groupe.
 - Messages prives entre membres.
 - Journal de jets de des.
