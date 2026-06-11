@@ -7,15 +7,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
     SessionLiveModuleSettings,
-    SessionLiveModuleKey,
     SessionLiveModuleSettingsValues,
 } from "@/types/live-module-settings";
 
-const MODULE_LABELS: Record<SessionLiveModuleKey, { label: string; description: string }> = {
-    live_chat: {
-        label: "Chat live",
-        description: "Messages visibles pendant la session.",
-    },
+type LiveModuleKey = keyof SessionLiveModuleSettingsValues;
+
+const MODULE_LABELS: Record<LiveModuleKey, { label: string; description: string }> = {
     group_notes: {
         label: "Notes de groupe",
         description: "Espace partagé pour les notes de table.",
@@ -34,13 +31,7 @@ const MODULE_LABELS: Record<SessionLiveModuleKey, { label: string; description: 
     },
 };
 
-const MODULE_KEYS: SessionLiveModuleKey[] = [
-    "live_chat",
-    "group_notes",
-    "dice",
-    "initiative",
-    "presence",
-];
+const MODULE_KEYS: LiveModuleKey[] = ["group_notes", "dice", "initiative", "presence"];
 
 type LiveModuleSettingsProps = Readonly<{
     sessionId: string;
@@ -50,7 +41,6 @@ type LiveModuleSettingsProps = Readonly<{
 
 function toValues(settings: SessionLiveModuleSettings): SessionLiveModuleSettingsValues {
     return {
-        live_chat: settings.live_chat,
         group_notes: settings.group_notes,
         dice: settings.dice,
         initiative: settings.initiative,
@@ -67,7 +57,7 @@ export function LiveModuleSettings({
         initialSettings ? toValues(initialSettings) : null,
     );
     const [isLoading, setIsLoading] = useState(!initialSettings);
-    const [savingModule, setSavingModule] = useState<SessionLiveModuleKey | null>(null);
+    const [savingModule, setSavingModule] = useState<LiveModuleKey | null>(null);
     const [feedback, setFeedback] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -98,7 +88,7 @@ export function LiveModuleSettings({
         fetchSettings();
     }, [fetchSettings]);
 
-    const updateModule = async (module: SessionLiveModuleKey, enabled: boolean) => {
+    const updateModule = async (module: LiveModuleKey, enabled: boolean) => {
         if (!settings || savingModule) return;
 
         const previousSettings = settings;
@@ -206,7 +196,8 @@ export function LiveModuleSettings({
                         Modules affichés
                     </h4>
                     <p className="text-muted-foreground text-[11px] leading-relaxed">
-                        Configuration commune à tous les participants du live.
+                        Configuration commune à tous les participants du live. La discussion de
+                        table reste toujours visible.
                     </p>
                 </div>
                 <Badge variant="outline" className="shrink-0 px-2 py-0 text-[9px]">

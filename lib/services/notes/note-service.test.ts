@@ -15,6 +15,7 @@ describe("NoteService", () => {
     const tableId = "table-123";
     const sessionId = "session-123";
     const loadedUpdatedAt = "2026-01-01T10:00:00.000Z";
+    type SessionById = Awaited<ReturnType<typeof SessionRepository.getById>>;
 
     const groupNote: GroupNote = {
         id: "note-123",
@@ -30,7 +31,7 @@ describe("NoteService", () => {
         vi.mocked(SessionRepository.getById).mockResolvedValue({
             id: sessionId,
             table_id: tableId,
-        });
+        } as SessionById);
         vi.mocked(MembershipRepository.getByUserAndTable).mockResolvedValue({
             id: "membership-123",
             table_id: tableId,

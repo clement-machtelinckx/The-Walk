@@ -82,9 +82,10 @@ export interface RollCallMember {
     rsvp_status?: ResponseStatus;
 }
 
-export interface SessionMessage {
+export interface TableMessage {
     id: string;
-    session_id: string;
+    table_id: string;
+    session_id: string | null;
     user_id: string | null;
     content: string;
     created_at: string;
@@ -118,8 +119,8 @@ export interface TablePrivateMessage {
     };
 }
 
-export interface SessionPrechatData {
-    data: SessionMessage[];
+export interface TableDiscussionData {
+    data: TableMessage[];
     total: number;
     page: number;
     limit: number;
@@ -128,14 +129,6 @@ export interface SessionPrechatData {
 
 export interface TablePrivateMessageData {
     data: TablePrivateMessage[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-}
-
-export interface SessionLiveChatData {
-    data: SessionMessage[];
     total: number;
     page: number;
     limit: number;

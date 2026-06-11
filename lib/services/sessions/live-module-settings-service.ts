@@ -10,9 +10,9 @@ import {
 } from "@/types/live-module-settings";
 
 const CONFIGURED_MARKER_MODULE_KEY = "__configured";
+const RETIRED_MODULE_KEYS = new Set(["live_chat"]);
 
 export const DEFAULT_SESSION_LIVE_MODULE_SETTINGS: SessionLiveModuleSettingsValues = {
-    live_chat: true,
     group_notes: true,
     dice: true,
     initiative: false,
@@ -25,7 +25,6 @@ function toEnabledModuleKeys(settings: SessionLiveModuleSettingsValues): string[
 
 function toSettingsValues(enabledModules: Set<string>): SessionLiveModuleSettingsValues {
     return {
-        live_chat: enabledModules.has("live_chat"),
         group_notes: enabledModules.has("group_notes"),
         dice: enabledModules.has("dice"),
         initiative: enabledModules.has("initiative"),
@@ -39,7 +38,8 @@ function buildSettings(
     isConfigured: boolean,
 ): SessionLiveModuleSettings {
     const exposedModuleKeys = enabledModuleKeys.filter(
-        (moduleKey) => moduleKey !== CONFIGURED_MARKER_MODULE_KEY,
+        (moduleKey) =>
+            moduleKey !== CONFIGURED_MARKER_MODULE_KEY && !RETIRED_MODULE_KEYS.has(moduleKey),
     );
     const values = isConfigured
         ? toSettingsValues(new Set(exposedModuleKeys))
@@ -85,7 +85,6 @@ export const LiveModuleSettingsService = {
         const currentKeys = currentRows.map((row) => row.module_key);
         const currentSettings = buildSettings(sessionId, currentKeys, currentKeys.length > 0);
         const nextSettings: SessionLiveModuleSettingsValues = {
-            live_chat: currentSettings.live_chat,
             group_notes: currentSettings.group_notes,
             dice: currentSettings.dice,
             initiative: currentSettings.initiative,
@@ -96,7 +95,9 @@ export const LiveModuleSettingsService = {
         const knownModuleKeys = new Set<string>(SESSION_LIVE_MODULE_KEYS);
         const existingFutureModuleKeys = currentKeys.filter(
             (moduleKey) =>
-                moduleKey !== CONFIGURED_MARKER_MODULE_KEY && !knownModuleKeys.has(moduleKey),
+                moduleKey !== CONFIGURED_MARKER_MODULE_KEY &&
+                !knownModuleKeys.has(moduleKey) &&
+                !RETIRED_MODULE_KEYS.has(moduleKey),
         );
         const nextEnabledModuleKeys = [
             ...toEnabledModuleKeys(nextSettings),
@@ -132,6 +133,9 @@ export const LiveModuleSettingsService = {
     ): Promise<SessionLiveModuleSettings> {
         if (moduleKey.startsWith("__")) {
             throw new ValidationError("Cette clé de module est réservée au système.");
+        }
+        if (RETIRED_MODULE_KEYS.has(moduleKey)) {
+            throw new ValidationError("La discussion principale n'est pas un module live.");
         }
 
         await requireSessionGm(userId, sessionId);

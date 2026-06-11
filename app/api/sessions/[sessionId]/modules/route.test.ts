@@ -16,9 +16,8 @@ describe("/api/sessions/[sessionId]/modules", () => {
 
     const settings: Settings = {
         session_id: sessionId,
-        enabled_modules: ["live_chat", "dice"],
+        enabled_modules: ["dice"],
         is_configured: true,
-        live_chat: true,
         group_notes: false,
         dice: true,
         initiative: false,
@@ -66,7 +65,7 @@ describe("/api/sessions/[sessionId]/modules", () => {
         vi.mocked(LiveModuleSettingsService.updateSettings).mockResolvedValue({
             ...settings,
             dice: false,
-            enabled_modules: ["live_chat"],
+            enabled_modules: [],
         });
 
         const request = new Request(`http://localhost/api/sessions/${sessionId}/modules`, {
@@ -90,7 +89,7 @@ describe("/api/sessions/[sessionId]/modules", () => {
         vi.mocked(requireAuth).mockResolvedValue(user as AuthUser);
         vi.mocked(LiveModuleSettingsService.updateModule).mockResolvedValue({
             ...settings,
-            enabled_modules: ["live_chat", "dice", "map"],
+            enabled_modules: ["dice", "map"],
         });
 
         const request = new Request(`http://localhost/api/sessions/${sessionId}/modules`, {

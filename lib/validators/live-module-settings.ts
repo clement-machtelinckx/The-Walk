@@ -2,7 +2,6 @@ import { z } from "zod";
 import { SESSION_LIVE_MODULE_KEYS } from "@/types/live-module-settings";
 
 export const sessionLiveModuleSettingsValuesSchema = z.object({
-    live_chat: z.boolean(),
     group_notes: z.boolean(),
     dice: z.boolean(),
     initiative: z.boolean(),

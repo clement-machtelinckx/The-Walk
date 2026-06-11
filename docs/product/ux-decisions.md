@@ -10,7 +10,7 @@ Les evenements importants sont regroupes dans un centre accessible depuis l'en-t
 
 ## Page table comme hub avant-session
 
-La planification, les RSVP, leur synthese et la discussion avant le jeu sont regroupes dans le bloc Prochaine session de la page table. La route dediee historique redirige vers ce hub et n'est plus un point d'entree produit.
+La planification, les RSVP et leur synthese sont regroupes dans le bloc Prochaine session. La discussion principale reste un bloc autonome et permanent sur la page table, puis continue dans le live.
 
 ## Drawer d'outils session
 

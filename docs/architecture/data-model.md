@@ -22,8 +22,7 @@ Cette page resume les principales entites metier. Le schema exact reste dans `su
 
 ## Messages et notes
 
-- `pre_session_messages` : messages lies a la preparation d'une session.
-- `live_session_messages` : messages de chat pendant une session live.
+- `table_messages` : discussion publique permanente de table, avec contexte de session optionnel.
 - `table_private_messages` : messages prives 1-to-1 dans le contexte d'une table, avec session optionnelle.
 - `personal_notes` : notes personnelles rattachees a un utilisateur, avec table/session optionnelles.
 - `group_notes` : notes partagees au niveau table, avec session optionnelle.

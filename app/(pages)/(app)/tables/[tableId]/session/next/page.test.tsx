@@ -18,15 +18,18 @@ vi.mock("next/navigation", () => ({
 
 describe("/tables/[tableId]/session/next page", () => {
     const tableId = "table-123";
+    type AuthUser = Awaited<ReturnType<typeof requireAuth>>;
+    type Membership = Awaited<ReturnType<typeof MembershipService.requireMembership>>;
+
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(requireAuth).mockResolvedValue({ id: "user-123" });
+        vi.mocked(requireAuth).mockResolvedValue({ id: "user-123" } as AuthUser);
     });
 
     it.each(["gm", "player"] as const)("redirects a %s member to the table hub", async (role) => {
         vi.mocked(MembershipService.requireMembership).mockResolvedValue({
             role,
-        });
+        } as Membership);
 
         await expect(NextSessionPage({ params: Promise.resolve({ tableId }) })).rejects.toThrow(
             "NEXT_REDIRECT",

@@ -298,7 +298,7 @@ npm run format
 - RSVP : réponse utilisateur à une session.
 - Présence : statut de présence sur une session.
 - Live session : démarrage, fin et hub de session active.
-- Chat : messages de préparation et messages live.
+- Discussion principale : fil permanent de table, visible hors live et pendant le live.
 - Notes : notes personnelles et notes de groupe.
 - Admin MJ : actions rapides, invitations, membres et gestion de session.
 - Mon compte : page simple de profil/compte.
@@ -330,8 +330,7 @@ Entités principales :
 - `session_presence`
 - `invitations`
 - `table_group_invitations`
-- `pre_session_messages`
-- `live_session_messages`
+- `table_messages`
 - `personal_notes`
 - `group_notes`
 

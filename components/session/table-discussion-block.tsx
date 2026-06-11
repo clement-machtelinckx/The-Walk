@@ -1,139 +1,85 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useSessionStore } from "@/store/session-store";
 import { useAuthStore } from "@/store/auth-store";
 import { usePolling } from "@/lib/hooks/use-polling";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { formatShortDate } from "@/lib/utils/date";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquare } from "lucide-react";
+import { MessageThread } from "@/components/session/message-thread";
 
 type TableDiscussionBlockProps = Readonly<{
-    sessionId: string;
+    tableId: string;
+    sessionId?: string;
+    context?: "table" | "live";
 }>;
 
-export function TableDiscussionBlock({ sessionId }: TableDiscussionBlockProps) {
+export function TableDiscussionBlock({
+    tableId,
+    sessionId,
+    context = "table",
+}: TableDiscussionBlockProps) {
     const { user } = useAuthStore();
     const {
-        prechats,
-        fetchPrechatMessages,
-        sendPrechatMessage,
-        isLoadingPrechat,
-        isSendingMessage,
+        discussions,
+        fetchDiscussionMessages,
+        sendDiscussionMessage,
+        isLoadingDiscussion,
+        isSendingDiscussionMessage,
     } = useSessionStore();
-    const [content, setContent] = useState("");
-    const scrollRef = useRef<HTMLDivElement>(null);
 
-    const prechat = prechats[sessionId];
-    const messages = useMemo(() => prechat?.data || [], [prechat]);
-
-    // Polling centralisé (toutes les 10 secondes)
-    const fetchFn = useCallback(
-        () => fetchPrechatMessages(sessionId),
-        [sessionId, fetchPrechatMessages],
+    const discussion = discussions[tableId];
+    const messages = useMemo(
+        () =>
+            (discussion?.data || []).map((message) => ({
+                id: message.id,
+                content: message.content,
+                createdAt: message.created_at,
+                isMine: message.user_id === user?.id,
+                authorName: message.profiles?.display_name || "Anonyme",
+            })),
+        [discussion?.data, user?.id],
     );
-    usePolling(fetchFn, { interval: 10000 });
 
-    // Scroll automatique vers le bas lors de nouveaux messages
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [messages]);
+    const fetchMessages = useCallback(() => {
+        return fetchDiscussionMessages(tableId);
+    }, [fetchDiscussionMessages, tableId]);
 
-    const handleSend = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!content.trim() || isSendingMessage) return;
-
-        const res = await sendPrechatMessage(sessionId, content);
-        if (res.success) {
-            setContent("");
-        }
-    };
+    usePolling(fetchMessages, {
+        interval: context === "live" ? 5000 : 10000,
+        enabled: Boolean(tableId),
+    });
 
     return (
-        <Card className="border-primary/20 flex h-[420px] w-full flex-col shadow-sm sm:h-[500px]">
-            <CardContent className="flex flex-grow flex-col overflow-hidden p-0">
-                {/* Liste des messages */}
-                <div
-                    ref={scrollRef}
-                    className="flex-grow space-y-4 overflow-y-auto scroll-smooth p-4"
-                >
-                    {isLoadingPrechat && messages.length === 0 ? (
-                        <div className="flex justify-center py-10">
-                            <Loader2 className="text-primary/50 h-6 w-6 animate-spin" />
-                        </div>
-                    ) : messages.length === 0 ? (
-                        <div className="text-muted-foreground py-10 text-center text-sm italic">
-                            Aucun message pour le moment. Échangez ici avant la session.
-                        </div>
-                    ) : (
-                        messages.map((msg) => {
-                            const isMe = msg.user_id === user?.id;
-                            return (
-                                <div
-                                    key={msg.id}
-                                    className={cn(
-                                        "flex max-w-[85%] flex-col space-y-1",
-                                        isMe ? "ml-auto items-end" : "mr-auto items-start",
-                                    )}
-                                >
-                                    <div className="text-muted-foreground flex items-center gap-2 px-1 text-[10px] font-bold tracking-wider uppercase">
-                                        {!isMe && (
-                                            <span>{msg.profiles?.display_name || "Anonyme"}</span>
-                                        )}
-                                        <span>{formatShortDate(msg.created_at)}</span>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            "rounded-2xl px-4 py-2 text-sm shadow-sm",
-                                            isMe
-                                                ? "bg-primary text-primary-foreground rounded-tr-none"
-                                                : "bg-muted text-foreground border-border/50 rounded-tl-none border",
-                                        )}
-                                    >
-                                        <p className="break-words whitespace-pre-wrap">
-                                            {msg.content}
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    )}
+        <Card className="border-primary/20 w-full gap-0 overflow-hidden py-0 shadow-sm">
+            <CardHeader className="bg-primary/5 flex flex-col items-start justify-between gap-4 border-b px-4 py-4 sm:flex-row sm:px-6">
+                <div className="space-y-1.5">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <MessageSquare className="text-primary h-5 w-5" />
+                        Discussion de table
+                    </CardTitle>
+                    <CardDescription className="max-w-2xl leading-relaxed">
+                        {context === "live"
+                            ? "Le fil principal de la table continue pendant le live."
+                            : "Le fil principal pour échanger avec toute la table."}
+                    </CardDescription>
                 </div>
+                <Badge variant={context === "live" ? "success" : "outline"} className="shrink-0">
+                    {context === "live" ? "Live en cours" : "Fil principal"}
+                </Badge>
+            </CardHeader>
 
-                {/* Saisie */}
-                <div className="bg-card border-t p-4">
-                    <form onSubmit={handleSend} className="flex items-end gap-2">
-                        <Textarea
-                            placeholder="Votre message..."
-                            className="max-h-[120px] min-h-[60px] resize-none"
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleSend(e);
-                                }
-                            }}
-                        />
-                        <Button
-                            type="submit"
-                            size="icon"
-                            className="h-10 w-10 shrink-0"
-                            disabled={!content.trim() || isSendingMessage}
-                        >
-                            {isSendingMessage ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <Send className="h-4 w-4" />
-                            )}
-                        </Button>
-                    </form>
-                </div>
+            <CardContent className="p-0">
+                <MessageThread
+                    messages={messages}
+                    isLoading={isLoadingDiscussion}
+                    isSending={isSendingDiscussionMessage}
+                    emptyMessage="Aucun message pour le moment. Ce fil accompagne la table avant et pendant le live."
+                    placeholder="Écrire à la table..."
+                    sendLabel="Envoyer le message à la table"
+                    onSend={(content) => sendDiscussionMessage(tableId, content, sessionId)}
+                />
             </CardContent>
         </Card>
     );

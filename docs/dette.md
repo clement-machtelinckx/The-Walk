@@ -127,7 +127,6 @@ Exemples notables :
 - `components/admin/invitation-manager.tsx`
 - `components/notifications/notification-center.tsx`
 - `components/profile/email-usage-card.tsx`
-- `components/session/livechat-block.tsx`
 - `components/session/personal-note-block.tsx`
 - `components/session/player-presence-panel.tsx`
 - `components/session/table-discussion-block.tsx`
@@ -198,7 +197,6 @@ Beaucoup d'issues se concentrent dans :
 
 - `components/session/session-tools-drawer.tsx`
 - `components/session/player-presence-panel.tsx`
-- `components/session/livechat-block.tsx`
 - `components/session/table-discussion-block.tsx`
 - `components/session/presence-block.tsx`
 - `components/session/private-conversation-panel.tsx`

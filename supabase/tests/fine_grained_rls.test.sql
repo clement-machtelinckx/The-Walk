@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select extensions.plan(44);
+select extensions.plan(47);
 
 insert into public.tables (id, name, owner_id)
 values
@@ -151,6 +151,40 @@ select set_config(
     'request.jwt.claim.sub',
     '22222222-2222-4222-8222-222222222222',
     true
+);
+
+select extensions.lives_ok(
+    $$insert into public.table_messages (table_id, user_id, content)
+      values (
+          'a1000000-0000-4000-8000-000000000001',
+          '22222222-2222-4222-8222-222222222222',
+          'Permanent table discussion'
+      )$$,
+    'table members can write outside a session'
+);
+
+select extensions.lives_ok(
+    $$insert into public.table_messages (table_id, session_id, user_id, content)
+      values (
+          'a1000000-0000-4000-8000-000000000001',
+          'a2000000-0000-4000-8000-000000000001',
+          '22222222-2222-4222-8222-222222222222',
+          'Session context'
+      )$$,
+    'table members can attach the matching session context'
+);
+
+select extensions.throws_ok(
+    $$insert into public.table_messages (table_id, session_id, user_id, content)
+      values (
+          'a1000000-0000-4000-8000-000000000001',
+          'a2000000-0000-4000-8000-000000000002',
+          '22222222-2222-4222-8222-222222222222',
+          'Wrong session context'
+      )$$,
+    '23514',
+    'Table message session_id must belong to table_id',
+    'table messages reject a session from another table'
 );
 
 select extensions.lives_ok(

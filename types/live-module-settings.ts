@@ -1,15 +1,8 @@
-export const SESSION_LIVE_MODULE_KEYS = [
-    "live_chat",
-    "group_notes",
-    "dice",
-    "initiative",
-    "presence",
-] as const;
+export const SESSION_LIVE_MODULE_KEYS = ["group_notes", "dice", "initiative", "presence"] as const;
 
 export type SessionLiveModuleKey = (typeof SESSION_LIVE_MODULE_KEYS)[number];
 
 export interface SessionLiveModuleSettingsValues {
-    live_chat: boolean;
     group_notes: boolean;
     dice: boolean;
     initiative: boolean;

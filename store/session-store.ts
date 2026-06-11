@@ -2,8 +2,7 @@ import { create } from "zustand";
 import {
     Session,
     SessionResponsesSummary,
-    SessionPrechatData,
-    SessionLiveChatData,
+    TableDiscussionData,
     RollCallMember,
     PresenceSummary,
     TablePrivateMessageData,
@@ -32,8 +31,7 @@ interface SessionState {
     activeSessions: Record<string, Session | null>;
     sessionHistories: Record<string, SessionHistoryItem[]>;
     responses: Record<string, SessionResponsesSummary | null>;
-    prechats: Record<string, SessionPrechatData | null>;
-    livechats: Record<string, SessionLiveChatData | null>;
+    discussions: Record<string, TableDiscussionData | null>;
     privateMessages: Record<string, TablePrivateMessageData | null>;
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
@@ -44,15 +42,13 @@ interface SessionState {
     isLoadingActiveSession: boolean;
     isLoadingHistory: boolean;
     isLoadingResponses: boolean;
-    isLoadingPrechat: boolean;
-    isLoadingLivechat: boolean;
+    isLoadingDiscussion: boolean;
     isLoadingPrivateMessages: boolean;
     isLoadingPresence: boolean;
     isLoadingPersonalNote: boolean;
     isLoadingGroupNote: boolean;
     isResponding: boolean;
-    isSendingMessage: boolean;
-    isSendingLiveMessage: boolean;
+    isSendingDiscussionMessage: boolean;
     isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
@@ -82,16 +78,11 @@ interface SessionState {
         payload: SessionResponseInput,
     ) => Promise<{ success: boolean; error?: string }>;
 
-    fetchPrechatMessages: (sessionId: string, page?: number) => Promise<void>;
-    sendPrechatMessage: (
-        sessionId: string,
+    fetchDiscussionMessages: (tableId: string, page?: number) => Promise<void>;
+    sendDiscussionMessage: (
+        tableId: string,
         content: string,
-    ) => Promise<{ success: boolean; error?: string }>;
-
-    fetchLivechatMessages: (sessionId: string, page?: number) => Promise<void>;
-    sendLivechatMessage: (
-        sessionId: string,
-        content: string,
+        sessionId?: string,
     ) => Promise<{ success: boolean; error?: string }>;
     fetchPrivateMessages: (
         tableId: string,
@@ -147,8 +138,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     activeSessions: {},
     sessionHistories: {},
     responses: {},
-    prechats: {},
-    livechats: {},
+    discussions: {},
     privateMessages: {},
     presenceData: {},
     personalNotes: {},
@@ -157,15 +147,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isLoadingActiveSession: false,
     isLoadingHistory: false,
     isLoadingResponses: false,
-    isLoadingPrechat: false,
-    isLoadingLivechat: false,
+    isLoadingDiscussion: false,
     isLoadingPrivateMessages: false,
     isLoadingPresence: false,
     isLoadingPersonalNote: false,
     isLoadingGroupNote: false,
     isResponding: false,
-    isSendingMessage: false,
-    isSendingLiveMessage: false,
+    isSendingDiscussionMessage: false,
     isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
@@ -359,102 +347,52 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         }
     },
 
-    fetchPrechatMessages: async (sessionId: string, page = 1) => {
-        set({ isLoadingPrechat: true, error: null });
+    fetchDiscussionMessages: async (tableId: string, page = 1) => {
+        set({ isLoadingDiscussion: true, error: null });
         try {
-            const res = await fetch(`/api/sessions/${sessionId}/prechat?page=${page}`);
+            const res = await fetch(`/api/tables/${tableId}/discussion?page=${page}`);
             const data = await res.json();
             if (res.ok) {
                 set((state) => ({
-                    prechats: {
-                        ...state.prechats,
-                        [sessionId]: data,
+                    discussions: {
+                        ...state.discussions,
+                        [tableId]: data,
                     },
-                    isLoadingPrechat: false,
+                    isLoadingDiscussion: false,
                 }));
             } else {
                 set({
                     error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingPrechat: false,
+                    isLoadingDiscussion: false,
                 });
             }
         } catch {
-            set({ error: "Erreur réseau", isLoadingPrechat: false });
+            set({ error: "Erreur réseau", isLoadingDiscussion: false });
         }
     },
 
-    sendPrechatMessage: async (sessionId: string, content: string) => {
-        set({ isSendingMessage: true, error: null });
+    sendDiscussionMessage: async (tableId: string, content: string, sessionId?: string) => {
+        set({ isSendingDiscussionMessage: true, error: null });
         try {
-            const res = await fetch(`/api/sessions/${sessionId}/prechat`, {
+            const res = await fetch(`/api/tables/${tableId}/discussion`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
+                body: JSON.stringify({ content, session_id: sessionId || null }),
             });
             const data = await res.json();
             if (res.ok) {
-                await get().fetchPrechatMessages(sessionId);
-                set({ isSendingMessage: false });
+                await get().fetchDiscussionMessages(tableId);
+                set({ isSendingDiscussionMessage: false });
                 return { success: true };
             } else {
-                set({ isSendingMessage: false, error: data.error });
+                set({ isSendingDiscussionMessage: false, error: data.error });
                 return {
                     success: false,
                     error: data.error || "Erreur lors de l'envoi du message",
                 };
             }
         } catch {
-            set({ isSendingMessage: false, error: "Erreur réseau" });
-            return { success: false, error: "Erreur réseau" };
-        }
-    },
-
-    fetchLivechatMessages: async (sessionId: string, page = 1) => {
-        set({ isLoadingLivechat: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/livechat?page=${page}`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    livechats: {
-                        ...state.livechats,
-                        [sessionId]: data,
-                    },
-                    isLoadingLivechat: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingLivechat: false,
-                });
-            }
-        } catch {
-            set({ error: "Erreur réseau", isLoadingLivechat: false });
-        }
-    },
-
-    sendLivechatMessage: async (sessionId: string, content: string) => {
-        set({ isSendingLiveMessage: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/livechat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                await get().fetchLivechatMessages(sessionId);
-                set({ isSendingLiveMessage: false });
-                return { success: true };
-            } else {
-                set({ isSendingLiveMessage: false, error: data.error });
-                return {
-                    success: false,
-                    error: data.error || "Erreur lors de l'envoi du message",
-                };
-            }
-        } catch {
-            set({ isSendingLiveMessage: false, error: "Erreur réseau" });
+            set({ isSendingDiscussionMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

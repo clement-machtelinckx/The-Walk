@@ -24,7 +24,7 @@ import { usePolling } from "@/lib/hooks/use-polling";
 import { useRouter } from "next/navigation";
 import { formatFullDate } from "@/lib/utils/date";
 import { PresenceBlock } from "./presence-block";
-import { LivechatBlock } from "./livechat-block";
+import { TableDiscussionBlock } from "./table-discussion-block";
 import { NotesHub } from "./notes/notes-hub";
 import { SessionToolsDrawer } from "./session-tools-drawer";
 import { DiceLogBlock } from "./dice-log-block";
@@ -38,7 +38,6 @@ type LiveSessionHubProps = Readonly<{
 
 function toModuleValues(settings: SessionLiveModuleSettings): SessionLiveModuleSettingsValues {
     return {
-        live_chat: settings.live_chat,
         group_notes: settings.group_notes,
         dice: settings.dice,
         initiative: settings.initiative,
@@ -91,11 +90,8 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
         [liveModules, moduleSettings],
     );
 
-    const hasVisibleMainModules =
-        liveModules.group_notes ||
-        liveModules.dice ||
-        liveModules.initiative ||
-        liveModules.live_chat;
+    const hasVisibleLiveEnrichments =
+        liveModules.group_notes || liveModules.dice || liveModules.initiative;
 
     // Polling centralisé pour vérifier l'état de la session (toutes les 30s)
     const checkSessionStatus = useCallback(async () => {
@@ -254,6 +250,8 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                     )}
                 </Card>
 
+                <TableDiscussionBlock tableId={tableId} sessionId={session.id} context="live" />
+
                 <NotesHub
                     sessionId={session.id}
                     isGM={isGM}
@@ -280,15 +278,15 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                     </div>
                 )}
 
-                {liveModules.live_chat && <LivechatBlock sessionId={session.id} />}
-
-                {!hasVisibleMainModules && (
+                {!hasVisibleLiveEnrichments && (
                     <Card className="border-dashed">
                         <CardContent className="p-4">
-                            <p className="text-sm font-semibold">Aucun module principal affiché.</p>
+                            <p className="text-sm font-semibold">
+                                Aucun enrichissement live affiché.
+                            </p>
                             <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                                Le noyau de session reste disponible. Le MJ peut réactiver des
-                                modules depuis les outils de session.
+                                La discussion de table reste disponible. Le MJ peut réactiver les
+                                autres outils depuis les réglages de session.
                             </p>
                         </CardContent>
                     </Card>
