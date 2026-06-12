@@ -163,6 +163,10 @@ describe("InitiativeService", () => {
                 initiative_modifier: 3,
             }),
         );
+        expect(InitiativeRepository.updatePositionsAsSystem).toHaveBeenCalledWith([
+            { id: playerEntry.id, position: 0 },
+        ]);
+        expect(InitiativeRepository.updatePositions).not.toHaveBeenCalled();
     });
 
     it("refuses a player rolling another member's entry", async () => {
@@ -271,5 +275,26 @@ describe("InitiativeService", () => {
                 modifier: 0,
             }),
         ).rejects.toThrow(ForbiddenError);
+    });
+
+    it("does not let a player reorder initiative entries", async () => {
+        vi.mocked(MembershipService.requireMembership).mockResolvedValue({
+            role: "player",
+        } as Awaited<ReturnType<typeof MembershipService.requireMembership>>);
+        vi.mocked(InitiativeRepository.listEntries).mockResolvedValue([
+            entry(),
+            entry({ id: "00000000-0000-4000-8000-000000000011", user_id: playerB, position: 1 }),
+        ]);
+
+        await expect(
+            InitiativeService.executeAction(playerA, sessionId, {
+                action: "move",
+                entry_id: entry().id,
+                direction: "down",
+            }),
+        ).rejects.toThrow(ForbiddenError);
+
+        expect(InitiativeRepository.updatePositions).not.toHaveBeenCalled();
+        expect(InitiativeRepository.updatePositionsAsSystem).not.toHaveBeenCalled();
     });
 });

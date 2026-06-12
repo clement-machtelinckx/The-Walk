@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requireAuth } from "@/lib/auth/server";
-import { ForbiddenError } from "@/lib/errors";
+import { DatabaseError, ForbiddenError } from "@/lib/errors";
 import { InitiativeService } from "@/lib/services/initiative/initiative-service";
 import { GET, POST } from "./route";
 
@@ -74,5 +74,24 @@ describe("/api/sessions/[sessionId]/initiative", () => {
             { params },
         );
         expect(forbiddenResponse.status).toBe(403);
+    });
+
+    it("does not expose raw database errors", async () => {
+        vi.mocked(InitiativeService.executeAction).mockRejectedValue(
+            new DatabaseError("Players can only submit their own pending initiative"),
+        );
+
+        const response = await POST(
+            new Request(`http://localhost/api/sessions/${sessionId}/initiative`, {
+                method: "POST",
+                body: JSON.stringify({ action: "reset" }),
+            }),
+            { params },
+        );
+
+        expect(response.status).toBe(500);
+        expect(await response.json()).toEqual({
+            error: "Impossible de mettre à jour l'initiative pour le moment.",
+        });
     });
 });

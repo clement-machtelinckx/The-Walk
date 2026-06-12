@@ -209,6 +209,22 @@ language plpgsql
 set search_path = ''
 as $$
 begin
+    if current_user = 'service_role'
+        and new.session_id is not distinct from old.session_id
+        and new.table_id is not distinct from old.table_id
+        and new.participant_type is not distinct from old.participant_type
+        and new.user_id is not distinct from old.user_id
+        and new.label is not distinct from old.label
+        and new.initiative_score is not distinct from old.initiative_score
+        and new.initiative_modifier is not distinct from old.initiative_modifier
+        and new.initiative_requested_at is not distinct from old.initiative_requested_at
+        and new.last_roll_id is not distinct from old.last_roll_id
+        and new.created_by is not distinct from old.created_by
+        and new.created_at is not distinct from old.created_at
+    then
+        return new;
+    end if;
+
     if (select public.is_table_gm(old.table_id)) then
         return new;
     end if;
@@ -355,3 +371,4 @@ $$;
 
 revoke all on function public.delete_empty_scheduled_session(uuid) from public, anon, service_role;
 grant execute on function public.delete_empty_scheduled_session(uuid) to authenticated;
+ 

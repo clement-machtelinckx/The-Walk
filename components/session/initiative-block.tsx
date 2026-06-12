@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useMemo, useRef, useState } from "react";
 import {
     BellRing,
-    ChevronLeft,
-    ChevronRight,
+    Check,
+    ChevronDown,
+    ChevronUp,
     Crosshair,
     Dice5,
     Loader2,
@@ -14,6 +15,7 @@ import {
     Swords,
     Trash2,
     UserPlus,
+    X,
 } from "lucide-react";
 
 import { AvatarCircle } from "@/components/ui/avatar-circle";
@@ -31,14 +33,20 @@ import {
 } from "@/components/ui/select";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { cn } from "@/lib/utils";
-import type { InitiativeActionInput } from "@/lib/validators/initiative";
 import { useAuthStore } from "@/store/auth-store";
-import type { InitiativeEntry, InitiativeSnapshot } from "@/types/initiative";
+import { useInitiativeStore } from "@/store/initiative-store";
+import type { InitiativeEntry } from "@/types/initiative";
 
 type InitiativeBlockProps = Readonly<{
     sessionId: string;
     isGM: boolean;
 }>;
+
+type EntryEdit = {
+    entryId: string;
+    field: "score" | "modifier";
+    value: string;
+};
 
 function entryName(entry: InitiativeEntry) {
     return entry.label || entry.profile?.display_name || "Joueur";
@@ -50,58 +58,38 @@ function formatModifier(modifier: number) {
 
 export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
     const user = useAuthStore((state) => state.user);
-    const [initiative, setInitiative] = useState<InitiativeSnapshot | null>(null);
+    const initiative = useInitiativeStore((state) => state.initiatives[sessionId] || null);
+    const isLoading = useInitiativeStore((state) => state.isLoading);
+    const isMutating = useInitiativeStore((state) => state.isMutating);
+    const storeError = useInitiativeStore((state) => state.error);
+    const fetchInitiative = useInitiativeStore((state) => state.fetchInitiative);
+    const requestInitiative = useInitiativeStore((state) => state.requestInitiative);
+    const addMember = useInitiativeStore((state) => state.addMember);
+    const addCustomParticipant = useInitiativeStore((state) => state.addCustomParticipant);
+    const rollInitiative = useInitiativeStore((state) => state.rollInitiative);
+    const rollCustomMissing = useInitiativeStore((state) => state.rollCustomMissing);
+    const updateEntry = useInitiativeStore((state) => state.updateEntry);
+    const moveEntry = useInitiativeStore((state) => state.moveEntry);
+    const setCurrent = useInitiativeStore((state) => state.setCurrent);
+    const removeEntry = useInitiativeStore((state) => state.removeEntry);
+    const reset = useInitiativeStore((state) => state.reset);
+    const clearStoreError = useInitiativeStore((state) => state.clearError);
+
     const [selectedMemberId, setSelectedMemberId] = useState("");
-    const [myModifier, setMyModifier] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isMutating, setIsMutating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [myModifierOverride, setMyModifierOverride] = useState<number | null>(null);
+    const [isAddingCustom, setIsAddingCustom] = useState(false);
+    const [customLabel, setCustomLabel] = useState("");
+    const [customModifier, setCustomModifier] = useState("0");
+    const [entryEdit, setEntryEdit] = useState<EntryEdit | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
+    const customLabelInputRef = useRef<HTMLInputElement>(null);
 
-    const fetchInitiative = useCallback(async () => {
-        const response = await fetch(`/api/sessions/${sessionId}/initiative`);
-        const data = await response.json();
-
-        if (!response.ok) {
-            setError(data.error || "Impossible de charger l'initiative.");
-            setIsLoading(false);
-            return;
-        }
-
-        setInitiative(data.initiative);
-        setError(null);
-        setIsLoading(false);
-    }, [sessionId]);
-
-    usePolling(fetchInitiative, { interval: 10000 });
-
-    const runAction = useCallback(
-        async (input: InitiativeActionInput) => {
-            if (isMutating) return;
-
-            setIsMutating(true);
-            setError(null);
-            try {
-                const response = await fetch(`/api/sessions/${sessionId}/initiative`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(input),
-                });
-                const data = await response.json();
-
-                if (!response.ok) {
-                    setError(data.error || "Impossible de mettre à jour l'initiative.");
-                    return;
-                }
-
-                setInitiative(data.initiative);
-            } catch {
-                setError("Erreur réseau pendant la mise à jour de l'initiative.");
-            } finally {
-                setIsMutating(false);
-            }
-        },
-        [isMutating, sessionId],
+    const refreshInitiative = useCallback(
+        () => fetchInitiative(sessionId),
+        [fetchInitiative, sessionId],
     );
+
+    usePolling(refreshInitiative, { interval: 10000, enabled: !isMutating });
 
     const entries = useMemo(() => initiative?.entries || [], [initiative?.entries]);
     const memberEntryIds = useMemo(
@@ -128,54 +116,63 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
     const canRollMyInitiative = Boolean(
         myEntry?.initiative_requested_at && myEntry.initiative_score === null,
     );
+    const myModifier = myModifierOverride ?? myEntry?.initiative_modifier ?? 0;
+    const error = localError || storeError;
 
-    useEffect(() => {
-        if (myEntry) setMyModifier(myEntry.initiative_modifier);
-    }, [myEntry]);
-
-    const handleAddCustom = () => {
-        const label = window.prompt("Nom du participant custom");
-        if (!label?.trim()) return;
-
-        const modifierValue = window.prompt("Modificateur d'initiative", "0");
-        if (modifierValue === null) return;
-        const modifier = Number(modifierValue);
-
-        if (!Number.isInteger(modifier) || modifier < -99 || modifier > 99) {
-            setError("Le modificateur doit être un entier entre -99 et 99.");
-            return;
-        }
-
-        void runAction({ action: "add_custom", label: label.trim(), modifier });
+    const clearErrors = () => {
+        setLocalError(null);
+        clearStoreError();
     };
 
-    const handleEditScore = (entry: InitiativeEntry) => {
-        const value = window.prompt(
-            "Score d'initiative. Laissez vide pour remettre en attente.",
-            entry.initiative_score === null ? "" : String(entry.initiative_score),
-        );
-        if (value === null) return;
-        const score = value.trim() === "" ? null : Number(value);
+    const handleAddCustom = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        clearErrors();
 
-        if (score !== null && (!Number.isInteger(score) || score < -999 || score > 999)) {
-            setError("Le score doit être un entier entre -999 et 999.");
+        const label = customLabel.trim();
+        const modifier = Number(customModifier);
+
+        if (!label) {
+            setLocalError("Le nom du participant est requis.");
+            return;
+        }
+        if (!Number.isInteger(modifier) || modifier < -99 || modifier > 99) {
+            setLocalError("Le modificateur doit être un entier entre -99 et 99.");
             return;
         }
 
-        void runAction({ action: "update_entry", entry_id: entry.id, score });
+        const result = await addCustomParticipant(sessionId, label, modifier);
+        if (result.success) {
+            setCustomLabel("");
+            setCustomModifier("0");
+            customLabelInputRef.current?.focus();
+        }
     };
 
-    const handleEditModifier = (entry: InitiativeEntry) => {
-        const value = window.prompt("Modificateur d'initiative", String(entry.initiative_modifier));
-        if (value === null) return;
-        const modifier = Number(value);
+    const handleEntryEdit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!entryEdit) return;
+        clearErrors();
 
-        if (!Number.isInteger(modifier) || modifier < -99 || modifier > 99) {
-            setError("Le modificateur doit être un entier entre -99 et 99.");
+        if (entryEdit.field === "score") {
+            const score = entryEdit.value.trim() === "" ? null : Number(entryEdit.value);
+            if (score !== null && (!Number.isInteger(score) || score < -999 || score > 999)) {
+                setLocalError("Le score doit être un entier entre -999 et 999.");
+                return;
+            }
+
+            const result = await updateEntry(sessionId, entryEdit.entryId, { score });
+            if (result.success) setEntryEdit(null);
             return;
         }
 
-        void runAction({ action: "update_entry", entry_id: entry.id, modifier });
+        const modifier = Number(entryEdit.value);
+        if (!Number.isInteger(modifier) || modifier < -99 || modifier > 99) {
+            setLocalError("Le modificateur doit être un entier entre -99 et 99.");
+            return;
+        }
+
+        const result = await updateEntry(sessionId, entryEdit.entryId, { modifier });
+        if (result.success) setEntryEdit(null);
     };
 
     const entryActions = (entry: InitiativeEntry, index: number): ContextMenuAction[] => {
@@ -185,23 +182,30 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 id: "current",
                 label: isCurrent ? "Retirer le tour actuel" : "Marquer comme tour actuel",
                 icon: Crosshair,
-                onSelect: () =>
-                    void runAction({
-                        action: "set_current",
-                        entry_id: isCurrent ? null : entry.id,
-                    }),
+                onSelect: () => void setCurrent(sessionId, isCurrent ? null : entry.id),
             },
             {
                 id: "score",
                 label: "Modifier le score",
                 icon: Pencil,
-                onSelect: () => handleEditScore(entry),
+                onSelect: () =>
+                    setEntryEdit({
+                        entryId: entry.id,
+                        field: "score",
+                        value:
+                            entry.initiative_score === null ? "" : String(entry.initiative_score),
+                    }),
             },
             {
                 id: "modifier",
                 label: "Modifier le modificateur",
                 icon: Pencil,
-                onSelect: () => handleEditModifier(entry),
+                onSelect: () =>
+                    setEntryEdit({
+                        entryId: entry.id,
+                        field: "modifier",
+                        value: String(entry.initiative_modifier),
+                    }),
             },
         ];
 
@@ -210,31 +214,25 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 id: "roll",
                 label: entry.initiative_score === null ? "Lancer l'initiative" : "Relancer",
                 icon: Dice5,
-                onSelect: () =>
-                    void runAction({
-                        action: "roll",
-                        entry_id: entry.id,
-                    }),
+                onSelect: () => void rollInitiative(sessionId, entry.id),
             });
         }
 
         actions.push(
             {
                 id: "up",
-                label: "Déplacer à gauche",
-                icon: ChevronLeft,
+                label: "Monter dans l'ordre",
+                icon: ChevronUp,
                 disabled: index === 0,
                 separatorBefore: true,
-                onSelect: () =>
-                    void runAction({ action: "move", entry_id: entry.id, direction: "up" }),
+                onSelect: () => void moveEntry(sessionId, entry.id, "up"),
             },
             {
                 id: "down",
-                label: "Déplacer à droite",
-                icon: ChevronRight,
+                label: "Descendre dans l'ordre",
+                icon: ChevronDown,
                 disabled: index === entries.length - 1,
-                onSelect: () =>
-                    void runAction({ action: "move", entry_id: entry.id, direction: "down" }),
+                onSelect: () => void moveEntry(sessionId, entry.id, "down"),
             },
             {
                 id: "remove",
@@ -242,7 +240,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 icon: Trash2,
                 destructive: true,
                 separatorBefore: true,
-                onSelect: () => void runAction({ action: "remove", entry_id: entry.id }),
+                onSelect: () => void removeEntry(sessionId, entry.id),
             },
         );
 
@@ -274,7 +272,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                     <div className="flex flex-wrap gap-2">
                         <Button
                             size="sm"
-                            onClick={() => void runAction({ action: "request" })}
+                            onClick={() => void requestInitiative(sessionId)}
                             disabled={isMutating}
                         >
                             <BellRing />
@@ -283,17 +281,20 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                         <Button
                             size="sm"
                             variant="outline"
-                            onClick={handleAddCustom}
+                            onClick={() => {
+                                clearErrors();
+                                setIsAddingCustom((current) => !current);
+                            }}
                             disabled={isMutating}
                         >
                             <Plus />
-                            Participant custom
+                            Ajouter
                         </Button>
                         {hasPendingCustom && (
                             <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => void runAction({ action: "roll_custom_missing" })}
+                                onClick={() => void rollCustomMissing(sessionId)}
                                 disabled={isMutating}
                             >
                                 <Dice5 />
@@ -308,7 +309,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                                     if (
                                         confirm("Réinitialiser complètement l'ordre d'initiative ?")
                                     ) {
-                                        void runAction({ action: "reset" });
+                                        void reset(sessionId);
                                     }
                                 }}
                                 disabled={isMutating}
@@ -322,10 +323,54 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
             </CardHeader>
 
             <CardContent className="space-y-4">
+                {isGM && isAddingCustom && (
+                    <form
+                        onSubmit={handleAddCustom}
+                        className="bg-background/70 grid gap-2 rounded-md border p-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto]"
+                    >
+                        <label className="space-y-1 text-xs font-medium">
+                            Nom
+                            <Input
+                                autoFocus
+                                ref={customLabelInputRef}
+                                maxLength={80}
+                                placeholder="Gobelin 1"
+                                value={customLabel}
+                                onChange={(event) => setCustomLabel(event.target.value)}
+                            />
+                        </label>
+                        <label className="space-y-1 text-xs font-medium">
+                            Modificateur
+                            <Input
+                                type="number"
+                                min={-99}
+                                max={99}
+                                value={customModifier}
+                                onChange={(event) => setCustomModifier(event.target.value)}
+                            />
+                        </label>
+                        <div className="flex items-end gap-1">
+                            <Button type="submit" size="sm" disabled={isMutating}>
+                                <Check />
+                                Ajouter
+                            </Button>
+                            <Button
+                                type="button"
+                                size="icon-sm"
+                                variant="ghost"
+                                aria-label="Annuler l'ajout"
+                                onClick={() => setIsAddingCustom(false)}
+                            >
+                                <X />
+                            </Button>
+                        </div>
+                    </form>
+                )}
+
                 {isGM && availableMembers.length > 0 && (
                     <div className="flex flex-col gap-2 sm:flex-row">
                         <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
-                            <SelectTrigger className="h-10 min-w-0 flex-1">
+                            <SelectTrigger className="h-9 min-w-0 flex-1">
                                 <SelectValue placeholder="Ajouter un joueur de la table" />
                             </SelectTrigger>
                             <SelectContent>
@@ -337,11 +382,12 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                             </SelectContent>
                         </Select>
                         <Button
+                            size="sm"
                             variant="outline"
                             disabled={!selectedMemberId || isMutating}
-                            onClick={() => {
-                                void runAction({ action: "add_member", user_id: selectedMemberId });
-                                setSelectedMemberId("");
+                            onClick={async () => {
+                                const result = await addMember(sessionId, selectedMemberId);
+                                if (result.success) setSelectedMemberId("");
                             }}
                         >
                             <UserPlus />
@@ -361,18 +407,16 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                                     min={-99}
                                     max={99}
                                     value={myModifier}
-                                    onChange={(event) => setMyModifier(Number(event.target.value))}
+                                    onChange={(event) =>
+                                        setMyModifierOverride(Number(event.target.value))
+                                    }
                                 />
                             </label>
                             <Button
                                 className="self-end sm:w-auto"
                                 disabled={isMutating}
                                 onClick={() =>
-                                    void runAction({
-                                        action: "roll",
-                                        entry_id: myEntry.id,
-                                        modifier: myModifier,
-                                    })
+                                    void rollInitiative(sessionId, myEntry.id, myModifier)
                                 }
                             >
                                 <Dice5 />
@@ -384,7 +428,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
 
                 {error && <p className="text-destructive text-xs font-medium">{error}</p>}
 
-                {isLoading ? (
+                {isLoading && !initiative ? (
                     <div className="flex justify-center py-8">
                         <Loader2 className="text-primary size-5 animate-spin" />
                     </div>
@@ -393,65 +437,110 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                         Aucun participant dans l&apos;ordre d&apos;initiative.
                     </p>
                 ) : (
-                    <div className="overflow-x-auto pb-2">
-                        <ol className="flex min-w-max gap-3">
-                            {entries.map((entry, index) => {
-                                const isCurrent = initiative?.state?.current_entry_id === entry.id;
-                                const isMe = entry.user_id === user?.id;
+                    <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {entries.map((entry, index) => {
+                            const isCurrent = initiative?.state?.current_entry_id === entry.id;
+                            const isMe = entry.user_id === user?.id;
+                            const isEditing = entryEdit?.entryId === entry.id;
 
-                                return (
-                                    <li
-                                        key={entry.id}
-                                        className={cn(
-                                            "bg-background relative w-40 shrink-0 rounded-lg border p-3 shadow-xs",
-                                            isCurrent && "border-primary ring-primary/20 ring-2",
-                                            isMe && !isCurrent && "border-primary/40",
-                                        )}
-                                    >
-                                        <div className="flex items-start justify-between gap-2">
-                                            <AvatarCircle
-                                                avatarKey={entry.profile?.avatar_key}
-                                                name={entryName(entry)}
-                                                size="lg"
-                                            />
+                            return (
+                                <li
+                                    key={entry.id}
+                                    className={cn(
+                                        "bg-background min-w-0 rounded-md border p-2.5 shadow-xs",
+                                        isCurrent && "border-primary ring-primary/20 ring-2",
+                                        isMe && !isCurrent && "border-primary/40",
+                                    )}
+                                >
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <AvatarCircle
+                                            avatarKey={entry.profile?.avatar_key}
+                                            name={entryName(entry)}
+                                            size="md"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex min-w-0 items-center gap-1.5">
+                                                <p className="truncate text-sm font-bold">
+                                                    {entryName(entry)}
+                                                </p>
+                                                {isCurrent && (
+                                                    <Badge className="shrink-0 px-1.5 py-0 text-[9px]">
+                                                        Tour actuel
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <p className="text-muted-foreground text-[10px] font-semibold uppercase">
+                                                {entry.participant_type === "member"
+                                                    ? "Joueur"
+                                                    : "Custom"}
+                                            </p>
+                                        </div>
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            <div className="text-right">
+                                                <p className="text-primary text-xl leading-none font-black">
+                                                    {entry.initiative_score ?? "—"}
+                                                </p>
+                                                <p className="text-muted-foreground text-[10px]">
+                                                    mod. {formatModifier(entry.initiative_modifier)}
+                                                </p>
+                                            </div>
                                             {isGM && (
                                                 <ContextMenuActions
                                                     actions={entryActions(entry, index)}
                                                     label={`Ouvrir les actions pour ${entryName(entry)}`}
+                                                    triggerClassName="size-8"
                                                 />
                                             )}
                                         </div>
-                                        <p className="mt-2 truncate text-sm font-bold">
-                                            {entryName(entry)}
-                                        </p>
-                                        <p className="text-muted-foreground text-[10px] font-semibold uppercase">
-                                            {entry.participant_type === "member"
-                                                ? "Joueur"
-                                                : "Participant custom"}
-                                        </p>
-                                        <div className="mt-3 flex items-end justify-between gap-2">
-                                            <div>
-                                                <p className="text-muted-foreground text-[10px] uppercase">
-                                                    Score
-                                                </p>
-                                                <p className="text-primary text-2xl leading-none font-black">
-                                                    {entry.initiative_score ?? "—"}
-                                                </p>
-                                            </div>
-                                            <Badge variant="outline">
-                                                mod. {formatModifier(entry.initiative_modifier)}
-                                            </Badge>
-                                        </div>
-                                        {isCurrent && (
-                                            <Badge className="mt-3 w-full justify-center">
-                                                Tour actuel
-                                            </Badge>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ol>
-                    </div>
+                                    </div>
+
+                                    {isEditing && entryEdit && (
+                                        <form
+                                            onSubmit={handleEntryEdit}
+                                            className="mt-2 flex items-end gap-1 border-t pt-2"
+                                        >
+                                            <label className="min-w-0 flex-1 space-y-1 text-[11px] font-medium">
+                                                {entryEdit.field === "score"
+                                                    ? "Score (vide = attente)"
+                                                    : "Modificateur"}
+                                                <Input
+                                                    autoFocus
+                                                    type="number"
+                                                    min={entryEdit.field === "score" ? -999 : -99}
+                                                    max={entryEdit.field === "score" ? 999 : 99}
+                                                    value={entryEdit.value}
+                                                    onChange={(event) =>
+                                                        setEntryEdit({
+                                                            ...entryEdit,
+                                                            value: event.target.value,
+                                                        })
+                                                    }
+                                                    className="h-8"
+                                                />
+                                            </label>
+                                            <Button
+                                                type="submit"
+                                                size="icon-sm"
+                                                aria-label="Valider la modification"
+                                                disabled={isMutating}
+                                            >
+                                                <Check />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                size="icon-sm"
+                                                variant="ghost"
+                                                aria-label="Annuler la modification"
+                                                onClick={() => setEntryEdit(null)}
+                                            >
+                                                <X />
+                                            </Button>
+                                        </form>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ol>
                 )}
             </CardContent>
         </Card>

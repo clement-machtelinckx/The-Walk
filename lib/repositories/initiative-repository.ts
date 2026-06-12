@@ -1,4 +1,4 @@
-import { getServerClient } from "@/lib/db";
+import { getServerClient, getServiceRoleClient } from "@/lib/db";
 import { handleDbError } from "@/lib/repositories/_shared/base";
 import type { InitiativeEntry, InitiativeState } from "@/types/initiative";
 
@@ -136,6 +136,21 @@ export const InitiativeRepository = {
     async updatePositions(entries: Array<{ id: string; position: number }>): Promise<void> {
         await Promise.all(
             entries.map((entry) => this.updateEntry(entry.id, { position: entry.position })),
+        );
+    },
+
+    async updatePositionsAsSystem(entries: Array<{ id: string; position: number }>): Promise<void> {
+        const supabase = getServiceRoleClient();
+
+        await Promise.all(
+            entries.map(async (entry) => {
+                const { error } = await supabase
+                    .from("session_initiative_entries")
+                    .update({ position: entry.position })
+                    .eq("id", entry.id);
+
+                handleDbError(error, "InitiativeRepository.updatePositionsAsSystem");
+            }),
         );
     },
 

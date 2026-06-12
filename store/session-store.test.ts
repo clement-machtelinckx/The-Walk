@@ -110,3 +110,84 @@ describe("useSessionStore private message actions", () => {
         expect(useSessionStore.getState().isSendingPrivateMessage).toBe(false);
     });
 });
+
+describe("useSessionStore live module actions", () => {
+    const sessionId = "33333333-3333-4333-8333-333333333333";
+
+    beforeEach(() => {
+        vi.restoreAllMocks();
+        useSessionStore.setState({
+            liveModuleSettings: {},
+            isLoadingLiveModules: false,
+            liveModuleError: null,
+            error: null,
+        });
+    });
+
+    it("loads live module settings by session", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue({
+                    settings: {
+                        group_notes: true,
+                        dice: true,
+                        initiative: true,
+                        presence: false,
+                    },
+                }),
+            }),
+        );
+
+        await useSessionStore.getState().fetchLiveModuleSettings(sessionId);
+
+        expect(fetch).toHaveBeenCalledWith(`/api/sessions/${sessionId}/modules`);
+        expect(useSessionStore.getState().liveModuleSettings[sessionId]).toEqual({
+            group_notes: true,
+            dice: true,
+            initiative: true,
+            presence: false,
+        });
+        expect(useSessionStore.getState().isLoadingLiveModules).toBe(false);
+    });
+
+    it("updates one live module and stores the server response", async () => {
+        useSessionStore.setState({
+            liveModuleSettings: {
+                [sessionId]: {
+                    group_notes: true,
+                    dice: true,
+                    initiative: false,
+                    presence: false,
+                },
+            },
+        });
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue({
+                    settings: {
+                        group_notes: true,
+                        dice: true,
+                        initiative: true,
+                        presence: false,
+                    },
+                }),
+            }),
+        );
+
+        const result = await useSessionStore
+            .getState()
+            .updateLiveModuleSetting(sessionId, "initiative", true);
+
+        expect(result.success).toBe(true);
+        expect(fetch).toHaveBeenCalledWith(`/api/sessions/${sessionId}/modules`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initiative: true }),
+        });
+        expect(useSessionStore.getState().liveModuleSettings[sessionId]?.initiative).toBe(true);
+    });
+});

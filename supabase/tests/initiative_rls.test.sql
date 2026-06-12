@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select extensions.plan(13);
+select extensions.plan(15);
 
 select extensions.has_table(
     'public',
@@ -173,6 +173,26 @@ select extensions.throws_ok(
     'Players can only submit their own pending initiative',
     'a player cannot reorder their own entry'
 );
+
+set local role service_role;
+
+select extensions.lives_ok(
+    $$update public.session_initiative_entries
+      set position = 1
+      where id = 'b3000000-0000-4000-8000-000000000001'$$,
+    'the trusted backend can normalize initiative positions'
+);
+
+select extensions.throws_ok(
+    $$update public.session_initiative_entries
+      set initiative_requested_at = initiative_requested_at + interval '1 second'
+      where id = 'b3000000-0000-4000-8000-000000000001'$$,
+    '42501',
+    'Players can only submit their own pending initiative',
+    'the trusted backend sorting path cannot alter initiative request metadata'
+);
+
+set local role authenticated;
 
 select extensions.is_empty(
     $$update public.session_initiative_entries

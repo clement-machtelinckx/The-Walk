@@ -50,7 +50,7 @@ async function normalizePositions(sessionId: string): Promise<void> {
     );
 }
 
-async function sortByScore(sessionId: string): Promise<void> {
+async function sortByScore(sessionId: string, asSystem = false): Promise<void> {
     const entries = await InitiativeRepository.listEntries(sessionId);
     const sorted = [...entries].sort((left, right) => {
         if (left.initiative_score === null && right.initiative_score === null) {
@@ -61,9 +61,14 @@ async function sortByScore(sessionId: string): Promise<void> {
         return right.initiative_score - left.initiative_score || left.position - right.position;
     });
 
-    await InitiativeRepository.updatePositions(
-        sorted.map((entry, position) => ({ id: entry.id, position })),
-    );
+    const positions = sorted.map((entry, position) => ({ id: entry.id, position }));
+
+    if (asSystem) {
+        await InitiativeRepository.updatePositionsAsSystem(positions);
+        return;
+    }
+
+    await InitiativeRepository.updatePositions(positions);
 }
 
 async function rollEntry(
@@ -216,7 +221,7 @@ async function rollInitiative(
     }
 
     await rollEntry(userId, session, entry, requestedModifier ?? entry.initiative_modifier);
-    await sortByScore(sessionId);
+    await sortByScore(sessionId, membership.role !== "gm");
 }
 
 async function rollCustomMissing(userId: string, sessionId: string): Promise<void> {
