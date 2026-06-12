@@ -36,7 +36,7 @@ async function requireActiveSessionGm(userId: string, sessionId: string): Promis
 async function requireSessionEntry(sessionId: string, entryId: string): Promise<InitiativeEntry> {
     const entry = await InitiativeRepository.getEntry(entryId);
 
-    if (!entry || entry.session_id !== sessionId) {
+    if (entry?.session_id !== sessionId) {
         throw new NotFoundError("Entrée d'initiative", entryId);
     }
 
@@ -134,10 +134,21 @@ async function requestInitiative(userId: string, sessionId: string): Promise<voi
     const targetedUserIds = playerIds.some((playerId) => presentPlayerIds.has(playerId))
         ? playerIds.filter((playerId) => presentPlayerIds.has(playerId))
         : playerIds;
+    const targetedUserIdSet = new Set(targetedUserIds);
+    const nonTargetedMemberEntries = existingEntries.filter(
+        (entry) =>
+            entry.participant_type === "member" &&
+            (entry.user_id === null || !targetedUserIdSet.has(entry.user_id)),
+    );
+    const nonTargetedEntryIds = new Set(nonTargetedMemberEntries.map((entry) => entry.id));
+    const retainedEntries = existingEntries.filter((entry) => !nonTargetedEntryIds.has(entry.id));
 
     const nextPosition =
-        existingEntries.reduce((maximum, entry) => Math.max(maximum, entry.position), -1) + 1;
+        retainedEntries.reduce((maximum, entry) => Math.max(maximum, entry.position), -1) + 1;
 
+    await Promise.all(
+        nonTargetedMemberEntries.map((entry) => InitiativeRepository.removeEntry(entry.id)),
+    );
     await InitiativeRepository.addMemberEntries(
         sessionId,
         session.table_id,
@@ -159,11 +170,14 @@ async function addMember(userId: string, sessionId: string, targetUserId: string
         session.table_id,
     );
 
-    if (!targetMembership || targetMembership.role !== "player") {
+    if (targetMembership?.role !== "player") {
         throw new ValidationError("Seuls les joueurs de la table peuvent rejoindre l'initiative.");
     }
 
-    const entries = await InitiativeRepository.listEntries(sessionId);
+    const [entries, state] = await Promise.all([
+        InitiativeRepository.listEntries(sessionId),
+        InitiativeRepository.getState(sessionId),
+    ]);
     const nextPosition =
         entries.reduce((maximum, entry) => Math.max(maximum, entry.position), -1) + 1;
     await InitiativeRepository.addMemberEntries(
@@ -173,6 +187,13 @@ async function addMember(userId: string, sessionId: string, targetUserId: string
         userId,
         nextPosition,
     );
+
+    const requestedAt = state?.initiative_requested_at;
+    if (requestedAt) {
+        await InitiativeRepository.requestMemberInitiative(sessionId, [targetUserId], requestedAt);
+        await sortByScore(sessionId);
+        await NotificationEventService.notifyInitiativeRequested(session, [targetUserId]);
+    }
 }
 
 async function addCustom(

@@ -34,6 +34,7 @@ type SessionToolsDrawerProps = Readonly<{
 
 type SessionToolsContext = "table" | "live";
 type SessionToolId = "players" | "rolls" | "advanced" | "gm";
+type PlaceholderState = "available" | "live-only" | "future" | "gm-only";
 
 const SESSION_TOOLS: Array<{
     id: SessionToolId;
@@ -72,6 +73,22 @@ const CONTEXT_DESCRIPTION: Record<SessionToolsContext, string> = {
     live: "Outils secondaires du live. Les modules futurs restent regroupés hors du noyau de session.",
 };
 
+const PLACEHOLDER_BADGES: Record<PlaceholderState, string> = {
+    available: "Disponible",
+    "live-only": "Disponible en live",
+    future: "Prévu",
+    "gm-only": "MJ",
+};
+
+function initiativeToolDetail(isLive: boolean, isEnabled: boolean): string {
+    if (isLive) {
+        if (isEnabled) return "L'ordre de tour indicatif est affiché dans le live.";
+        return "Activez le module initiative depuis l'onglet MJ.";
+    }
+
+    return "Disponible pendant une session live.";
+}
+
 function ToolPanel({
     icon: Icon,
     title,
@@ -106,16 +123,9 @@ function PlaceholderItem({
 }: {
     label: string;
     detail: string;
-    state?: "available" | "live-only" | "future" | "gm-only";
+    state?: PlaceholderState;
 }) {
-    const badge =
-        state === "live-only"
-            ? "Disponible en live"
-            : state === "future"
-              ? "Prévu"
-              : state === "gm-only"
-                ? "MJ"
-                : "Disponible";
+    const badge = PLACEHOLDER_BADGES[state];
 
     return (
         <div
@@ -268,13 +278,10 @@ export function SessionToolsDrawer({
                                     <DiceLogBlock tableId={tableId} sessionId={sessionId} />
                                     <PlaceholderItem
                                         label="Initiative"
-                                        detail={
-                                            isLive
-                                                ? moduleSettings?.initiative
-                                                    ? "L'ordre de tour indicatif est affiché dans le live."
-                                                    : "Activez le module initiative depuis l'onglet MJ."
-                                                : "Disponible pendant une session live."
-                                        }
+                                        detail={initiativeToolDetail(
+                                            isLive,
+                                            Boolean(moduleSettings?.initiative),
+                                        )}
                                         state={
                                             isLive && moduleSettings?.initiative
                                                 ? "available"

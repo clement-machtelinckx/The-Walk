@@ -32,12 +32,12 @@ export function NotificationCenter() {
     const markAllNotificationsAsRead = useNotificationStore((state) => state.markAllAsRead);
 
     useEffect(() => {
-        void fetchUnreadCount();
+        fetchUnreadCount();
     }, [fetchUnreadCount]);
 
     useEffect(() => {
         if (isOpen) {
-            void fetchNotifications();
+            fetchNotifications();
         }
     }, [fetchNotifications, isOpen]);
 

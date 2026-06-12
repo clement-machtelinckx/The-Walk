@@ -27,7 +27,7 @@ export const InitiativeRepository = {
             .order("created_at", { ascending: true });
 
         handleDbError(error, "InitiativeRepository.listEntries");
-        return (data as unknown as InitiativeEntry[]) || [];
+        return data || [];
     },
 
     async getEntry(entryId: string): Promise<InitiativeEntry | null> {
@@ -39,7 +39,7 @@ export const InitiativeRepository = {
             .maybeSingle();
 
         handleDbError(error, "InitiativeRepository.getEntry");
-        return data as unknown as InitiativeEntry | null;
+        return data;
     },
 
     async getState(sessionId: string): Promise<InitiativeState | null> {
@@ -51,7 +51,7 @@ export const InitiativeRepository = {
             .maybeSingle();
 
         handleDbError(error, "InitiativeRepository.getState");
-        return data as InitiativeState | null;
+        return data;
     },
 
     async addMemberEntries(

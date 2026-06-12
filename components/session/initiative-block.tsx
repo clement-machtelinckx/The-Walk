@@ -118,6 +118,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
     );
     const myModifier = myModifierOverride ?? myEntry?.initiative_modifier ?? 0;
     const error = localError || storeError;
+    const isInitialLoading = isLoading && !initiative;
 
     const clearErrors = () => {
         setLocalError(null);
@@ -182,7 +183,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 id: "current",
                 label: isCurrent ? "Retirer le tour actuel" : "Marquer comme tour actuel",
                 icon: Crosshair,
-                onSelect: () => void setCurrent(sessionId, isCurrent ? null : entry.id),
+                onSelect: () => setCurrent(sessionId, isCurrent ? null : entry.id),
             },
             {
                 id: "score",
@@ -214,7 +215,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 id: "roll",
                 label: entry.initiative_score === null ? "Lancer l'initiative" : "Relancer",
                 icon: Dice5,
-                onSelect: () => void rollInitiative(sessionId, entry.id),
+                onSelect: () => rollInitiative(sessionId, entry.id),
             });
         }
 
@@ -225,14 +226,14 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 icon: ChevronUp,
                 disabled: index === 0,
                 separatorBefore: true,
-                onSelect: () => void moveEntry(sessionId, entry.id, "up"),
+                onSelect: () => moveEntry(sessionId, entry.id, "up"),
             },
             {
                 id: "down",
                 label: "Descendre dans l'ordre",
                 icon: ChevronDown,
                 disabled: index === entries.length - 1,
-                onSelect: () => void moveEntry(sessionId, entry.id, "down"),
+                onSelect: () => moveEntry(sessionId, entry.id, "down"),
             },
             {
                 id: "remove",
@@ -240,7 +241,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                 icon: Trash2,
                 destructive: true,
                 separatorBefore: true,
-                onSelect: () => void removeEntry(sessionId, entry.id),
+                onSelect: () => removeEntry(sessionId, entry.id),
             },
         );
 
@@ -272,7 +273,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                     <div className="flex flex-wrap gap-2">
                         <Button
                             size="sm"
-                            onClick={() => void requestInitiative(sessionId)}
+                            onClick={() => requestInitiative(sessionId)}
                             disabled={isMutating}
                         >
                             <BellRing />
@@ -294,7 +295,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => void rollCustomMissing(sessionId)}
+                                onClick={() => rollCustomMissing(sessionId)}
                                 disabled={isMutating}
                             >
                                 <Dice5 />
@@ -309,7 +310,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                                     if (
                                         confirm("Réinitialiser complètement l'ordre d'initiative ?")
                                     ) {
-                                        void reset(sessionId);
+                                        reset(sessionId);
                                     }
                                 }}
                                 disabled={isMutating}
@@ -415,9 +416,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
                             <Button
                                 className="self-end sm:w-auto"
                                 disabled={isMutating}
-                                onClick={() =>
-                                    void rollInitiative(sessionId, myEntry.id, myModifier)
-                                }
+                                onClick={() => rollInitiative(sessionId, myEntry.id, myModifier)}
                             >
                                 <Dice5 />
                                 Lancer mon initiative
@@ -428,15 +427,17 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
 
                 {error && <p className="text-destructive text-xs font-medium">{error}</p>}
 
-                {isLoading && !initiative ? (
+                {isInitialLoading && (
                     <div className="flex justify-center py-8">
                         <Loader2 className="text-primary size-5 animate-spin" />
                     </div>
-                ) : entries.length === 0 ? (
+                )}
+                {!isInitialLoading && entries.length === 0 && (
                     <p className="text-muted-foreground bg-background/50 rounded-md border border-dashed p-4 text-xs">
                         Aucun participant dans l&apos;ordre d&apos;initiative.
                     </p>
-                ) : (
+                )}
+                {!isInitialLoading && entries.length > 0 && (
                     <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         {entries.map((entry, index) => {
                             const isCurrent = initiative?.state?.current_entry_id === entry.id;

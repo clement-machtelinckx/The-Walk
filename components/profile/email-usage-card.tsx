@@ -12,7 +12,7 @@ export function EmailUsageCard() {
     const fetchUsage = useEmailUsageStore((state) => state.fetchUsage);
 
     useEffect(() => {
-        void fetchUsage();
+        fetchUsage();
     }, [fetchUsage]);
 
     return (

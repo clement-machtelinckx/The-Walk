@@ -69,22 +69,22 @@ export const useInitiativeStore = create<InitiativeStore>((set, get) => {
             });
             const data = await response.json();
 
-            if (!response.ok) {
-                const error = initiativeErrorMessage(
-                    data.error,
-                    "Impossible de mettre à jour l'initiative.",
-                );
-                set({ error });
-                return { success: false, error };
+            if (response.ok) {
+                set((state) => ({
+                    initiatives: {
+                        ...state.initiatives,
+                        [sessionId]: data.initiative,
+                    },
+                }));
+                return { success: true };
             }
 
-            set((state) => ({
-                initiatives: {
-                    ...state.initiatives,
-                    [sessionId]: data.initiative,
-                },
-            }));
-            return { success: true };
+            const error = initiativeErrorMessage(
+                data.error,
+                "Impossible de mettre à jour l'initiative.",
+            );
+            set({ error });
+            return { success: false, error };
         } catch {
             const error = "Erreur réseau pendant la mise à jour de l'initiative.";
             set({ error });
@@ -107,25 +107,25 @@ export const useInitiativeStore = create<InitiativeStore>((set, get) => {
                 const response = await fetch(`/api/sessions/${sessionId}/initiative`);
                 const data = await response.json();
 
-                if (!response.ok) {
-                    set({
-                        error: initiativeErrorMessage(
-                            data.error,
-                            "Impossible de charger l'initiative.",
-                        ),
+                if (response.ok) {
+                    set((state) => ({
+                        initiatives: {
+                            ...state.initiatives,
+                            [sessionId]: data.initiative,
+                        },
                         isLoading: false,
-                    });
+                        error: null,
+                    }));
                     return;
                 }
 
-                set((state) => ({
-                    initiatives: {
-                        ...state.initiatives,
-                        [sessionId]: data.initiative,
-                    },
+                set({
+                    error: initiativeErrorMessage(
+                        data.error,
+                        "Impossible de charger l'initiative.",
+                    ),
                     isLoading: false,
-                    error: null,
-                }));
+                });
             } catch {
                 set({
                     error: "Erreur réseau pendant le chargement de l'initiative.",

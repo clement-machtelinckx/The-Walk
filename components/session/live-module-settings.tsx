@@ -64,7 +64,7 @@ export function LiveModuleSettings({
     const [feedback, setFeedback] = useState<string | null>(null);
 
     useEffect(() => {
-        void fetchLiveModuleSettings(sessionId).then((nextSettings) => {
+        fetchLiveModuleSettings(sessionId).then((nextSettings) => {
             if (nextSettings) onSettingsChange?.(nextSettings);
         });
     }, [fetchLiveModuleSettings, onSettingsChange, sessionId]);
