@@ -29,6 +29,7 @@ Les notifications in-app sont stockees dans `notifications` :
 - prochaine session planifiee ;
 - message prive recu ;
 - session live demarree.
+- initiative demandee aux joueurs presents, ou a defaut aux joueurs de la table.
 
 ## Limites actuelles
 

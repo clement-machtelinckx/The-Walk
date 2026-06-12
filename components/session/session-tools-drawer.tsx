@@ -270,10 +270,16 @@ export function SessionToolsDrawer({
                                         label="Initiative"
                                         detail={
                                             isLive
-                                                ? "Le suivi d'ordre de tour pourra partager ce panneau avec les outils de dés."
+                                                ? moduleSettings?.initiative
+                                                    ? "L'ordre de tour indicatif est affiché dans le live."
+                                                    : "Activez le module initiative depuis l'onglet MJ."
                                                 : "Disponible pendant une session live."
                                         }
-                                        state={isLive ? "available" : "live-only"}
+                                        state={
+                                            isLive && moduleSettings?.initiative
+                                                ? "available"
+                                                : "live-only"
+                                        }
                                     />
                                 </ToolPanel>
                             </TabsContent>
