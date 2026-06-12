@@ -2,7 +2,7 @@ import { Session } from "@/types/session";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Ban, Calendar, Edit, FileText, Loader2, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ContextMenuActions, type ContextMenuAction } from "@/components/ui/context-menu-actions";
 import { formatFullDate, isPastDate } from "@/lib/utils/date";
 
 type SessionCardProps = Readonly<{
@@ -34,6 +34,42 @@ export function SessionCard({
     const statusConfig = statusConfigs[session.status];
     const canManageScheduled = canEdit && session.status === "scheduled";
     const isOverdue = session.status === "scheduled" && isPastDate(session.scheduled_at);
+    const isManaging = Boolean(isCancelling || isDeleting);
+    const managementActions: ContextMenuAction[] = [];
+
+    if (onEdit) {
+        managementActions.push({
+            id: "edit",
+            label: "Modifier la session",
+            icon: Edit,
+            onSelect: onEdit,
+            disabled: isManaging,
+        });
+    }
+
+    if (canManageScheduled && onCancelSession) {
+        managementActions.push({
+            id: "cancel",
+            label: isCancelling ? "Annulation en cours..." : "Annuler la session",
+            icon: isCancelling ? Loader2 : Ban,
+            iconClassName: isCancelling ? "animate-spin" : undefined,
+            onSelect: onCancelSession,
+            disabled: isManaging,
+            separatorBefore: managementActions.length > 0,
+        });
+    }
+
+    if (canManageScheduled && onDeleteSession) {
+        managementActions.push({
+            id: "delete",
+            label: isDeleting ? "Suppression en cours..." : "Supprimer la session",
+            icon: isDeleting ? Loader2 : Trash2,
+            iconClassName: isDeleting ? "animate-spin" : undefined,
+            onSelect: onDeleteSession,
+            disabled: isManaging,
+            destructive: true,
+        });
+    }
 
     return (
         <Card className="border-primary/20 bg-card/50 overflow-hidden shadow-sm">
@@ -76,50 +112,12 @@ export function SessionCard({
                 )}
             </CardContent>
 
-            {canEdit && (
-                <CardFooter className="bg-muted/20 flex flex-col gap-2 border-t py-3 sm:flex-row sm:justify-end">
-                    {canManageScheduled && onCancelSession && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={onCancelSession}
-                            disabled={isCancelling || isDeleting}
-                            className="w-full sm:w-auto"
-                        >
-                            {isCancelling ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <Ban className="mr-2 h-4 w-4" />
-                            )}
-                            Annuler
-                        </Button>
-                    )}
-                    {canManageScheduled && onDeleteSession && (
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={onDeleteSession}
-                            disabled={isCancelling || isDeleting}
-                            className="w-full sm:w-auto"
-                        >
-                            {isDeleting ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <Trash2 className="mr-2 h-4 w-4" />
-                            )}
-                            Supprimer
-                        </Button>
-                    )}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={onEdit}
-                        disabled={isCancelling || isDeleting}
-                        className="w-full sm:w-auto"
-                    >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Modifier la session
-                    </Button>
+            {canEdit && managementActions.length > 0 && (
+                <CardFooter className="bg-muted/20 flex justify-end border-t py-2">
+                    <ContextMenuActions
+                        actions={managementActions}
+                        label={`Ouvrir les actions de la session ${session.title}`}
+                    />
                 </CardFooter>
             )}
         </Card>
