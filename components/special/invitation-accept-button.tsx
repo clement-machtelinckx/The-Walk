@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { useInvitationStore } from "@/store/invitation-store";
 
 type InvitationAcceptButtonProps = Readonly<{
     token: string;
@@ -14,35 +15,27 @@ export function InvitationAcceptButton({ token }: InvitationAcceptButtonProps) {
     const [error, setError] = useState<string | null>(null);
     const [isSuccess, setIsSuccess] = useState(false);
     const router = useRouter();
+    const acceptInvitation = useInvitationStore((state) => state.acceptInvitation);
 
     const handleAccept = async () => {
         setIsLoading(true);
         setError(null);
 
-        try {
-            const response = await fetch(`/api/invitations/${token}/accept`, {
-                method: "POST",
-            });
+        const result = await acceptInvitation(token);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                setError(result.error || "Une erreur est survenue.");
-                setIsLoading(false);
-                return;
-            }
-
-            setIsSuccess(true);
-
-            // Short delay to show success state
-            setTimeout(() => {
-                router.push(result.redirectTo || "/tables");
-                router.refresh();
-            }, 1000);
-        } catch {
-            setError("Erreur réseau ou serveur.");
+        if (!result.success) {
+            setError(result.error || "Une erreur est survenue.");
             setIsLoading(false);
+            return;
         }
+
+        setIsSuccess(true);
+
+        // Short delay to show success state
+        setTimeout(() => {
+            router.push(result.redirectTo || "/tables");
+            router.refresh();
+        }, 1000);
     };
 
     if (isSuccess) {

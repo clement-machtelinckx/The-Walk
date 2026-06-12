@@ -13,6 +13,10 @@ import {
     SessionResponseInput,
 } from "@/lib/validators/session";
 import { RollCallInput } from "@/lib/validators/presence";
+import type {
+    SessionLiveModuleKey,
+    SessionLiveModuleSettingsValues,
+} from "@/types/live-module-settings";
 
 interface PresenceStateData {
     rollCall: RollCallMember[];
@@ -22,6 +26,12 @@ interface PresenceStateData {
 export interface SessionHistoryItem {
     session: Session;
     presenceSummary: PresenceSummary | null;
+}
+
+export interface SessionReminderSummary {
+    sent: number;
+    failed: number;
+    skipped: number;
 }
 
 interface SessionState {
@@ -34,6 +44,7 @@ interface SessionState {
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
     groupNotes: Record<string, GroupNote | null>;
+    liveModuleSettings: Record<string, SessionLiveModuleSettingsValues | null>;
 
     // Loading states
     isLoadingSession: boolean;
@@ -53,6 +64,8 @@ interface SessionState {
     isSavingPresence: boolean;
     isSavingPersonalNote: boolean;
     isSavingGroupNote: boolean;
+    isLoadingLiveModules: boolean;
+    liveModuleError: string | null;
     error: string | null;
 
     // Actions
@@ -120,6 +133,20 @@ interface SessionState {
         error?: string;
         code?: string;
     }>;
+    setLiveModuleSettings: (sessionId: string, settings: SessionLiveModuleSettingsValues) => void;
+    fetchLiveModuleSettings: (sessionId: string) => Promise<SessionLiveModuleSettingsValues | null>;
+    updateLiveModuleSetting: (
+        sessionId: string,
+        module: SessionLiveModuleKey,
+        enabled: boolean,
+    ) => Promise<{
+        success: boolean;
+        settings?: SessionLiveModuleSettingsValues;
+        error?: string;
+    }>;
+    sendSessionReminder: (
+        sessionId: string,
+    ) => Promise<{ success: boolean; summary?: SessionReminderSummary; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -132,6 +159,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     presenceData: {},
     personalNotes: {},
     groupNotes: {},
+    liveModuleSettings: {},
     isLoadingSession: false,
     isLoadingActiveSession: false,
     isLoadingHistory: false,
@@ -149,6 +177,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isSavingPresence: false,
     isSavingPersonalNote: false,
     isSavingGroupNote: false,
+    isLoadingLiveModules: false,
+    liveModuleError: null,
     error: null,
 
     // Actions
@@ -697,6 +727,102 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         } catch {
             set({ isSavingGroupNote: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    setLiveModuleSettings: (sessionId, settings) =>
+        set((state) => ({
+            liveModuleSettings: {
+                ...state.liveModuleSettings,
+                [sessionId]: settings,
+            },
+        })),
+
+    fetchLiveModuleSettings: async (sessionId: string) => {
+        set({ isLoadingLiveModules: true, liveModuleError: null });
+
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/modules`);
+            const data = await response.json();
+
+            if (response.ok && data.settings) {
+                const settings: SessionLiveModuleSettingsValues = {
+                    group_notes: data.settings.group_notes,
+                    dice: data.settings.dice,
+                    initiative: data.settings.initiative,
+                    presence: data.settings.presence,
+                };
+                get().setLiveModuleSettings(sessionId, settings);
+                return settings;
+            } else if (!response.ok) {
+                set({ liveModuleError: data.error || "Impossible de charger les modules." });
+            }
+        } catch {
+            set({ liveModuleError: "Erreur réseau pendant le chargement des modules." });
+        } finally {
+            set({ isLoadingLiveModules: false });
+        }
+
+        return null;
+    },
+
+    updateLiveModuleSetting: async (sessionId, module, enabled) => {
+        const previousSettings = get().liveModuleSettings[sessionId];
+        if (!previousSettings) {
+            return { success: false, error: "Impossible de charger les modules." };
+        }
+
+        get().setLiveModuleSettings(sessionId, { ...previousSettings, [module]: enabled });
+        set({ liveModuleError: null });
+
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/modules`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ [module]: enabled }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.error || "Impossible d'enregistrer ce module.";
+                get().setLiveModuleSettings(sessionId, previousSettings);
+                set({ liveModuleError: error });
+                return { success: false, error };
+            }
+
+            const settings: SessionLiveModuleSettingsValues = {
+                group_notes: data.settings.group_notes,
+                dice: data.settings.dice,
+                initiative: data.settings.initiative,
+                presence: data.settings.presence,
+            };
+            get().setLiveModuleSettings(sessionId, settings);
+            return { success: true, settings };
+        } catch {
+            const error = "Erreur réseau pendant l'enregistrement.";
+            get().setLiveModuleSettings(sessionId, previousSettings);
+            set({ liveModuleError: error });
+            return { success: false, error };
+        }
+    },
+
+    sendSessionReminder: async (sessionId: string) => {
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/reminder-email`, {
+                method: "POST",
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.summary) {
+                return {
+                    success: false,
+                    error: data.error || "Impossible d'envoyer le rappel email.",
+                };
+            }
+
+            return { success: true, summary: data.summary };
+        } catch {
+            return { success: false, error: "Impossible d'envoyer le rappel email." };
         }
     },
 }));

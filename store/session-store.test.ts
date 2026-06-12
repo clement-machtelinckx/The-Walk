@@ -110,3 +110,124 @@ describe("useSessionStore private message actions", () => {
         expect(useSessionStore.getState().isSendingPrivateMessage).toBe(false);
     });
 });
+
+describe("useSessionStore live module actions", () => {
+    const sessionId = "33333333-3333-4333-8333-333333333333";
+
+    beforeEach(() => {
+        vi.restoreAllMocks();
+        useSessionStore.setState({
+            liveModuleSettings: {},
+            isLoadingLiveModules: false,
+            liveModuleError: null,
+            error: null,
+        });
+    });
+
+    it("loads live module settings by session", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue({
+                    settings: {
+                        group_notes: true,
+                        dice: true,
+                        initiative: true,
+                        presence: false,
+                    },
+                }),
+            }),
+        );
+
+        await useSessionStore.getState().fetchLiveModuleSettings(sessionId);
+
+        expect(fetch).toHaveBeenCalledWith(`/api/sessions/${sessionId}/modules`);
+        expect(useSessionStore.getState().liveModuleSettings[sessionId]).toEqual({
+            group_notes: true,
+            dice: true,
+            initiative: true,
+            presence: false,
+        });
+        expect(useSessionStore.getState().isLoadingLiveModules).toBe(false);
+    });
+
+    it("updates one live module and stores the server response", async () => {
+        useSessionStore.setState({
+            liveModuleSettings: {
+                [sessionId]: {
+                    group_notes: true,
+                    dice: true,
+                    initiative: false,
+                    presence: false,
+                },
+            },
+        });
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue({
+                    settings: {
+                        group_notes: true,
+                        dice: true,
+                        initiative: true,
+                        presence: false,
+                    },
+                }),
+            }),
+        );
+
+        const result = await useSessionStore
+            .getState()
+            .updateLiveModuleSetting(sessionId, "initiative", true);
+
+        expect(result.success).toBe(true);
+        expect(fetch).toHaveBeenCalledWith(`/api/sessions/${sessionId}/modules`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initiative: true }),
+        });
+        expect(useSessionStore.getState().liveModuleSettings[sessionId]?.initiative).toBe(true);
+    });
+});
+
+describe("useSessionStore session reminder action", () => {
+    const sessionId = "33333333-3333-4333-8333-333333333333";
+
+    beforeEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("sends a session reminder and returns its summary", async () => {
+        const summary = { sent: 2, failed: 0, skipped: 1 };
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue({ summary }),
+            }),
+        );
+
+        const result = await useSessionStore.getState().sendSessionReminder(sessionId);
+
+        expect(result).toEqual({ success: true, summary });
+        expect(fetch).toHaveBeenCalledWith(`/api/sessions/${sessionId}/reminder-email`, {
+            method: "POST",
+        });
+    });
+
+    it("surfaces session reminder API errors", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: false,
+                json: vi.fn().mockResolvedValue({ error: "Quota atteint" }),
+            }),
+        );
+
+        const result = await useSessionStore.getState().sendSessionReminder(sessionId);
+
+        expect(result).toEqual({ success: false, error: "Quota atteint" });
+    });
+});

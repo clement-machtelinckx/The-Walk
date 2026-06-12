@@ -14,6 +14,8 @@ Cette page resume les principales entites metier. Le schema exact reste dans `su
 - `session_responses` : reponse RSVP d'un membre : `going`, `maybe`, `declined`, `pending`.
 - `session_presence` : presence pendant ou autour de la session : `present`, `absent`, `late`, `excused`.
 - `session_live_enabled_modules` : modules live actives par session.
+- `session_initiative_entries` : ordre d'initiative indicatif, joueurs et participants custom.
+- `session_initiative_state` : demande d'initiative et participant actuellement mis en avant.
 
 ## Invitations
 

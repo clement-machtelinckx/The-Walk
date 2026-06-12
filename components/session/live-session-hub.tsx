@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Session } from "@/types/session";
 import type {
     SessionLiveModuleSettings,
@@ -9,16 +9,7 @@ import type {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-    Ban,
-    LogOut,
-    Loader2,
-    FileText,
-    ChevronDown,
-    ChevronUp,
-    Dice5,
-    Swords,
-} from "lucide-react";
+import { Ban, LogOut, Loader2, FileText, ChevronDown, ChevronUp, Dice5 } from "lucide-react";
 import { useSessionStore } from "@/store/session-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { useRouter } from "next/navigation";
@@ -28,6 +19,7 @@ import { TableDiscussionBlock } from "./table-discussion-block";
 import { NotesHub } from "./notes/notes-hub";
 import { SessionToolsDrawer } from "./session-tools-drawer";
 import { DiceLogBlock } from "./dice-log-block";
+import { InitiativeBlock } from "./initiative-block";
 
 type LiveSessionHubProps = Readonly<{
     session: Session;
@@ -45,26 +37,6 @@ function toModuleValues(settings: SessionLiveModuleSettings): SessionLiveModuleS
     };
 }
 
-function InitiativeBlock() {
-    return (
-        <Card className="border-primary/10 bg-primary/5">
-            <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase">
-                    <Swords className="text-primary h-4 w-4" />
-                    Initiative
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-muted-foreground bg-background/60 rounded-md border border-dashed p-3 text-xs leading-relaxed">
-                    Le suivi d&apos;initiative n&apos;a pas encore de bloc dédié. Le module est
-                    branché à la configuration et pourra accueillir l&apos;outil d&apos;ordre de
-                    tour.
-                </p>
-            </CardContent>
-        </Card>
-    );
-}
-
 export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: LiveSessionHubProps) {
     const router = useRouter();
     const {
@@ -74,13 +46,20 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
         isCancellingSession,
         activeSessions,
         fetchActiveSession,
+        liveModuleSettings,
+        setLiveModuleSettings,
+        fetchLiveModuleSettings,
     } = useSessionStore();
     const isGM = myRole === "gm";
 
     const [isSummaryCollapsed, setIsSummaryCollapsed] = useState(false);
-    const [liveModules, setLiveModules] = useState<SessionLiveModuleSettingsValues>(
-        toModuleValues(moduleSettings),
-    );
+    const liveModules = liveModuleSettings[session.id] || toModuleValues(moduleSettings);
+
+    useEffect(() => {
+        if (!liveModuleSettings[session.id]) {
+            setLiveModuleSettings(session.id, toModuleValues(moduleSettings));
+        }
+    }, [liveModuleSettings, moduleSettings, session.id, setLiveModuleSettings]);
 
     const currentModuleSettings = useMemo<SessionLiveModuleSettings>(
         () => ({
@@ -105,13 +84,13 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
     usePolling(checkSessionStatus, { interval: 30000 });
 
     const refreshModuleSettings = useCallback(async () => {
-        const response = await fetch(`/api/sessions/${session.id}/modules`);
-        const data = await response.json();
+        await fetchLiveModuleSettings(session.id);
+    }, [fetchLiveModuleSettings, session.id]);
 
-        if (response.ok && data.settings) {
-            setLiveModules(toModuleValues(data.settings));
-        }
-    }, [session.id]);
+    const handleModuleSettingsChange = useCallback(
+        (settings: SessionLiveModuleSettingsValues) => setLiveModuleSettings(session.id, settings),
+        [session.id, setLiveModuleSettings],
+    );
 
     usePolling(refreshModuleSettings, { interval: 15000 });
 
@@ -153,7 +132,7 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                 context="live"
                 sessionId={session.id}
                 moduleSettings={currentModuleSettings}
-                onModuleSettingsChange={setLiveModules}
+                onModuleSettingsChange={handleModuleSettingsChange}
             />
 
             {/* Header plus compact */}
@@ -274,7 +253,9 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                             </Card>
                         )}
 
-                        {liveModules.initiative && <InitiativeBlock />}
+                        {liveModules.initiative && (
+                            <InitiativeBlock sessionId={session.id} isGM={isGM} />
+                        )}
                     </div>
                 )}
 

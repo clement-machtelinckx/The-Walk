@@ -44,3 +44,6 @@
 - Permissions cote serveur, completees par RLS Supabase.
 - Separation entre affichage, orchestration metier et persistance.
 - UI organisee par domaine pour faciliter la reprise.
+- Les composants client de feature conservent leur etat UI local, mais deleguent les appels API
+  metier reutilisables aux stores Zustand ou a une abstraction client dediee. Un appel direct reste
+  acceptable uniquement pour un cas ponctuel explicitement assume, notamment un prototype isole.

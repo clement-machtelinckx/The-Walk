@@ -1,60 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AlertCircle, Loader2, Mail } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { EmailUsageSummary } from "@/types/email";
-
-interface EmailUsageResponse {
-    usage: EmailUsageSummary;
-}
+import { useEmailUsageStore } from "@/store/email-usage-store";
 
 export function EmailUsageCard() {
-    const [usage, setUsage] = useState<EmailUsageSummary | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const usage = useEmailUsageStore((state) => state.usage);
+    const isLoading = useEmailUsageStore((state) => state.isLoading);
+    const error = useEmailUsageStore((state) => state.error);
+    const fetchUsage = useEmailUsageStore((state) => state.fetchUsage);
 
     useEffect(() => {
-        let isMounted = true;
-
-        async function fetchUsage() {
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const response = await fetch("/api/email/usage");
-                const payload = (await response.json()) as Partial<EmailUsageResponse> & {
-                    error?: string;
-                };
-
-                if (!response.ok || !payload.usage) {
-                    throw new Error(payload.error || "Impossible de charger l'usage email.");
-                }
-
-                if (isMounted) {
-                    setUsage(payload.usage);
-                }
-            } catch (fetchError) {
-                if (isMounted) {
-                    setError(
-                        fetchError instanceof Error
-                            ? fetchError.message
-                            : "Impossible de charger l'usage email.",
-                    );
-                }
-            } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
-            }
-        }
-
         fetchUsage();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
+    }, [fetchUsage]);
 
     return (
         <Card className="border-primary/10 bg-card/50 shadow-sm">
