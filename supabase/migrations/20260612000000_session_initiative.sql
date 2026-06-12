@@ -371,4 +371,3 @@ $$;
 
 revoke all on function public.delete_empty_scheduled_session(uuid) from public, anon, service_role;
 grant execute on function public.delete_empty_scheduled_session(uuid) to authenticated;
- 

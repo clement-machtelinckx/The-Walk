@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, Check, CheckCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,136 +15,45 @@ import {
 import { formatShortDate } from "@/lib/utils/date";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/types/notification";
-
-interface NotificationsResponse {
-    data: Notification[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-}
-
-interface UnreadCountResponse {
-    unreadCount: number;
-}
-
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-    const response = await fetch(url, init);
-    const payload = (await response.json()) as T & { error?: string };
-
-    if (!response.ok) {
-        throw new Error(payload.error || "Une erreur est survenue.");
-    }
-
-    return payload;
-}
+import { useNotificationStore } from "@/store/notification-store";
 
 export function NotificationCenter() {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isMarkingAll, setIsMarkingAll] = useState(false);
     const [activeNotificationId, setActiveNotificationId] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
-
-    const refreshUnreadCount = useCallback(async () => {
-        const data = await fetchJson<UnreadCountResponse>("/api/notifications/unread-count");
-        setUnreadCount(data.unreadCount);
-    }, []);
-
-    const refreshNotifications = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const data = await fetchJson<NotificationsResponse>("/api/notifications?limit=20");
-            setNotifications(data.data);
-            await refreshUnreadCount();
-        } catch (fetchError) {
-            setError(
-                fetchError instanceof Error
-                    ? fetchError.message
-                    : "Impossible de charger les notifications.",
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    }, [refreshUnreadCount]);
+    const notifications = useNotificationStore((state) => state.notifications);
+    const unreadCount = useNotificationStore((state) => state.unreadCount);
+    const isLoading = useNotificationStore((state) => state.isLoading);
+    const isMarkingAll = useNotificationStore((state) => state.isMarkingAll);
+    const error = useNotificationStore((state) => state.error);
+    const fetchUnreadCount = useNotificationStore((state) => state.fetchUnreadCount);
+    const fetchNotifications = useNotificationStore((state) => state.fetchNotifications);
+    const markNotificationAsRead = useNotificationStore((state) => state.markAsRead);
+    const markAllNotificationsAsRead = useNotificationStore((state) => state.markAllAsRead);
 
     useEffect(() => {
-        refreshUnreadCount().catch(() => {
-            setUnreadCount(0);
-        });
-    }, [refreshUnreadCount]);
+        void fetchUnreadCount();
+    }, [fetchUnreadCount]);
 
     useEffect(() => {
         if (isOpen) {
-            refreshNotifications();
+            void fetchNotifications();
         }
-    }, [isOpen, refreshNotifications]);
+    }, [fetchNotifications, isOpen]);
 
     const markAsRead = async (notification: Notification) => {
         setActiveNotificationId(notification.id);
-        setError(null);
+        const result = await markNotificationAsRead(notification.id);
 
-        try {
-            if (!notification.is_read) {
-                await fetchJson<{ notification: Notification }>(
-                    `/api/notifications/${notification.id}/read`,
-                    { method: "PATCH" },
-                );
-                setNotifications((current) =>
-                    current.map((item) =>
-                        item.id === notification.id
-                            ? { ...item, is_read: true, read_at: new Date().toISOString() }
-                            : item,
-                    ),
-                );
-                setUnreadCount((current) => Math.max(current - 1, 0));
-            }
-
-            if (notification.href) {
-                setIsOpen(false);
-                router.push(notification.href);
-            }
-        } catch (markError) {
-            setError(
-                markError instanceof Error
-                    ? markError.message
-                    : "Impossible de marquer la notification comme lue.",
-            );
-        } finally {
-            setActiveNotificationId(null);
+        if (result.success && notification.href) {
+            setIsOpen(false);
+            router.push(notification.href);
         }
+        setActiveNotificationId(null);
     };
 
     const markAllAsRead = async () => {
-        setIsMarkingAll(true);
-        setError(null);
-
-        try {
-            await fetchJson<{ updatedCount: number }>("/api/notifications/read-all", {
-                method: "PATCH",
-            });
-            setNotifications((current) =>
-                current.map((notification) => ({
-                    ...notification,
-                    is_read: true,
-                    read_at: notification.read_at || new Date().toISOString(),
-                })),
-            );
-            setUnreadCount(0);
-        } catch (markError) {
-            setError(
-                markError instanceof Error
-                    ? markError.message
-                    : "Impossible de marquer les notifications comme lues.",
-            );
-        } finally {
-            setIsMarkingAll(false);
-        }
+        await markAllNotificationsAsRead();
     };
 
     return (

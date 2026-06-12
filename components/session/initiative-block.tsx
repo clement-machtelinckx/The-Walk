@@ -248,7 +248,7 @@ export function InitiativeBlock({ sessionId, isGM }: InitiativeBlockProps) {
     };
 
     return (
-        <Card className="border-primary/10 bg-primary/5 min-w-0">
+        <Card className="bg-card min-w-0 border shadow-sm">
             <CardHeader className="space-y-3 pb-3">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">

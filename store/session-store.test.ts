@@ -191,3 +191,43 @@ describe("useSessionStore live module actions", () => {
         expect(useSessionStore.getState().liveModuleSettings[sessionId]?.initiative).toBe(true);
     });
 });
+
+describe("useSessionStore session reminder action", () => {
+    const sessionId = "33333333-3333-4333-8333-333333333333";
+
+    beforeEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it("sends a session reminder and returns its summary", async () => {
+        const summary = { sent: 2, failed: 0, skipped: 1 };
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue({ summary }),
+            }),
+        );
+
+        const result = await useSessionStore.getState().sendSessionReminder(sessionId);
+
+        expect(result).toEqual({ success: true, summary });
+        expect(fetch).toHaveBeenCalledWith(`/api/sessions/${sessionId}/reminder-email`, {
+            method: "POST",
+        });
+    });
+
+    it("surfaces session reminder API errors", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: false,
+                json: vi.fn().mockResolvedValue({ error: "Quota atteint" }),
+            }),
+        );
+
+        const result = await useSessionStore.getState().sendSessionReminder(sessionId);
+
+        expect(result).toEqual({ success: false, error: "Quota atteint" });
+    });
+});

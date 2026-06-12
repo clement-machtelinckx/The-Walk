@@ -28,6 +28,12 @@ export interface SessionHistoryItem {
     presenceSummary: PresenceSummary | null;
 }
 
+export interface SessionReminderSummary {
+    sent: number;
+    failed: number;
+    skipped: number;
+}
+
 interface SessionState {
     // Data
     nextSessions: Record<string, Session | null>;
@@ -138,6 +144,9 @@ interface SessionState {
         settings?: SessionLiveModuleSettingsValues;
         error?: string;
     }>;
+    sendSessionReminder: (
+        sessionId: string,
+    ) => Promise<{ success: boolean; summary?: SessionReminderSummary; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -794,6 +803,26 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             get().setLiveModuleSettings(sessionId, previousSettings);
             set({ liveModuleError: error });
             return { success: false, error };
+        }
+    },
+
+    sendSessionReminder: async (sessionId: string) => {
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/reminder-email`, {
+                method: "POST",
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.summary) {
+                return {
+                    success: false,
+                    error: data.error || "Impossible d'envoyer le rappel email.",
+                };
+            }
+
+            return { success: true, summary: data.summary };
+        } catch {
+            return { success: false, error: "Impossible d'envoyer le rappel email." };
         }
     },
 }));
