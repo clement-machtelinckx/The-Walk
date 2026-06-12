@@ -10,6 +10,7 @@ Ce dossier contient la couche d'accès aux données (Persistence Layer) du proje
 ## Convention Utilisateurs
 
 Le projet utilise une séparation nette entre l'authentification et les données métier :
+
 - **auth.users** : Géré exclusivement par Supabase Auth. Contient les identifiants techniques.
 - **public.profiles** : Entité métier "User" de l'application. C'est cette table qui doit être utilisée pour toutes les relations métier (FKs). Un trigger assure la création automatique d'un profil lors d'un nouvel import/signup.
 
@@ -23,6 +24,7 @@ Le projet utilise une séparation nette entre l'authentification et les données
 ## Schéma V1
 
 Les entités principales sont :
+
 - `profiles` : Profils utilisateurs (The-Walk core user).
 - `tables` : Tables de jeu.
 - `table_memberships` : Liens entre utilisateurs et tables (`gm`, `player`, `observer`).
@@ -30,6 +32,5 @@ Les entités principales sont :
 - `session_responses` : Présences et réponses aux sessions (`going`, `maybe`, `declined`, `pending`).
 - `session_presence` : Statut de présence métier (`present`, `absent`, `late`, `excused`).
 - `invitations` : Système d'invitation par lien (token) ou email (`pending`, `accepted`, `declined`, `expired`).
-- `pre_session_messages` : Canal de préparation.
-- `live_session_messages` : Canal de jeu en direct.
+- `table_messages` : Discussion publique permanente de table, avec contexte de session optionnel.
 - `notes` : Notes personnelles et de groupe.

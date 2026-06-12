@@ -20,6 +20,8 @@ describe("MembershipService", () => {
     it("maps table memberships to DTOs with profile data", async () => {
         vi.mocked(MembershipRepository.listByTable).mockResolvedValue([
             {
+                id: "membership-123",
+                table_id: tableId,
                 user_id: targetId,
                 role: "player",
                 joined_at: "2026-01-01T10:00:00.000Z",
@@ -29,8 +31,6 @@ describe("MembershipService", () => {
                     display_name: "Player",
                     avatar_url: null,
                     avatar_key: null,
-                    created_at: "2026-01-01T09:00:00.000Z",
-                    updated_at: "2026-01-01T09:00:00.000Z",
                 },
             },
         ] as TableMembers);
@@ -48,8 +48,6 @@ describe("MembershipService", () => {
                     display_name: "Player",
                     avatar_url: null,
                     avatar_key: null,
-                    created_at: "2026-01-01T09:00:00.000Z",
-                    updated_at: "2026-01-01T09:00:00.000Z",
                 },
             },
         ]);

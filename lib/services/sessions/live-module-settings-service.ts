@@ -1,9 +1,10 @@
-import { ForbiddenError, ValidationError } from "@/lib/errors";
+import { ForbiddenError } from "@/lib/errors";
 import { MembershipService } from "@/lib/services/memberships/membership-service";
 import { SessionLiveEnabledModuleRepository } from "@/lib/repositories/session-live-enabled-module-repository";
 import { SessionRepository } from "@/lib/repositories/session-repository";
 import {
     SESSION_LIVE_MODULE_KEYS,
+    SessionLiveModuleKey,
     SessionLiveModuleSettings,
     SessionLiveModuleSettingsValues,
     UpdateSessionLiveModuleSettingsInput,
@@ -12,20 +13,18 @@ import {
 const CONFIGURED_MARKER_MODULE_KEY = "__configured";
 
 export const DEFAULT_SESSION_LIVE_MODULE_SETTINGS: SessionLiveModuleSettingsValues = {
-    live_chat: true,
     group_notes: true,
     dice: true,
     initiative: false,
     presence: true,
 };
 
-function toEnabledModuleKeys(settings: SessionLiveModuleSettingsValues): string[] {
+function toEnabledModuleKeys(settings: SessionLiveModuleSettingsValues): SessionLiveModuleKey[] {
     return SESSION_LIVE_MODULE_KEYS.filter((moduleKey) => settings[moduleKey]);
 }
 
 function toSettingsValues(enabledModules: Set<string>): SessionLiveModuleSettingsValues {
     return {
-        live_chat: enabledModules.has("live_chat"),
         group_notes: enabledModules.has("group_notes"),
         dice: enabledModules.has("dice"),
         initiative: enabledModules.has("initiative"),
@@ -38,18 +37,15 @@ function buildSettings(
     enabledModuleKeys: string[],
     isConfigured: boolean,
 ): SessionLiveModuleSettings {
-    const exposedModuleKeys = enabledModuleKeys.filter(
-        (moduleKey) => moduleKey !== CONFIGURED_MARKER_MODULE_KEY,
-    );
+    const enabledModules = new Set(enabledModuleKeys);
     const values = isConfigured
-        ? toSettingsValues(new Set(exposedModuleKeys))
+        ? toSettingsValues(enabledModules)
         : DEFAULT_SESSION_LIVE_MODULE_SETTINGS;
+    const exposedModuleKeys = toEnabledModuleKeys(values);
 
     return {
         session_id: sessionId,
-        enabled_modules: isConfigured
-            ? exposedModuleKeys
-            : toEnabledModuleKeys(DEFAULT_SESSION_LIVE_MODULE_SETTINGS),
+        enabled_modules: exposedModuleKeys,
         is_configured: isConfigured,
         ...values,
     };
@@ -85,7 +81,6 @@ export const LiveModuleSettingsService = {
         const currentKeys = currentRows.map((row) => row.module_key);
         const currentSettings = buildSettings(sessionId, currentKeys, currentKeys.length > 0);
         const nextSettings: SessionLiveModuleSettingsValues = {
-            live_chat: currentSettings.live_chat,
             group_notes: currentSettings.group_notes,
             dice: currentSettings.dice,
             initiative: currentSettings.initiative,
@@ -93,15 +88,7 @@ export const LiveModuleSettingsService = {
             ...updates,
         };
 
-        const knownModuleKeys = new Set<string>(SESSION_LIVE_MODULE_KEYS);
-        const existingFutureModuleKeys = currentKeys.filter(
-            (moduleKey) =>
-                moduleKey !== CONFIGURED_MARKER_MODULE_KEY && !knownModuleKeys.has(moduleKey),
-        );
-        const nextEnabledModuleKeys = [
-            ...toEnabledModuleKeys(nextSettings),
-            ...existingFutureModuleKeys,
-        ];
+        const nextEnabledModuleKeys = toEnabledModuleKeys(nextSettings);
         const keysToEnable = new Set([...nextEnabledModuleKeys, CONFIGURED_MARKER_MODULE_KEY]);
         const currentPersistedKeys = new Set(currentKeys);
 
@@ -127,13 +114,9 @@ export const LiveModuleSettingsService = {
     async updateModule(
         userId: string,
         sessionId: string,
-        moduleKey: string,
+        moduleKey: SessionLiveModuleKey,
         enabled: boolean,
     ): Promise<SessionLiveModuleSettings> {
-        if (moduleKey.startsWith("__")) {
-            throw new ValidationError("Cette clé de module est réservée au système.");
-        }
-
         await requireSessionGm(userId, sessionId);
 
         const currentRows = await SessionLiveEnabledModuleRepository.listBySessionId(sessionId);

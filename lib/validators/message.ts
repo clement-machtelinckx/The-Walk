@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const createMessageSchema = z.object({
-    session_id: z.string().uuid("ID de session invalide"),
+    table_id: z.string().uuid("ID de table invalide"),
+    session_id: z.string().uuid("ID de session invalide").nullable().optional(),
     content: z
         .string()
         .trim()

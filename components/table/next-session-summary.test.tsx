@@ -40,10 +40,6 @@ vi.mock("@/components/session/response-block", () => ({
 vi.mock("@/components/session/response-summary", () => ({
     ResponseSummary: () => <div>Résumé des réponses</div>,
 }));
-vi.mock("@/components/session/table-discussion-block", () => ({
-    TableDiscussionBlock: () => <div>Chat de préparation</div>,
-}));
-
 describe("NextSessionSummary", () => {
     const defaultStore = {
         startSession: vi.fn(),
@@ -74,7 +70,7 @@ describe("NextSessionSummary", () => {
 
         expect(screen.getByText("Session créée")).toBeInTheDocument();
         expect(screen.getByText("RSVP interactif")).toBeInTheDocument();
-        expect(screen.getByText("Chat de préparation")).toBeInTheDocument();
+        expect(screen.queryByText("Discussion de table")).not.toBeInTheDocument();
     });
 
     it("shows session preparation directly to players", () => {
@@ -101,7 +97,7 @@ describe("NextSessionSummary", () => {
         expect(screen.getByText("Le prochain chapitre")).toBeInTheDocument();
         expect(screen.getByText("RSVP interactif")).toBeInTheDocument();
         expect(screen.getByText("Résumé des réponses")).toBeInTheDocument();
-        expect(screen.getByText("Chat de préparation")).toBeInTheDocument();
+        expect(screen.queryByText("Discussion de table")).not.toBeInTheDocument();
         expect(screen.queryByText("Démarrer la session live")).not.toBeInTheDocument();
     });
 });

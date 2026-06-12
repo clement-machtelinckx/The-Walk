@@ -91,7 +91,8 @@ Helpers serveur liés à l'authentification et aux permissions de base :
 
 ### `store/`
 
-Stores Zustand pour certains états client : auth, tables, invitations, sessions.
+Stores Zustand pour certains états client : auth, tables, invitations, sessions et discussion
+publique de table.
 
 Ces stores restent côté client. Ils ne remplacent pas les validations serveur ni les contrôles de permissions.
 
@@ -298,7 +299,7 @@ npm run format
 - RSVP : réponse utilisateur à une session.
 - Présence : statut de présence sur une session.
 - Live session : démarrage, fin et hub de session active.
-- Chat : messages de préparation et messages live.
+- Discussion principale : fil permanent de table, visible hors live et pendant le live.
 - Notes : notes personnelles et notes de groupe.
 - Admin MJ : actions rapides, invitations, membres et gestion de session.
 - Mon compte : page simple de profil/compte.
@@ -330,8 +331,7 @@ Entités principales :
 - `session_presence`
 - `invitations`
 - `table_group_invitations`
-- `pre_session_messages`
-- `live_session_messages`
+- `table_messages`
 - `personal_notes`
 - `group_notes`
 

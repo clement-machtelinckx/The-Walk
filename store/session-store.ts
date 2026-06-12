@@ -2,8 +2,6 @@ import { create } from "zustand";
 import {
     Session,
     SessionResponsesSummary,
-    SessionPrechatData,
-    SessionLiveChatData,
     RollCallMember,
     PresenceSummary,
     TablePrivateMessageData,
@@ -32,8 +30,6 @@ interface SessionState {
     activeSessions: Record<string, Session | null>;
     sessionHistories: Record<string, SessionHistoryItem[]>;
     responses: Record<string, SessionResponsesSummary | null>;
-    prechats: Record<string, SessionPrechatData | null>;
-    livechats: Record<string, SessionLiveChatData | null>;
     privateMessages: Record<string, TablePrivateMessageData | null>;
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
@@ -44,15 +40,11 @@ interface SessionState {
     isLoadingActiveSession: boolean;
     isLoadingHistory: boolean;
     isLoadingResponses: boolean;
-    isLoadingPrechat: boolean;
-    isLoadingLivechat: boolean;
     isLoadingPrivateMessages: boolean;
     isLoadingPresence: boolean;
     isLoadingPersonalNote: boolean;
     isLoadingGroupNote: boolean;
     isResponding: boolean;
-    isSendingMessage: boolean;
-    isSendingLiveMessage: boolean;
     isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
@@ -82,17 +74,6 @@ interface SessionState {
         payload: SessionResponseInput,
     ) => Promise<{ success: boolean; error?: string }>;
 
-    fetchPrechatMessages: (sessionId: string, page?: number) => Promise<void>;
-    sendPrechatMessage: (
-        sessionId: string,
-        content: string,
-    ) => Promise<{ success: boolean; error?: string }>;
-
-    fetchLivechatMessages: (sessionId: string, page?: number) => Promise<void>;
-    sendLivechatMessage: (
-        sessionId: string,
-        content: string,
-    ) => Promise<{ success: boolean; error?: string }>;
     fetchPrivateMessages: (
         tableId: string,
         recipientUserId: string,
@@ -147,8 +128,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     activeSessions: {},
     sessionHistories: {},
     responses: {},
-    prechats: {},
-    livechats: {},
     privateMessages: {},
     presenceData: {},
     personalNotes: {},
@@ -157,15 +136,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isLoadingActiveSession: false,
     isLoadingHistory: false,
     isLoadingResponses: false,
-    isLoadingPrechat: false,
-    isLoadingLivechat: false,
     isLoadingPrivateMessages: false,
     isLoadingPresence: false,
     isLoadingPersonalNote: false,
     isLoadingGroupNote: false,
     isResponding: false,
-    isSendingMessage: false,
-    isSendingLiveMessage: false,
     isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
@@ -355,106 +330,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch {
             set({ isResponding: false, error: "Erreur réseau" });
-            return { success: false, error: "Erreur réseau" };
-        }
-    },
-
-    fetchPrechatMessages: async (sessionId: string, page = 1) => {
-        set({ isLoadingPrechat: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/prechat?page=${page}`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    prechats: {
-                        ...state.prechats,
-                        [sessionId]: data,
-                    },
-                    isLoadingPrechat: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingPrechat: false,
-                });
-            }
-        } catch {
-            set({ error: "Erreur réseau", isLoadingPrechat: false });
-        }
-    },
-
-    sendPrechatMessage: async (sessionId: string, content: string) => {
-        set({ isSendingMessage: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/prechat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                await get().fetchPrechatMessages(sessionId);
-                set({ isSendingMessage: false });
-                return { success: true };
-            } else {
-                set({ isSendingMessage: false, error: data.error });
-                return {
-                    success: false,
-                    error: data.error || "Erreur lors de l'envoi du message",
-                };
-            }
-        } catch {
-            set({ isSendingMessage: false, error: "Erreur réseau" });
-            return { success: false, error: "Erreur réseau" };
-        }
-    },
-
-    fetchLivechatMessages: async (sessionId: string, page = 1) => {
-        set({ isLoadingLivechat: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/livechat?page=${page}`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    livechats: {
-                        ...state.livechats,
-                        [sessionId]: data,
-                    },
-                    isLoadingLivechat: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingLivechat: false,
-                });
-            }
-        } catch {
-            set({ error: "Erreur réseau", isLoadingLivechat: false });
-        }
-    },
-
-    sendLivechatMessage: async (sessionId: string, content: string) => {
-        set({ isSendingLiveMessage: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/livechat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                await get().fetchLivechatMessages(sessionId);
-                set({ isSendingLiveMessage: false });
-                return { success: true };
-            } else {
-                set({ isSendingLiveMessage: false, error: data.error });
-                return {
-                    success: false,
-                    error: data.error || "Erreur lors de l'envoi du message",
-                };
-            }
-        } catch {
-            set({ isSendingLiveMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },

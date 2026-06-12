@@ -23,10 +23,10 @@ Le decoupage V1/V2 n'est pas fige : il vaut mieux lire ce document par niveau de
 | Invitations de groupe | `Done` | Lien partageable temporaire avec role choisi. |
 | Sessions | `Done` | Prochaine session, RSVP, demarrage live, fin, annulation, suppression controlee, historique. |
 | Presence | `Done` | Statuts de presence, resume et panneau joueurs. |
-| Messages | `Done` | Pre-session, chat live et messages prives de table. |
+| Messages | `Done` | Discussion publique permanente de table avec contexte de session optionnel, et messages prives de table. |
 | Notes | `Done` | Notes personnelles et notes de groupe, rattachees a table/session selon contexte. |
 | Des | `Done` | Lancers serveur, persistance table, session optionnelle et journal live. |
-| Modules live | `Done` | Modules activables par session : chat, notes, des, initiative, presence. |
+| Modules live | `Done` | Enrichissements activables par session : notes, des, initiative et presence. |
 | Drawer d'outils session | `Done` | Onglets joueurs/prive, des/initiative, avance et MJ. |
 | Notifications in-app | `Done` | Centre global, compteur non lu, lecture unitaire, lecture globale. |
 | Emails transactionnels | `Done` | Mailtrap/Brevo, logs, quota, invitations, confirmation d'inscription, rappel de session. |

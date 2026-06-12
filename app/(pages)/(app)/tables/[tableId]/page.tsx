@@ -4,7 +4,7 @@ import { MembershipService } from "@/lib/services/memberships/membership-service
 import { PageShell } from "@/components/layout/app-shell";
 import { TableHeader } from "@/components/table/table-header";
 import { MemberList } from "@/components/table/member-list";
-import { NextSessionSummary } from "@/components/table/next-session-summary";
+import { TableMainContent } from "@/components/table/table-main-content";
 import { SessionHistory } from "@/components/table/session-history";
 import { Card } from "@/components/ui/card";
 import { formatShortDate } from "@/lib/utils/date";
@@ -47,10 +47,9 @@ export default async function TableDetailPage({ params }: TableRouteProps) {
 
                 <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
                     <div className="space-y-6 md:col-span-2">
-                        {/* Summary / Main Feed */}
-                        <NextSessionSummary
+                        <TableMainContent
                             tableId={tableId}
-                            session={details.nextSession}
+                            nextSession={details.nextSession}
                             activeSession={details.activeSession}
                             myRole={details.myRole}
                         />

@@ -2,17 +2,15 @@
 
 import { useState } from "react";
 import { Session } from "@/types/session";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
-    AlertCircle,
-    Calendar,
-    ArrowRight,
-    Loader2,
-    MessageSquare,
-    Play,
-    Plus,
-    Users,
-} from "lucide-react";
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    CardFooter,
+} from "@/components/ui/card";
+import { AlertCircle, Calendar, ArrowRight, Loader2, Play, Plus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -20,7 +18,6 @@ import { EmptyState } from "@/components/special/empty-state";
 import { SessionForm } from "@/components/session/session-form";
 import { ResponseBlock } from "@/components/session/response-block";
 import { ResponseSummary } from "@/components/session/response-summary";
-import { TableDiscussionBlock } from "@/components/session/table-discussion-block";
 import { SessionCard } from "@/components/session/session-card";
 import { TableRole } from "@/types/table";
 import { useSessionStore } from "@/store/session-store";
@@ -31,17 +28,19 @@ type NextSessionSummaryProps = Readonly<{
     session: Session | null;
     activeSession?: Session | null;
     myRole: TableRole;
+    onSessionChange?: (session: Session | null) => void;
 }>;
 
 /**
- * Hub de préparation intégré à la page table.
- * Regroupe planification, RSVP, synthèse et discussion avant le live.
+ * Bloc de préparation intégré à la page table.
+ * Regroupe planification, actions de session et participation.
  */
 export function NextSessionSummary({
     tableId,
     session: initialSession,
     activeSession,
     myRole,
+    onSessionChange,
 }: NextSessionSummaryProps) {
     const router = useRouter();
     const {
@@ -80,6 +79,7 @@ export function NextSessionSummary({
         const result = await cancelSession(session.id);
         if (result.success) {
             setSession(null);
+            onSessionChange?.(null);
             setActionError(null);
             return;
         }
@@ -99,6 +99,7 @@ export function NextSessionSummary({
         const result = await deleteSession(session.id);
         if (result.success) {
             setSession(null);
+            onSessionChange?.(null);
             setActionError(null);
             return;
         }
@@ -152,6 +153,7 @@ export function NextSessionSummary({
                             tableId={tableId}
                             onSuccess={(createdSession) => {
                                 setSession(createdSession);
+                                onSessionChange?.(createdSession);
                                 setIsCreating(false);
                             }}
                             onCancel={() => setIsCreating(false)}
@@ -191,6 +193,7 @@ export function NextSessionSummary({
                         initialData={session}
                         onSuccess={(updatedSession) => {
                             setSession(updatedSession);
+                            onSessionChange?.(updatedSession);
                             setIsEditing(false);
                             setActionError(null);
                         }}
@@ -240,45 +243,17 @@ export function NextSessionSummary({
 
             <Card className="border-primary/20 bg-card/50 overflow-hidden">
                 <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="text-lg">Préparer avec la table</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <Users className="text-primary h-5 w-5" />
+                        Participation
+                    </CardTitle>
+                    <CardDescription>
+                        Confirmez votre présence et consultez les réponses du groupe.
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-8 pt-6">
-                    <section className="space-y-4" aria-labelledby="table-session-participation">
-                        <div className="space-y-1">
-                            <h3
-                                id="table-session-participation"
-                                className="flex items-center gap-2 font-bold"
-                            >
-                                <Users className="text-primary h-4 w-4" />
-                                Participation
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Confirmez votre présence et consultez les réponses du groupe.
-                            </p>
-                        </div>
-                        <ResponseBlock sessionId={session.id} />
-                        <ResponseSummary
-                            sessionId={session.id}
-                            collapsible
-                            defaultExpanded={false}
-                        />
-                    </section>
-
-                    <section className="space-y-4" aria-labelledby="table-session-discussion">
-                        <div className="space-y-1">
-                            <h3
-                                id="table-session-discussion"
-                                className="flex items-center gap-2 font-bold"
-                            >
-                                <MessageSquare className="text-primary h-4 w-4" />
-                                Discussion de préparation
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                                Échangez avec la table avant de lancer la session.
-                            </p>
-                        </div>
-                        <TableDiscussionBlock sessionId={session.id} />
-                    </section>
+                <CardContent className="space-y-4 pt-6">
+                    <ResponseBlock sessionId={session.id} />
+                    <ResponseSummary sessionId={session.id} collapsible defaultExpanded={false} />
                 </CardContent>
             </Card>
         </div>
