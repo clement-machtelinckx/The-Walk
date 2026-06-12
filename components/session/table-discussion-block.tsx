@@ -6,7 +6,8 @@ import { useAuthStore } from "@/store/auth-store";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, MessageSquare } from "lucide-react";
 import { MessageThread } from "@/components/session/message-thread";
 
 type TableDiscussionBlockProps = Readonly<{
@@ -24,12 +25,15 @@ export function TableDiscussionBlock({
     const {
         discussions,
         fetchDiscussionMessages,
+        loadOlderDiscussionMessages,
         sendDiscussionMessage,
         isLoadingDiscussion,
+        isLoadingDiscussionHistory,
         isSendingDiscussionMessage,
     } = useDiscussionStore();
 
     const discussion = discussions[tableId];
+    const hasOlderMessages = Boolean(discussion && discussion.page < discussion.totalPages);
     const messages = useMemo(
         () =>
             (discussion?.data || []).map((message) => ({
@@ -71,6 +75,23 @@ export function TableDiscussionBlock({
             </CardHeader>
 
             <CardContent className="p-0">
+                {hasOlderMessages && (
+                    <div className="flex justify-center border-b px-3 py-2 sm:px-4">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full text-xs sm:w-auto"
+                            disabled={isLoadingDiscussionHistory}
+                            onClick={() => loadOlderDiscussionMessages(tableId)}
+                        >
+                            {isLoadingDiscussionHistory && (
+                                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                            )}
+                            Charger les messages plus anciens
+                        </Button>
+                    </div>
+                )}
                 <MessageThread
                     messages={messages}
                     isLoading={isLoadingDiscussion}

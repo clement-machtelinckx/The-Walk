@@ -40,12 +40,13 @@ export function MessageThread({
     const [localError, setLocalError] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const isCompact = variant === "compact";
+    const latestMessageId = messages.at(-1)?.id;
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [latestMessageId]);
 
     const handleSend = async (event?: React.FormEvent) => {
         event?.preventDefault();
