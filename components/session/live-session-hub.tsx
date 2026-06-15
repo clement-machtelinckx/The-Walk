@@ -20,6 +20,7 @@ import { NotesHub } from "./notes/notes-hub";
 import { SessionToolsDrawer } from "./session-tools-drawer";
 import { DiceLogBlock } from "./dice-log-block";
 import { InitiativeBlock } from "./initiative-block";
+import { ContextMenuActions, type ContextMenuAction } from "@/components/ui/context-menu-actions";
 
 type LiveSessionHubProps = Readonly<{
     session: Session;
@@ -124,6 +125,29 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
         alert(result.error || "Impossible d'annuler la session.");
     };
 
+    const liveActions: ContextMenuAction[] = isGM
+        ? [
+              {
+                  id: "cancel",
+                  label: isCancellingSession ? "Annulation en cours..." : "Annuler la session",
+                  icon: isCancellingSession ? Loader2 : Ban,
+                  iconClassName: isCancellingSession ? "animate-spin" : undefined,
+                  onSelect: handleCancelSession,
+                  disabled: isEndingSession || isCancellingSession,
+              },
+              {
+                  id: "end",
+                  label: isEndingSession ? "Clôture en cours..." : "Clôturer la session",
+                  icon: isEndingSession ? Loader2 : LogOut,
+                  iconClassName: isEndingSession ? "animate-spin" : undefined,
+                  onSelect: handleEndSession,
+                  disabled: isEndingSession || isCancellingSession,
+                  destructive: true,
+                  separatorBefore: true,
+              },
+          ]
+        : [];
+
     return (
         <div className="space-y-6 py-2 md:py-4">
             <SessionToolsDrawer
@@ -165,38 +189,10 @@ export function LiveSessionHub({ session, tableId, myRole, moduleSettings }: Liv
                     </Button>
 
                     {isGM && (
-                        <>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleCancelSession}
-                                disabled={isEndingSession || isCancellingSession}
-                                className="h-8 text-xs shadow-sm"
-                            >
-                                {isCancellingSession ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                ) : (
-                                    <Ban className="h-3 w-3 sm:mr-1.5" />
-                                )}
-                                <span className="hidden sm:inline">Annuler</span>
-                                <span className="sm:hidden">Annuler</span>
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={handleEndSession}
-                                disabled={isEndingSession || isCancellingSession}
-                                className="h-8 text-xs shadow-sm"
-                            >
-                                {isEndingSession ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                ) : (
-                                    <LogOut className="h-3 w-3 sm:mr-1.5" />
-                                )}
-                                <span className="hidden sm:inline">Clôturer</span>
-                                <span className="sm:hidden">Fin</span>
-                            </Button>
-                        </>
+                        <ContextMenuActions
+                            actions={liveActions}
+                            label="Ouvrir les actions de la session live"
+                        />
                     )}
                 </div>
             </header>

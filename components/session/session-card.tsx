@@ -1,9 +1,11 @@
 import { Session } from "@/types/session";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ban, Calendar, Edit, FileText, Loader2, Trash2 } from "lucide-react";
+import { Ban, Calendar, Edit, Loader2, Trash2 } from "lucide-react";
 import { ContextMenuActions, type ContextMenuAction } from "@/components/ui/context-menu-actions";
 import { formatFullDate, isPastDate } from "@/lib/utils/date";
+import { SessionDetailsSheet } from "@/components/session/session-details-sheet";
+import type { ReactNode } from "react";
 
 type SessionCardProps = Readonly<{
     session: Session;
@@ -13,6 +15,7 @@ type SessionCardProps = Readonly<{
     onDeleteSession?: () => void;
     isCancelling?: boolean;
     isDeleting?: boolean;
+    rsvp?: ReactNode;
 }>;
 
 const statusConfigs = {
@@ -30,6 +33,7 @@ export function SessionCard({
     onDeleteSession,
     isCancelling,
     isDeleting,
+    rsvp,
 }: SessionCardProps) {
     const statusConfig = statusConfigs[session.status];
     const canManageScheduled = canEdit && session.status === "scheduled";
@@ -72,54 +76,48 @@ export function SessionCard({
     }
 
     return (
-        <Card className="border-primary/20 bg-card/50 overflow-hidden shadow-sm">
-            <CardHeader className="bg-primary/5 border-primary/10 flex flex-row items-center justify-between border-b py-4">
-                <div className="space-y-1">
+        <Card className="border-primary/20 bg-card/50 gap-0 overflow-hidden py-0 shadow-sm">
+            <CardHeader className="bg-primary/5 border-primary/10 flex flex-row items-start justify-between gap-3 border-b px-4 py-4 sm:px-6">
+                <div className="min-w-0 space-y-1">
                     <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase">
                         <Calendar size={12} />
-                        Prochaine Session
+                        Prochaine session
                     </div>
-                    <CardTitle className="text-2xl font-bold">{session.title}</CardTitle>
+                    <CardTitle className="truncate text-xl font-bold">{session.title}</CardTitle>
                 </div>
-                <Badge variant={statusConfig.variant}>
+                <Badge variant={statusConfig.variant} className="shrink-0">
                     {isOverdue ? "Horaire dépassé" : statusConfig.label}
                 </Badge>
             </CardHeader>
 
-            <CardContent className="space-y-6 pt-6">
-                <div className="bg-muted/50 flex items-center gap-4 rounded-lg border p-4">
+            <CardContent className="px-4 py-4 sm:px-6">
+                <div className="flex items-center gap-3">
                     <div className="bg-primary/10 text-primary rounded-full p-2">
-                        <Calendar size={24} />
+                        <Calendar size={18} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                         <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
-                            Date et Heure
+                            Date et heure
                         </p>
-                        <p className="text-lg font-bold">{formatFullDate(session.scheduled_at)}</p>
+                        <p className="truncate text-sm font-bold sm:text-base">
+                            {formatFullDate(session.scheduled_at)}
+                        </p>
                     </div>
                 </div>
-
-                {session.description && (
-                    <div className="space-y-2">
-                        <div className="text-primary flex items-center gap-2 text-sm font-bold italic">
-                            <FileText size={16} />
-                            Description
-                        </div>
-                        <div className="bg-background border-primary/5 text-muted-foreground rounded-lg border p-4 text-sm leading-relaxed whitespace-pre-wrap">
-                            {session.description}
-                        </div>
-                    </div>
-                )}
             </CardContent>
 
-            {canEdit && managementActions.length > 0 && (
-                <CardFooter className="bg-muted/20 flex justify-end border-t py-2">
-                    <ContextMenuActions
-                        actions={managementActions}
-                        label={`Ouvrir les actions de la session ${session.title}`}
-                    />
-                </CardFooter>
-            )}
+            <CardFooter className="bg-muted/20 flex flex-col items-stretch gap-3 border-t px-4 py-3 sm:px-6">
+                {rsvp}
+                <div className="flex items-center justify-between gap-2">
+                    <SessionDetailsSheet session={session} />
+                    {canEdit && managementActions.length > 0 && (
+                        <ContextMenuActions
+                            actions={managementActions}
+                            label={`Ouvrir les actions de la session ${session.title}`}
+                        />
+                    )}
+                </div>
+            </CardFooter>
         </Card>
     );
 }

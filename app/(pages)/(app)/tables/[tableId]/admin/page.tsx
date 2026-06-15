@@ -6,7 +6,6 @@ import { MembershipService } from "@/lib/services/memberships/membership-service
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, UserPlus, Calendar, Link as LinkIcon, Settings2 } from "lucide-react";
 import Link from "next/link";
-import { AdminQuickActions } from "@/components/admin/admin-quick-actions";
 import { MemberList } from "@/components/table/member-list";
 import { NextSessionAdminBlock } from "@/components/admin/next-session-admin-block";
 import { GroupInvitationPanel } from "@/components/admin/group-invitation-panel";
@@ -49,9 +48,6 @@ export default async function TableAdminPage({ params }: TableAdminPageProps) {
             }
         >
             <div className="flex flex-col gap-6 py-2 md:py-4">
-                {/* 1. Actions Rapides MJ (Plus compactes) */}
-                <AdminQuickActions tableId={tableId} />
-
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
                     {/* Left Column: Core Management */}
                     <div className="space-y-6 lg:col-span-7">

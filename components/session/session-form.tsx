@@ -65,7 +65,7 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <FormField
                     control={form.control}
                     name="title"
@@ -88,11 +88,11 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Description / Notes de préparation</FormLabel>
+                            <FormLabel>Description</FormLabel>
                             <FormControl>
                                 <Textarea
                                     placeholder="Briefing pour les joueurs..."
-                                    className="min-h-32 resize-none"
+                                    className="min-h-28 resize-none"
                                     {...field}
                                     value={field.value || ""}
                                 />
@@ -110,7 +110,7 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
                     name="scheduled_at"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Date et Heure</FormLabel>
+                            <FormLabel>Date et heure</FormLabel>
                             <FormControl>
                                 <Input type="datetime-local" {...field} value={field.value || ""} />
                             </FormControl>
@@ -126,7 +126,7 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
                     </div>
                 )}
 
-                <div className="flex flex-col gap-3 pt-4 sm:flex-row">
+                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
                     <Button type="submit" className="flex-1" disabled={form.formState.isSubmitting}>
                         {form.formState.isSubmitting ? (
                             <>
@@ -142,7 +142,7 @@ export function SessionForm({ tableId, initialData, onSuccess, onCancel }: Sessi
                     <Button
                         type="button"
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 sm:flex-none"
                         onClick={onCancel}
                         disabled={form.formState.isSubmitting}
                     >

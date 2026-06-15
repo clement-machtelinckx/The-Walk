@@ -10,7 +10,12 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: vi.fn() }),
 }));
 vi.mock("@/components/session/session-card", () => ({
-    SessionCard: ({ session }: { session: { title: string } }) => <div>{session.title}</div>,
+    SessionCard: ({ session, rsvp }: { session: { title: string }; rsvp?: React.ReactNode }) => (
+        <div>
+            {session.title}
+            {rsvp}
+        </div>
+    ),
 }));
 vi.mock("@/components/session/session-form", () => ({
     SessionForm: ({ onSuccess }: { onSuccess: (session: unknown) => void }) => (
@@ -99,5 +104,32 @@ describe("NextSessionSummary", () => {
         expect(screen.getByText("Résumé des réponses")).toBeInTheDocument();
         expect(screen.queryByText("Discussion de table")).not.toBeInTheDocument();
         expect(screen.queryByText("Démarrer la session live")).not.toBeInTheDocument();
+    });
+
+    it("shows a clear live entry only when a session is active", () => {
+        render(
+            <NextSessionSummary
+                tableId="table-123"
+                session={null}
+                activeSession={{
+                    id: "session-live",
+                    table_id: "table-123",
+                    title: "Session en cours",
+                    description: null,
+                    status: "active",
+                    scheduled_at: "2026-06-20T18:00:00.000Z",
+                    started_at: "2026-06-20T18:00:00.000Z",
+                    ended_at: null,
+                    created_at: "2026-06-10T12:00:00.000Z",
+                    updated_at: "2026-06-20T18:00:00.000Z",
+                }}
+                myRole="player"
+            />,
+        );
+
+        expect(screen.getByRole("link", { name: /Rejoindre la session/ })).toHaveAttribute(
+            "href",
+            "/tables/table-123/session/live/session-live",
+        );
     });
 });
