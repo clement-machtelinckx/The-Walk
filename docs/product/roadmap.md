@@ -23,10 +23,10 @@ Le decoupage V1/V2 n'est pas fige : il vaut mieux lire ce document par niveau de
 | Invitations de groupe | `Done` | Lien partageable temporaire avec role choisi. |
 | Sessions | `Done` | Prochaine session, RSVP, demarrage live, fin, annulation, suppression controlee, historique. |
 | Presence | `Done` | Statuts de presence, resume et panneau joueurs. |
-| Messages | `Done` | Pre-session, chat live et messages prives de table. |
+| Messages | `Done` | Discussion publique permanente de table avec contexte de session optionnel, et messages prives de table. |
 | Notes | `Done` | Notes personnelles et notes de groupe, rattachees a table/session selon contexte. |
 | Des | `Done` | Lancers serveur, persistance table, session optionnelle et journal live. |
-| Modules live | `Done` | Modules activables par session : chat, notes, des, initiative, presence. |
+| Modules live | `Done` | Enrichissements activables par session : notes, des, initiative et presence. |
 | Drawer d'outils session | `Done` | Onglets joueurs/prive, des/initiative, avance et MJ. |
 | Notifications in-app | `Done` | Centre global, compteur non lu, lecture unitaire, lecture globale. |
 | Emails transactionnels | `Done` | Mailtrap/Brevo, logs, quota, invitations, confirmation d'inscription, rappel de session. |
@@ -40,7 +40,7 @@ Le decoupage V1/V2 n'est pas fige : il vaut mieux lire ce document par niveau de
 | Parcours live sur mobile | `A consolider` | Le live est fonctionnel, mais les modules et le drawer doivent rester confortables en usage reel. |
 | Messages prives | `A consolider` | Le scope table est en place, mais l'UX reste simple et merite une validation en conditions live. |
 | Role `observer` | `A consolider` | Le role existe, mais ses limites produit exactes doivent etre arbitrees et verifiees dans les services. |
-| Initiative | `A consolider` | Le module est branche, mais le suivi d'ordre de tour reste un placeholder. |
+| Initiative | `A consolider` | L'outil indicatif est livre ; son confort mobile et son usage en session restent a valider. |
 | Notifications | `A consolider` | Le centre global fonctionne par API/polling, pas en temps reel. |
 | Emails | `A consolider` | Les providers et logs existent ; il faut valider configuration, quotas et comportement en environnement cible. |
 | Tests des flux critiques | `A consolider` | Plusieurs tests existent, mais les parcours complets table/session/live restent a couvrir davantage. |
@@ -70,7 +70,7 @@ Cette phase regroupe les enrichissements de jeu. Le dessin n'est qu'un outil pos
 
 | Sujet | Statut | Notes |
 |---|---|---|
-| Suivi d'initiative complet | `A faire` | Ordre de tour, edition MJ, affichage compact live. |
+| Suivi d'initiative indicatif | `Done` | Ordre de tour, edition MJ, jets joueurs/custom et affichage compact live. |
 | Notes rapides MJ | `A faire` | Capturer une idee ou un evenement sans quitter le live. |
 | Resume rapide de fin de session | `A faire` | Transformer les notes/messages en trace lisible. |
 | Timeline ou historique enrichi | `A faire` | Mettre en valeur evenements, notes importantes, des et decisions. |

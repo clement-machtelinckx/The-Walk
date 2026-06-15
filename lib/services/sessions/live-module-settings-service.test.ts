@@ -47,9 +47,8 @@ describe("LiveModuleSettingsService", () => {
 
         expect(settings).toEqual({
             session_id: sessionId,
-            enabled_modules: ["live_chat", "group_notes", "dice", "presence"],
+            enabled_modules: ["group_notes", "dice", "presence"],
             is_configured: false,
-            live_chat: true,
             group_notes: true,
             dice: true,
             initiative: false,
@@ -70,7 +69,6 @@ describe("LiveModuleSettingsService", () => {
         expect(settings).toMatchObject({
             enabled_modules: ["dice", "presence"],
             is_configured: true,
-            live_chat: false,
             group_notes: false,
             dice: true,
             initiative: false,
@@ -87,7 +85,7 @@ describe("LiveModuleSettingsService", () => {
         await expect(
             LiveModuleSettingsService.getSettings(userId, sessionId),
         ).resolves.toMatchObject({
-            live_chat: true,
+            group_notes: true,
         });
     });
 
@@ -169,7 +167,6 @@ describe("LiveModuleSettingsService", () => {
         vi.mocked(SessionLiveEnabledModuleRepository.listBySessionId).mockResolvedValue([]);
 
         const settings = await LiveModuleSettingsService.updateSettings(userId, sessionId, {
-            live_chat: false,
             group_notes: false,
             dice: false,
             initiative: false,
@@ -185,7 +182,6 @@ describe("LiveModuleSettingsService", () => {
             session_id: sessionId,
             enabled_modules: [],
             is_configured: true,
-            live_chat: false,
             group_notes: false,
             dice: false,
             initiative: false,
@@ -193,25 +189,21 @@ describe("LiveModuleSettingsService", () => {
         });
     });
 
-    it("preserves future module keys when updating the known V1 projection", async () => {
+    it("removes unrecognized persisted module keys when updating settings", async () => {
         vi.mocked(SessionLiveEnabledModuleRepository.listBySessionId).mockResolvedValue([
             row("__configured"),
-            row("map"),
+            row("unknown_module"),
             row("dice"),
         ]);
 
         const settings = await LiveModuleSettingsService.updateSettings(userId, sessionId, {
-            dice: false,
+            dice: true,
         });
 
+        expect(settings.enabled_modules).toEqual(["dice"]);
         expect(SessionLiveEnabledModuleRepository.disableModule).toHaveBeenCalledWith(
             sessionId,
-            "dice",
+            "unknown_module",
         );
-        expect(SessionLiveEnabledModuleRepository.disableModule).not.toHaveBeenCalledWith(
-            sessionId,
-            "map",
-        );
-        expect(settings.enabled_modules).toContain("map");
     });
 });

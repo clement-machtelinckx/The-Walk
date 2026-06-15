@@ -53,7 +53,9 @@ export default function AboutPage() {
                         <Badge variant="secondary">À propos de {siteConfig.name}</Badge>
                         <h1 className="text-4xl leading-tight font-extrabold tracking-tight md:text-6xl">
                             Un projet passionné pour
-                            <span className="text-primary block">préparer moins et jouer plus.</span>
+                            <span className="text-primary block">
+                                préparer moins et jouer plus.
+                            </span>
                         </h1>
                         <p className="text-muted-foreground mx-auto max-w-2xl text-lg leading-relaxed">
                             The-Walk est développé par un solo dev amateur de jeux de rôle, avec une
@@ -81,8 +83,8 @@ export default function AboutPage() {
                         <p>
                             Préparer une partie peut vite vouloir dire jongler entre plusieurs
                             conversations, documents, notes et outils. Cette dispersion fait perdre
-                            du temps et encourage parfois l’over-prep, alors que l’essentiel reste de
-                            réunir le groupe et de lancer l’aventure.
+                            du temps et encourage parfois l’over-prep, alors que l’essentiel reste
+                            de réunir le groupe et de lancer l’aventure.
                         </p>
                         <p>
                             The-Walk cherche à réunir dans une seule app les outils utiles pour
@@ -135,9 +137,9 @@ export default function AboutPage() {
                         <h2 className="text-2xl font-bold">Une base sérieuse, appelée à grandir</h2>
                         <p className="text-muted-foreground max-w-2xl leading-relaxed">
                             La première version pose les fondations : tables, sessions, échanges,
-                            notes et outils de jeu. La plateforme continuera d’évoluer progressivement
-                            avec des composants utiles, choisis pour servir les parties plutôt que
-                            les alourdir.
+                            notes et outils de jeu. La plateforme continuera d’évoluer
+                            progressivement avec des composants utiles, choisis pour servir les
+                            parties plutôt que les alourdir.
                         </p>
                     </div>
                     <Button variant="outline" asChild>

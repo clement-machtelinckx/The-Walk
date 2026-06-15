@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserMinus, Loader2 } from "lucide-react";
 import { RoleBadge } from "@/components/special/role-badge";
 import { useAuth } from "@/components/auth/auth-provider";
-import { Button } from "@/components/ui/button";
+import { ContextMenuActions } from "@/components/ui/context-menu-actions";
 import {
     Select,
     SelectContent,
@@ -131,19 +131,32 @@ export function MemberList({ tableId, members, myRole }: MemberListProps) {
                                     )}
 
                                     {canBeRemoved && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-muted-foreground hover:text-destructive h-7 w-7"
-                                            onClick={() => handleRemoveMember(member.userId)}
-                                            disabled={removingId === member.userId}
-                                        >
-                                            {removingId === member.userId ? (
-                                                <Loader2 size={14} className="animate-spin" />
-                                            ) : (
-                                                <UserMinus size={14} />
-                                            )}
-                                        </Button>
+                                        <ContextMenuActions
+                                            label={`Ouvrir les actions pour ${
+                                                member.profile.display_name || "ce membre"
+                                            }`}
+                                            actions={[
+                                                {
+                                                    id: `remove-${member.userId}`,
+                                                    label:
+                                                        removingId === member.userId
+                                                            ? "Retrait en cours..."
+                                                            : "Retirer le membre",
+                                                    icon:
+                                                        removingId === member.userId
+                                                            ? Loader2
+                                                            : UserMinus,
+                                                    iconClassName:
+                                                        removingId === member.userId
+                                                            ? "animate-spin"
+                                                            : undefined,
+                                                    destructive: true,
+                                                    disabled: removingId === member.userId,
+                                                    onSelect: () =>
+                                                        handleRemoveMember(member.userId),
+                                                },
+                                            ]}
+                                        />
                                     )}
                                 </div>
                             </div>

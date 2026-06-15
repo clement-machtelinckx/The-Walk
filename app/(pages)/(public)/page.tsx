@@ -17,6 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/layout/container";
 import { PublicAccessActions } from "@/components/layout/public-access-actions";
+import Image from "next/image";
+import { getAvatarImagePath } from "@/config/avatars";
 
 export const metadata: Metadata = {
     title: "Préparer moins, jouer plus",
@@ -93,7 +95,7 @@ function VisualPlaceholder({
             <p className="text-muted-foreground mt-1 max-w-xs text-sm leading-relaxed">
                 {description}
             </p>
-            <Badge variant="outline" className="mt-4 bg-background">
+            <Badge variant="outline" className="bg-background mt-4">
                 Capture à venir
             </Badge>
         </div>
@@ -128,11 +130,17 @@ export default function HomePage() {
                         </Link>
                     </div>
 
-                    <VisualPlaceholder
-                        title="Aperçu de la table"
-                        description="Emplacement prévu pour une future capture de la vue table et de la prochaine session."
-                        className="min-h-80"
-                    />
+                    <div className="border-primary/15 bg-background/70 relative mx-auto w-full max-w-xl overflow-hidden rounded-2xl border p-2 shadow-xl shadow-black/10 lg:mx-0">
+                        <Image
+                            src="/images/hero_image.webp"
+                            alt="Quatre amis réunis autour d’une table de jeu de rôle fantasy, accompagnés par leur téléphone"
+                            width={1200}
+                            height={900}
+                            priority
+                            sizes="(min-width: 1024px) 42vw, 100vw"
+                            className="aspect-[4/3] w-full rounded-xl object-cover"
+                        />
+                    </div>
                 </Container>
             </section>
 
@@ -206,7 +214,9 @@ export default function HomePage() {
                                     className="bg-muted/30 flex items-start gap-3 rounded-lg border p-4"
                                 >
                                     <Icon className="text-primary mt-0.5 h-5 w-5 shrink-0" />
-                                    <p className="text-sm font-medium leading-relaxed">{item.label}</p>
+                                    <p className="text-sm leading-relaxed font-medium">
+                                        {item.label}
+                                    </p>
                                 </div>
                             );
                         })}
@@ -233,7 +243,10 @@ export default function HomePage() {
 
                     <ol className="grid gap-4 md:grid-cols-2">
                         {firstSteps.map((step, index) => (
-                            <li key={step.title} className="bg-card rounded-xl border p-5 shadow-sm">
+                            <li
+                                key={step.title}
+                                className="bg-card rounded-xl border p-5 shadow-sm"
+                            >
                                 <div className="flex items-start gap-4">
                                     <span className="bg-primary text-primary-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold">
                                         {index + 1}
@@ -254,10 +267,12 @@ export default function HomePage() {
                 <section className="bg-primary text-primary-foreground rounded-xl p-7 md:p-10">
                     <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-bold">Prêt à préparer moins lourdement ?</h2>
+                            <h2 className="text-2xl font-bold">
+                                Prêt à préparer moins lourdement ?
+                            </h2>
                             <p className="text-primary-foreground/80 max-w-xl leading-relaxed">
-                                Ouvre l’app pour retrouver tes tables, ou crée ton compte pour lancer
-                                la première session du groupe.
+                                Ouvre l’app pour retrouver tes tables, ou crée ton compte pour
+                                lancer la première session du groupe.
                             </p>
                         </div>
                         <Button variant="secondary" size="lg" asChild>

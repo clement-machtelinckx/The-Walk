@@ -14,6 +14,8 @@ Cette page resume les principales entites metier. Le schema exact reste dans `su
 - `session_responses` : reponse RSVP d'un membre : `going`, `maybe`, `declined`, `pending`.
 - `session_presence` : presence pendant ou autour de la session : `present`, `absent`, `late`, `excused`.
 - `session_live_enabled_modules` : modules live actives par session.
+- `session_initiative_entries` : ordre d'initiative indicatif, joueurs et participants custom.
+- `session_initiative_state` : demande d'initiative et participant actuellement mis en avant.
 
 ## Invitations
 
@@ -22,8 +24,7 @@ Cette page resume les principales entites metier. Le schema exact reste dans `su
 
 ## Messages et notes
 
-- `pre_session_messages` : messages lies a la preparation d'une session.
-- `live_session_messages` : messages de chat pendant une session live.
+- `table_messages` : discussion publique permanente de table, avec contexte de session optionnel.
 - `table_private_messages` : messages prives 1-to-1 dans le contexte d'une table, avec session optionnelle.
 - `personal_notes` : notes personnelles rattachees a un utilisateur, avec table/session optionnelles.
 - `group_notes` : notes partagees au niveau table, avec session optionnelle.
@@ -39,3 +40,5 @@ Cette page resume les principales entites metier. Le schema exact reste dans `su
 - Les roles sont stockes dans `table_memberships`.
 - `tables.owner_id` identifie le createur/proprietaire, mais l'administration courante passe surtout par le role `gm`.
 - Les migrations hardening ajoutent des politiques RLS pour limiter les acces directs en base.
+- La discussion publique est adressee par `table_id` dans l'API et l'etat client ; `session_id`
+  qualifie seulement le contexte d'emission d'un message.

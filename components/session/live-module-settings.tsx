@@ -1,21 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Settings2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSessionStore } from "@/store/session-store";
 import type {
     SessionLiveModuleSettings,
-    SessionLiveModuleKey,
     SessionLiveModuleSettingsValues,
 } from "@/types/live-module-settings";
 
-const MODULE_LABELS: Record<SessionLiveModuleKey, { label: string; description: string }> = {
-    live_chat: {
-        label: "Chat live",
-        description: "Messages visibles pendant la session.",
-    },
+type LiveModuleKey = keyof SessionLiveModuleSettingsValues;
+
+const MODULE_LABELS: Record<LiveModuleKey, { label: string; description: string }> = {
     group_notes: {
         label: "Notes de groupe",
         description: "Espace partagé pour les notes de table.",
@@ -34,13 +32,7 @@ const MODULE_LABELS: Record<SessionLiveModuleKey, { label: string; description: 
     },
 };
 
-const MODULE_KEYS: SessionLiveModuleKey[] = [
-    "live_chat",
-    "group_notes",
-    "dice",
-    "initiative",
-    "presence",
-];
+const MODULE_KEYS: LiveModuleKey[] = ["group_notes", "dice", "initiative", "presence"];
 
 type LiveModuleSettingsProps = Readonly<{
     sessionId: string;
@@ -50,7 +42,6 @@ type LiveModuleSettingsProps = Readonly<{
 
 function toValues(settings: SessionLiveModuleSettings): SessionLiveModuleSettingsValues {
     return {
-        live_chat: settings.live_chat,
         group_notes: settings.group_notes,
         dice: settings.dice,
         initiative: settings.initiative,
@@ -63,74 +54,33 @@ export function LiveModuleSettings({
     initialSettings,
     onSettingsChange,
 }: LiveModuleSettingsProps) {
-    const [settings, setSettings] = useState<SessionLiveModuleSettingsValues | null>(
-        initialSettings ? toValues(initialSettings) : null,
-    );
-    const [isLoading, setIsLoading] = useState(!initialSettings);
-    const [savingModule, setSavingModule] = useState<SessionLiveModuleKey | null>(null);
+    const storedSettings = useSessionStore((state) => state.liveModuleSettings[sessionId] || null);
+    const settings = storedSettings || (initialSettings ? toValues(initialSettings) : null);
+    const isLoading = useSessionStore((state) => state.isLoadingLiveModules) && !settings;
+    const error = useSessionStore((state) => state.liveModuleError);
+    const fetchLiveModuleSettings = useSessionStore((state) => state.fetchLiveModuleSettings);
+    const updateLiveModuleSetting = useSessionStore((state) => state.updateLiveModuleSetting);
+    const [savingModule, setSavingModule] = useState<LiveModuleKey | null>(null);
     const [feedback, setFeedback] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
-
-    const fetchSettings = useCallback(async () => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const response = await fetch(`/api/sessions/${sessionId}/modules`);
-            const data = await response.json();
-
-            if (!response.ok) {
-                setError(data.error || "Impossible de charger les modules.");
-                return;
-            }
-
-            const nextSettings = toValues(data.settings);
-            setSettings(nextSettings);
-            onSettingsChange?.(nextSettings);
-        } catch {
-            setError("Erreur réseau pendant le chargement des modules.");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [onSettingsChange, sessionId]);
 
     useEffect(() => {
-        fetchSettings();
-    }, [fetchSettings]);
+        fetchLiveModuleSettings(sessionId).then((nextSettings) => {
+            if (nextSettings) onSettingsChange?.(nextSettings);
+        });
+    }, [fetchLiveModuleSettings, onSettingsChange, sessionId]);
 
-    const updateModule = async (module: SessionLiveModuleKey, enabled: boolean) => {
+    const updateModule = async (module: LiveModuleKey, enabled: boolean) => {
         if (!settings || savingModule) return;
 
-        const previousSettings = settings;
         setSavingModule(module);
         setFeedback(null);
-        setError(null);
-        setSettings({ ...settings, [module]: enabled });
 
-        try {
-            const response = await fetch(`/api/sessions/${sessionId}/modules`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ [module]: enabled }),
-            });
-            const data = await response.json();
-
-            if (!response.ok) {
-                setSettings(previousSettings);
-                setError(data.error || "Impossible d'enregistrer ce module.");
-                return;
-            }
-
-            const nextSettings = toValues(data.settings);
-            setSettings(nextSettings);
-            onSettingsChange?.(nextSettings);
+        const result = await updateLiveModuleSetting(sessionId, module, enabled);
+        if (result.success && result.settings) {
+            onSettingsChange?.(result.settings);
             setFeedback("Modules mis à jour.");
-        } catch {
-            setSettings(previousSettings);
-            setError("Erreur réseau pendant l'enregistrement.");
-        } finally {
-            setSavingModule(null);
         }
+        setSavingModule(null);
     };
 
     let moduleSettingsContent = null;
@@ -206,7 +156,8 @@ export function LiveModuleSettings({
                         Modules affichés
                     </h4>
                     <p className="text-muted-foreground text-[11px] leading-relaxed">
-                        Configuration commune à tous les participants du live.
+                        Configuration commune à tous les participants du live. La discussion de
+                        table reste toujours visible.
                     </p>
                 </div>
                 <Badge variant="outline" className="shrink-0 px-2 py-0 text-[9px]">

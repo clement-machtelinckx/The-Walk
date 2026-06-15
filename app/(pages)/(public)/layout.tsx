@@ -50,10 +50,16 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                             Hub de session JDR pour tables organisées
                         </p>
                         <div className="flex items-center gap-4 text-sm">
-                            <Link href="/about" className="text-muted-foreground hover:text-foreground">
+                            <Link
+                                href="/about"
+                                className="text-muted-foreground hover:text-foreground"
+                            >
                                 À propos
                             </Link>
-                            <Link href="/faq" className="text-muted-foreground hover:text-foreground">
+                            <Link
+                                href="/faq"
+                                className="text-muted-foreground hover:text-foreground"
+                            >
                                 FAQ
                             </Link>
                             <Link href="/tables" className="text-primary font-semibold">
@@ -80,7 +86,9 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                                 <Github className="h-4 w-4" />
                             </a>
                         </p>
-                        <p>© {currentYear} {siteConfig.name}. Tous droits réservés.</p>
+                        <p>
+                            © {currentYear} {siteConfig.name}. Tous droits réservés.
+                        </p>
                     </div>
                 </Container>
             </footer>

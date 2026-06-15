@@ -14,6 +14,7 @@ Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorite
 
 - Creation et liste des tables.
 - Detail d'une table.
+- Discussion principale de table, visible comme bloc autonome.
 - Administration table pour les MJ.
 - Suppression de table limitee au proprietaire.
 - Liste des membres et roles.
@@ -29,6 +30,7 @@ Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorite
 ## Sessions
 
 - Creation et modification de prochaine session par MJ.
+- Bloc Prochaine session de la page table regroupant planification, actions et RSVP.
 - RSVP des membres.
 - Demarrage, fin, annulation et suppression controlee.
 - Historique des sessions.
@@ -37,14 +39,14 @@ Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorite
 ## Live session
 
 - Page de session live.
-- Chat live.
-- Messages de pre-session.
+- Continuite de la discussion principale de table dans le live.
 - Notes personnelles et notes de groupe.
 - Messages prives entre membres.
 - Journal de jets de des.
-- Modules live activables par session.
+- Enrichissements live activables par session, sans rendre la discussion optionnelle.
 - Drawer d'outils de session.
 - Presence compacte dans le live et panneau joueurs dans le drawer.
+- Initiative indicative avec ordre horizontal, participants custom, jets et pilotage MJ.
 
 ## Notifications et emails
 

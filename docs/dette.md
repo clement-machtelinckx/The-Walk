@@ -127,10 +127,9 @@ Exemples notables :
 - `components/admin/invitation-manager.tsx`
 - `components/notifications/notification-center.tsx`
 - `components/profile/email-usage-card.tsx`
-- `components/session/livechat-block.tsx`
 - `components/session/personal-note-block.tsx`
 - `components/session/player-presence-panel.tsx`
-- `components/session/prechat-block.tsx`
+- `components/session/table-discussion-block.tsx`
 - `components/session/private-conversation-panel.tsx`
 - `components/session/session-form.tsx`
 - `components/session/session-tools-drawer.tsx`
@@ -157,8 +156,6 @@ Exemples remontés :
 ### 5. Accessibilité mineure à corriger sans refonte
 Exemples :
 
-- `components/session/next-session-container.tsx`
-  - préférer `<output>` au rôle `status`
 - `components/ui/carousel.tsx`
   - préférer certains éléments HTML sémantiques à des rôles génériques
 
@@ -200,8 +197,7 @@ Beaucoup d'issues se concentrent dans :
 
 - `components/session/session-tools-drawer.tsx`
 - `components/session/player-presence-panel.tsx`
-- `components/session/livechat-block.tsx`
-- `components/session/prechat-block.tsx`
+- `components/session/table-discussion-block.tsx`
 - `components/session/presence-block.tsx`
 - `components/session/private-conversation-panel.tsx`
 - `components/session/session-form.tsx`

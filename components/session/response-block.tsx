@@ -3,7 +3,6 @@
 import { useSessionStore } from "@/store/session-store";
 import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, X, HelpCircle, Loader2, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserResponseStatus } from "@/lib/validators/session";
@@ -34,7 +33,7 @@ export function ResponseBlock({ sessionId }: ResponseBlockProps) {
     }[] = [
         {
             status: "going",
-            label: "Oui",
+            label: "Présent",
             icon: Check,
             color: "text-green-600 border-green-200 bg-green-50 hover:bg-green-100",
             activeColor: "bg-green-600 text-white border-green-600 hover:bg-green-700",
@@ -48,7 +47,7 @@ export function ResponseBlock({ sessionId }: ResponseBlockProps) {
         },
         {
             status: "declined",
-            label: "Non",
+            label: "Absent",
             icon: X,
             color: "text-red-600 border-red-200 bg-red-50 hover:bg-red-100",
             activeColor: "bg-red-600 text-white border-red-600 hover:bg-red-700",
@@ -56,39 +55,39 @@ export function ResponseBlock({ sessionId }: ResponseBlockProps) {
     ];
 
     return (
-        <Card className="w-full">
-            <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-medium">Ta participation</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-3 gap-3">
-                    {options.map((option) => {
-                        const Icon = option.icon;
-                        const isActive = currentStatus === option.status;
-                        const isThisLoading = isResponding && isActive;
+        <div className="space-y-2">
+            <p className="text-muted-foreground text-[10px] font-bold tracking-widest uppercase">
+                Ta participation
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+                {options.map((option) => {
+                    const Icon = option.icon;
+                    const isActive = currentStatus === option.status;
+                    const isThisLoading = isResponding && isActive;
 
-                        return (
-                            <Button
-                                key={option.status}
-                                variant="outline"
-                                className={cn(
-                                    "flex h-auto flex-col items-center justify-center gap-2 border-2 px-2 py-4 transition-all",
-                                    isActive ? option.activeColor : option.color,
-                                )}
-                                onClick={() => handleRespond(option.status)}
-                                disabled={isResponding}
-                            >
-                                {isThisLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <Icon className="h-5 w-5" />
-                                )}
-                                <span className="text-sm font-semibold">{option.label}</span>
-                            </Button>
-                        );
-                    })}
-                </div>
-            </CardContent>
-        </Card>
+                    return (
+                        <Button
+                            key={option.status}
+                            variant="outline"
+                            size="sm"
+                            aria-pressed={isActive}
+                            className={cn(
+                                "min-w-0 gap-1 px-2 text-xs transition-all",
+                                isActive ? option.activeColor : option.color,
+                            )}
+                            onClick={() => handleRespond(option.status)}
+                            disabled={isResponding}
+                        >
+                            {isThisLoading ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                                <Icon className="h-3.5 w-3.5" />
+                            )}
+                            <span className="truncate">{option.label}</span>
+                        </Button>
+                    );
+                })}
+            </div>
+        </div>
     );
 }

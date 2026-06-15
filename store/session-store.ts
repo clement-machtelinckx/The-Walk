@@ -2,8 +2,6 @@ import { create } from "zustand";
 import {
     Session,
     SessionResponsesSummary,
-    SessionPrechatData,
-    SessionLiveChatData,
     RollCallMember,
     PresenceSummary,
     TablePrivateMessageData,
@@ -15,6 +13,10 @@ import {
     SessionResponseInput,
 } from "@/lib/validators/session";
 import { RollCallInput } from "@/lib/validators/presence";
+import type {
+    SessionLiveModuleKey,
+    SessionLiveModuleSettingsValues,
+} from "@/types/live-module-settings";
 
 interface PresenceStateData {
     rollCall: RollCallMember[];
@@ -26,33 +28,34 @@ export interface SessionHistoryItem {
     presenceSummary: PresenceSummary | null;
 }
 
+export interface SessionReminderSummary {
+    sent: number;
+    failed: number;
+    skipped: number;
+}
+
 interface SessionState {
     // Data
     nextSessions: Record<string, Session | null>;
     activeSessions: Record<string, Session | null>;
     sessionHistories: Record<string, SessionHistoryItem[]>;
     responses: Record<string, SessionResponsesSummary | null>;
-    prechats: Record<string, SessionPrechatData | null>;
-    livechats: Record<string, SessionLiveChatData | null>;
     privateMessages: Record<string, TablePrivateMessageData | null>;
     presenceData: Record<string, PresenceStateData | null>;
     personalNotes: Record<string, PersonalNote | null>;
     groupNotes: Record<string, GroupNote | null>;
+    liveModuleSettings: Record<string, SessionLiveModuleSettingsValues | null>;
 
     // Loading states
     isLoadingSession: boolean;
     isLoadingActiveSession: boolean;
     isLoadingHistory: boolean;
     isLoadingResponses: boolean;
-    isLoadingPrechat: boolean;
-    isLoadingLivechat: boolean;
     isLoadingPrivateMessages: boolean;
     isLoadingPresence: boolean;
     isLoadingPersonalNote: boolean;
     isLoadingGroupNote: boolean;
     isResponding: boolean;
-    isSendingMessage: boolean;
-    isSendingLiveMessage: boolean;
     isSendingPrivateMessage: boolean;
     isStartingSession: boolean;
     isEndingSession: boolean;
@@ -61,6 +64,8 @@ interface SessionState {
     isSavingPresence: boolean;
     isSavingPersonalNote: boolean;
     isSavingGroupNote: boolean;
+    isLoadingLiveModules: boolean;
+    liveModuleError: string | null;
     error: string | null;
 
     // Actions
@@ -82,17 +87,6 @@ interface SessionState {
         payload: SessionResponseInput,
     ) => Promise<{ success: boolean; error?: string }>;
 
-    fetchPrechatMessages: (sessionId: string, page?: number) => Promise<void>;
-    sendPrechatMessage: (
-        sessionId: string,
-        content: string,
-    ) => Promise<{ success: boolean; error?: string }>;
-
-    fetchLivechatMessages: (sessionId: string, page?: number) => Promise<void>;
-    sendLivechatMessage: (
-        sessionId: string,
-        content: string,
-    ) => Promise<{ success: boolean; error?: string }>;
     fetchPrivateMessages: (
         tableId: string,
         recipientUserId: string,
@@ -139,6 +133,20 @@ interface SessionState {
         error?: string;
         code?: string;
     }>;
+    setLiveModuleSettings: (sessionId: string, settings: SessionLiveModuleSettingsValues) => void;
+    fetchLiveModuleSettings: (sessionId: string) => Promise<SessionLiveModuleSettingsValues | null>;
+    updateLiveModuleSetting: (
+        sessionId: string,
+        module: SessionLiveModuleKey,
+        enabled: boolean,
+    ) => Promise<{
+        success: boolean;
+        settings?: SessionLiveModuleSettingsValues;
+        error?: string;
+    }>;
+    sendSessionReminder: (
+        sessionId: string,
+    ) => Promise<{ success: boolean; summary?: SessionReminderSummary; error?: string }>;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -147,25 +155,20 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     activeSessions: {},
     sessionHistories: {},
     responses: {},
-    prechats: {},
-    livechats: {},
     privateMessages: {},
     presenceData: {},
     personalNotes: {},
     groupNotes: {},
+    liveModuleSettings: {},
     isLoadingSession: false,
     isLoadingActiveSession: false,
     isLoadingHistory: false,
     isLoadingResponses: false,
-    isLoadingPrechat: false,
-    isLoadingLivechat: false,
     isLoadingPrivateMessages: false,
     isLoadingPresence: false,
     isLoadingPersonalNote: false,
     isLoadingGroupNote: false,
     isResponding: false,
-    isSendingMessage: false,
-    isSendingLiveMessage: false,
     isSendingPrivateMessage: false,
     isStartingSession: false,
     isEndingSession: false,
@@ -174,6 +177,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     isSavingPresence: false,
     isSavingPersonalNote: false,
     isSavingGroupNote: false,
+    isLoadingLiveModules: false,
+    liveModuleError: null,
     error: null,
 
     // Actions
@@ -355,106 +360,6 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             }
         } catch {
             set({ isResponding: false, error: "Erreur réseau" });
-            return { success: false, error: "Erreur réseau" };
-        }
-    },
-
-    fetchPrechatMessages: async (sessionId: string, page = 1) => {
-        set({ isLoadingPrechat: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/prechat?page=${page}`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    prechats: {
-                        ...state.prechats,
-                        [sessionId]: data,
-                    },
-                    isLoadingPrechat: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingPrechat: false,
-                });
-            }
-        } catch {
-            set({ error: "Erreur réseau", isLoadingPrechat: false });
-        }
-    },
-
-    sendPrechatMessage: async (sessionId: string, content: string) => {
-        set({ isSendingMessage: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/prechat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                await get().fetchPrechatMessages(sessionId);
-                set({ isSendingMessage: false });
-                return { success: true };
-            } else {
-                set({ isSendingMessage: false, error: data.error });
-                return {
-                    success: false,
-                    error: data.error || "Erreur lors de l'envoi du message",
-                };
-            }
-        } catch {
-            set({ isSendingMessage: false, error: "Erreur réseau" });
-            return { success: false, error: "Erreur réseau" };
-        }
-    },
-
-    fetchLivechatMessages: async (sessionId: string, page = 1) => {
-        set({ isLoadingLivechat: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/livechat?page=${page}`);
-            const data = await res.json();
-            if (res.ok) {
-                set((state) => ({
-                    livechats: {
-                        ...state.livechats,
-                        [sessionId]: data,
-                    },
-                    isLoadingLivechat: false,
-                }));
-            } else {
-                set({
-                    error: data.error || "Erreur lors de la récupération des messages",
-                    isLoadingLivechat: false,
-                });
-            }
-        } catch {
-            set({ error: "Erreur réseau", isLoadingLivechat: false });
-        }
-    },
-
-    sendLivechatMessage: async (sessionId: string, content: string) => {
-        set({ isSendingLiveMessage: true, error: null });
-        try {
-            const res = await fetch(`/api/sessions/${sessionId}/livechat`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ content }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-                await get().fetchLivechatMessages(sessionId);
-                set({ isSendingLiveMessage: false });
-                return { success: true };
-            } else {
-                set({ isSendingLiveMessage: false, error: data.error });
-                return {
-                    success: false,
-                    error: data.error || "Erreur lors de l'envoi du message",
-                };
-            }
-        } catch {
-            set({ isSendingLiveMessage: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
         }
     },
@@ -822,6 +727,102 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         } catch {
             set({ isSavingGroupNote: false, error: "Erreur réseau" });
             return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    setLiveModuleSettings: (sessionId, settings) =>
+        set((state) => ({
+            liveModuleSettings: {
+                ...state.liveModuleSettings,
+                [sessionId]: settings,
+            },
+        })),
+
+    fetchLiveModuleSettings: async (sessionId: string) => {
+        set({ isLoadingLiveModules: true, liveModuleError: null });
+
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/modules`);
+            const data = await response.json();
+
+            if (response.ok && data.settings) {
+                const settings: SessionLiveModuleSettingsValues = {
+                    group_notes: data.settings.group_notes,
+                    dice: data.settings.dice,
+                    initiative: data.settings.initiative,
+                    presence: data.settings.presence,
+                };
+                get().setLiveModuleSettings(sessionId, settings);
+                return settings;
+            } else if (!response.ok) {
+                set({ liveModuleError: data.error || "Impossible de charger les modules." });
+            }
+        } catch {
+            set({ liveModuleError: "Erreur réseau pendant le chargement des modules." });
+        } finally {
+            set({ isLoadingLiveModules: false });
+        }
+
+        return null;
+    },
+
+    updateLiveModuleSetting: async (sessionId, module, enabled) => {
+        const previousSettings = get().liveModuleSettings[sessionId];
+        if (!previousSettings) {
+            return { success: false, error: "Impossible de charger les modules." };
+        }
+
+        get().setLiveModuleSettings(sessionId, { ...previousSettings, [module]: enabled });
+        set({ liveModuleError: null });
+
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/modules`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ [module]: enabled }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.error || "Impossible d'enregistrer ce module.";
+                get().setLiveModuleSettings(sessionId, previousSettings);
+                set({ liveModuleError: error });
+                return { success: false, error };
+            }
+
+            const settings: SessionLiveModuleSettingsValues = {
+                group_notes: data.settings.group_notes,
+                dice: data.settings.dice,
+                initiative: data.settings.initiative,
+                presence: data.settings.presence,
+            };
+            get().setLiveModuleSettings(sessionId, settings);
+            return { success: true, settings };
+        } catch {
+            const error = "Erreur réseau pendant l'enregistrement.";
+            get().setLiveModuleSettings(sessionId, previousSettings);
+            set({ liveModuleError: error });
+            return { success: false, error };
+        }
+    },
+
+    sendSessionReminder: async (sessionId: string) => {
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/reminder-email`, {
+                method: "POST",
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.summary) {
+                return {
+                    success: false,
+                    error: data.error || "Impossible d'envoyer le rappel email.",
+                };
+            }
+
+            return { success: true, summary: data.summary };
+        } catch {
+            return { success: false, error: "Impossible d'envoyer le rappel email." };
         }
     },
 }));

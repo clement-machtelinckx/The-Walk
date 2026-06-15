@@ -32,8 +32,9 @@ type SessionToolsDrawerProps = Readonly<{
     onModuleSettingsChange?: (settings: SessionLiveModuleSettingsValues) => void;
 }>;
 
-type SessionToolsContext = "table" | "pre-session" | "live";
+type SessionToolsContext = "table" | "live";
 type SessionToolId = "players" | "rolls" | "advanced" | "gm";
+type PlaceholderState = "active" | "live-only" | "future" | "gm-only";
 
 const SESSION_TOOLS: Array<{
     id: SessionToolId;
@@ -44,35 +45,54 @@ const SESSION_TOOLS: Array<{
     {
         id: "players",
         label: "Joueurs",
-        title: "Joueurs et privé",
+        title: "Joueurs et échanges",
         icon: Users,
     },
     {
         id: "rolls",
-        label: "Dés",
-        title: "Dés et initiative",
+        label: "Live",
+        title: "Outils live",
         icon: Dice5,
     },
     {
         id: "advanced",
-        label: "Avancé",
-        title: "Outils avancés",
+        label: "À venir",
+        title: "À venir et externe",
         icon: Wrench,
     },
     {
         id: "gm",
         label: "MJ",
-        title: "Outils MJ",
+        title: "Modules et ressources MJ",
         icon: Crown,
     },
 ];
 
-const CONTEXT_DESCRIPTION: Record<SessionToolsContext, string> = {
-    table: "Outils de table. Les fonctions strictement live restent visibles mais indiquent leur contexte.",
-    "pre-session":
-        "Outils de préparation. Les fonctions strictement live restent visibles mais inactives.",
-    live: "Outils secondaires du live. Les modules futurs restent regroupés hors du noyau de session.",
+const CONTEXT_TITLE: Record<SessionToolsContext, string> = {
+    table: "Outils de table",
+    live: "Outils du live",
 };
+
+const CONTEXT_DESCRIPTION: Record<SessionToolsContext, string> = {
+    table: "Accès aux outils partagés. La prochaine session et son administration restent sur la page table.",
+    live: "Outils secondaires et modules de la session en cours, sans répéter les actions principales du live.",
+};
+
+const PLACEHOLDER_BADGES: Record<PlaceholderState, string> = {
+    active: "Actif",
+    "live-only": "Disponible en live",
+    future: "Prévu",
+    "gm-only": "Réservé MJ",
+};
+
+function initiativeToolDetail(isLive: boolean, isEnabled: boolean): string {
+    if (isLive) {
+        if (isEnabled) return "L'ordre de tour indicatif est affiché dans le live.";
+        return "Activez le module initiative depuis l'onglet MJ.";
+    }
+
+    return "Disponible pendant une session live.";
+}
 
 function ToolPanel({
     icon: Icon,
@@ -104,32 +124,26 @@ function ToolPanel({
 function PlaceholderItem({
     label,
     detail,
-    state = "available",
+    state = "future",
 }: {
     label: string;
     detail: string;
-    state?: "available" | "live-only" | "future" | "gm-only";
+    state?: PlaceholderState;
 }) {
-    const badge =
-        state === "live-only"
-            ? "Disponible en live"
-            : state === "future"
-              ? "Prévu"
-              : state === "gm-only"
-                ? "MJ"
-                : "Disponible";
+    const badge = PLACEHOLDER_BADGES[state];
 
     return (
         <div
+            aria-disabled="true"
             className={cn(
                 "bg-muted/30 rounded-md border border-dashed p-3",
-                state === "live-only" && "opacity-70",
+                state !== "active" && "opacity-70",
             )}
         >
             <div className="flex items-center justify-between gap-3">
                 <p className="text-xs font-semibold">{label}</p>
                 <Badge
-                    variant={state === "available" ? "success" : "outline"}
+                    variant={state === "active" ? "success" : "outline"}
                     className="shrink-0 px-2 py-0 text-[9px]"
                 >
                     {badge}
@@ -163,7 +177,7 @@ export function SessionToolsDrawer({
             {!open && (
                 <div
                     className="border-primary/20 bg-background/95 fixed top-1/2 right-2 z-40 flex -translate-y-1/2 flex-col items-center gap-1 rounded-lg border p-1 shadow-lg backdrop-blur sm:right-0 sm:rounded-r-none sm:border-r-0"
-                    aria-label="Accès rapide aux outils de session"
+                    aria-label={`Accès rapide aux ${CONTEXT_TITLE[context].toLowerCase()}`}
                 >
                     <span
                         aria-hidden="true"
@@ -200,7 +214,7 @@ export function SessionToolsDrawer({
                     <SheetHeader className="border-b pr-12">
                         <SheetTitle className="flex items-center gap-2">
                             <Wrench className="text-primary h-6 w-6" />
-                            Outils de session
+                            {CONTEXT_TITLE[context]}
                         </SheetTitle>
                         <SheetDescription>{CONTEXT_DESCRIPTION[context]}</SheetDescription>
                     </SheetHeader>
@@ -236,12 +250,12 @@ export function SessionToolsDrawer({
                             <TabsContent value="players" className="m-0 space-y-4">
                                 <ToolPanel
                                     icon={MessageSquare}
-                                    title="Joueurs / privé"
-                                    description="Messages privés de table, vue joueurs et futurs contrôles ciblés."
+                                    title="Joueurs et échanges"
+                                    description="Vue des joueurs et espaces d'échange associés à la table."
                                 >
                                     <PlaceholderItem
                                         label="Messages privés de table"
-                                        detail="Espace prévu pour rester accessible depuis la table, la préparation et le live."
+                                        detail="Espace prévu pour rester accessible depuis la table, la session suivante et le live."
                                         state="future"
                                     />
                                     <PlayerPresencePanel
@@ -253,10 +267,10 @@ export function SessionToolsDrawer({
                                         label="Contrôles live ciblés"
                                         detail={
                                             isLive
-                                                ? "Les interactions strictement live pourront être ajoutées ici."
+                                                ? "Des interactions live ciblées pourront être ajoutées ici."
                                                 : "Disponible pendant une session live."
                                         }
-                                        state={isLive ? "available" : "live-only"}
+                                        state={isLive ? "future" : "live-only"}
                                     />
                                 </ToolPanel>
                             </TabsContent>
@@ -264,18 +278,21 @@ export function SessionToolsDrawer({
                             <TabsContent value="rolls" className="m-0 space-y-4">
                                 <ToolPanel
                                     icon={Dice5}
-                                    title="Dés / initiative"
-                                    description="Jets de dés accessibles largement, initiative réservée au live."
+                                    title="Outils live"
+                                    description="Jets de dés et état des modules utilisés pendant une session live."
                                 >
                                     <DiceLogBlock tableId={tableId} sessionId={sessionId} />
                                     <PlaceholderItem
                                         label="Initiative"
-                                        detail={
-                                            isLive
-                                                ? "Le suivi d'ordre de tour pourra partager ce panneau avec les outils de dés."
-                                                : "Disponible pendant une session live."
+                                        detail={initiativeToolDetail(
+                                            isLive,
+                                            Boolean(moduleSettings?.initiative),
+                                        )}
+                                        state={
+                                            isLive && moduleSettings?.initiative
+                                                ? "active"
+                                                : "live-only"
                                         }
-                                        state={isLive ? "available" : "live-only"}
                                     />
                                 </ToolPanel>
                             </TabsContent>
@@ -283,8 +300,8 @@ export function SessionToolsDrawer({
                             <TabsContent value="advanced" className="m-0 space-y-4">
                                 <ToolPanel
                                     icon={Shield}
-                                    title="Futur / outils avancés"
-                                    description="Modules secondaires et futurs outils qui ne doivent pas encombrer la page principale."
+                                    title="À venir et externe"
+                                    description="Accès externe et emplacements clairement réservés aux futurs outils."
                                 >
                                     <Button
                                         variant="outline"
@@ -324,8 +341,8 @@ export function SessionToolsDrawer({
                                 <TabsContent value="gm" className="m-0 space-y-4">
                                     <ToolPanel
                                         icon={Crown}
-                                        title="MJ"
-                                        description="Zone réservée aux outils de pilotage et ressources du meneur."
+                                        title="Modules et ressources MJ"
+                                        description="Configuration des modules live et ressources réservées au meneur."
                                     >
                                         {sessionId && (
                                             <LiveModuleSettings
@@ -345,9 +362,9 @@ export function SessionToolsDrawer({
                                             state="future"
                                         />
                                         <PlaceholderItem
-                                            label="Raccourcis MJ"
-                                            detail="Raccourcis structurels réservés au MJ, sans les mélanger aux outils joueurs."
-                                            state="gm-only"
+                                            label="Actions MJ supplémentaires"
+                                            detail="Aucune action supplémentaire n'est disponible dans ce tiroir pour le moment."
+                                            state="future"
                                         />
                                     </ToolPanel>
                                 </TabsContent>

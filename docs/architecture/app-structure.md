@@ -5,7 +5,8 @@
 - `app/` : routes Next.js App Router, layouts, pages publiques/protegees, metadata et route handlers API.
 - `components/` : composants UI et composants par domaine fonctionnel.
 - `lib/` : auth, clients Supabase, services metier, repositories, validators, email et utilitaires.
-- `store/` : stores Zustand pour certains etats client.
+- `store/` : stores Zustand pour certains etats client, dont un store dedie a la discussion
+  publique de table.
 - `supabase/` : configuration locale, migrations SQL et seed.
 - `types/` : types TypeScript partages par domaine.
 - `config/` : configuration applicative visible, comme site et avatars.
@@ -43,3 +44,6 @@
 - Permissions cote serveur, completees par RLS Supabase.
 - Separation entre affichage, orchestration metier et persistance.
 - UI organisee par domaine pour faciliter la reprise.
+- Les composants client de feature conservent leur etat UI local, mais deleguent les appels API
+  metier reutilisables aux stores Zustand ou a une abstraction client dediee. Un appel direct reste
+  acceptable uniquement pour un cas ponctuel explicitement assume, notamment un prototype isole.

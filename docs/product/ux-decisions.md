@@ -8,6 +8,10 @@ Les interfaces sont pensees pour rester utilisables sur mobile : navigation simp
 
 Les evenements importants sont regroupes dans un centre accessible depuis l'en-tete, pour eviter de disperser les signaux dans chaque page.
 
+## Page table comme hub avant-session
+
+La planification, les RSVP et leur synthese sont regroupes dans le bloc Prochaine session. La discussion principale reste un bloc autonome et permanent sur la page table, puis continue dans le live.
+
 ## Drawer d'outils session
 
 La session live regroupe les outils dans un drawer : joueurs/presence, jets de des, options avancees et outils MJ. Cela garde la page live lisible tout en conservant les outils disponibles.
