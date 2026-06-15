@@ -46,6 +46,7 @@ Cette page decrit ce qui existe dans le repo. Les limites et prochaines priorite
 - Enrichissements live activables par session, sans rendre la discussion optionnelle.
 - Drawer d'outils de session.
 - Presence compacte dans le live et panneau joueurs dans le drawer.
+- Initiative indicative avec ordre horizontal, participants custom, jets et pilotage MJ.
 
 ## Notifications et emails
 

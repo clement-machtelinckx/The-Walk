@@ -119,4 +119,24 @@ export const NotificationEventService = {
                 ),
         );
     },
+
+    async notifyInitiativeRequested(session: Session, userIds: string[]): Promise<void> {
+        await Promise.all(
+            userIds.map((userId) =>
+                createNotificationSafe({
+                    user_id: userId,
+                    type: "initiative_requested",
+                    title: "Initiative demandée",
+                    body: "Le MJ demande votre jet d'initiative pour la session.",
+                    resource_type: "session",
+                    resource_id: session.id,
+                    href: `/tables/${session.table_id}/session/live/${session.id}`,
+                    data: {
+                        tableId: session.table_id,
+                        sessionId: session.id,
+                    },
+                }),
+            ),
+        );
+    },
 };

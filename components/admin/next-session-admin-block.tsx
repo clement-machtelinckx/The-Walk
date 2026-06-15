@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSessionStore } from "@/store/session-store";
+import { useSessionStore, type SessionReminderSummary } from "@/store/session-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Loader2, ArrowRight, Mail, CheckCircle2, AlertCircle } from "lucide-react";
 import { formatShortDate } from "@/lib/utils/date";
@@ -13,21 +13,16 @@ type NextSessionAdminBlockProps = Readonly<{
     tableId: string;
 }>;
 
-interface ReminderSummary {
-    sent: number;
-    failed: number;
-    skipped: number;
-}
-
 /**
  * Bloc d'information sur la prochaine session dans l'espace Admin.
  * Rôle : Structural / Informatif uniquement.
  * N'est PAS le hub avant-session (RSVP/discussion/démarrage sont sur la page table).
  */
 export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
-    const { nextSessions, isLoadingSession, fetchNextSession } = useSessionStore();
+    const { nextSessions, isLoadingSession, fetchNextSession, sendSessionReminder } =
+        useSessionStore();
     const [isSendingReminder, setIsSendingReminder] = useState(false);
-    const [reminderSummary, setReminderSummary] = useState<ReminderSummary | null>(null);
+    const [reminderSummary, setReminderSummary] = useState<SessionReminderSummary | null>(null);
     const [reminderError, setReminderError] = useState<string | null>(null);
 
     const session = nextSessions[tableId];
@@ -45,27 +40,13 @@ export function NextSessionAdminBlock({ tableId }: NextSessionAdminBlockProps) {
         setReminderSummary(null);
         setReminderError(null);
 
-        try {
-            const response = await fetch(`/api/sessions/${session.id}/reminder-email`, {
-                method: "POST",
-            });
-            const payload = (await response.json()) as {
-                summary?: ReminderSummary;
-                error?: string;
-            };
-
-            if (!response.ok || !payload.summary) {
-                throw new Error(payload.error || "Impossible d'envoyer le rappel email.");
-            }
-
-            setReminderSummary(payload.summary);
-        } catch (error) {
-            setReminderError(
-                error instanceof Error ? error.message : "Impossible d'envoyer le rappel email.",
-            );
-        } finally {
-            setIsSendingReminder(false);
+        const result = await sendSessionReminder(session.id);
+        if (result.success && result.summary) {
+            setReminderSummary(result.summary);
+        } else {
+            setReminderError(result.error || "Impossible d'envoyer le rappel email.");
         }
+        setIsSendingReminder(false);
     };
 
     if (isLoadingSession && !session) {

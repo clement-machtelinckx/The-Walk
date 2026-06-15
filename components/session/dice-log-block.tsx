@@ -13,13 +13,16 @@ import {
 } from "@/components/ui/select";
 import { usePolling } from "@/lib/hooks/use-polling";
 import { ALLOWED_DICE_TYPES } from "@/lib/validators/dice";
-import { DiceRollLog } from "@/types/dice";
+import { useDiceStore } from "@/store/dice-store";
+import type { DiceRollLog } from "@/types/dice";
 import { cn } from "@/lib/utils";
 
 type DiceLogBlockProps = Readonly<{
     tableId: string;
     sessionId?: string;
 }>;
+
+const EMPTY_ROLLS: DiceRollLog[] = [];
 
 function formatFormula(roll: Pick<DiceRollLog, "quantity" | "dice_type" | "modifier">) {
     const base = `${roll.quantity > 1 ? roll.quantity : ""}d${roll.dice_type}`;
@@ -39,10 +42,12 @@ export function DiceLogBlock({ tableId, sessionId }: DiceLogBlockProps) {
     const [diceType, setDiceType] = useState("20");
     const [quantity, setQuantity] = useState(1);
     const [modifier, setModifier] = useState(0);
-    const [rolls, setRolls] = useState<DiceRollLog[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isRolling, setIsRolling] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const rolls = useDiceStore((state) => state.rolls[tableId] || EMPTY_ROLLS);
+    const isLoading = useDiceStore((state) => state.isLoading);
+    const isRolling = useDiceStore((state) => state.isRolling);
+    const error = useDiceStore((state) => state.error);
+    const fetchRolls = useDiceStore((state) => state.fetchRolls);
+    const rollDice = useDiceStore((state) => state.rollDice);
 
     const formulaPreview = useMemo(
         () =>
@@ -54,57 +59,17 @@ export function DiceLogBlock({ tableId, sessionId }: DiceLogBlockProps) {
         [diceType, modifier, quantity],
     );
 
-    const fetchRolls = useCallback(async () => {
-        const response = await fetch(`/api/tables/${tableId}/dice`);
-        const data = await response.json();
+    const refreshRolls = useCallback(() => fetchRolls(tableId), [fetchRolls, tableId]);
 
-        if (!response.ok) {
-            setError(data.error || "Impossible de charger les lancers.");
-            return;
-        }
+    usePolling(refreshRolls, { interval: 10000, enabled: !isRolling });
 
-        setRolls(data.rolls || []);
-        setIsLoading(false);
-        setError(null);
-    }, [tableId]);
-
-    usePolling(fetchRolls, { interval: 10000 });
-
-    const handleRoll = async () => {
-        if (isRolling) return;
-
-        setIsRolling(true);
-        setError(null);
-
-        try {
-            const response = await fetch(`/api/tables/${tableId}/dice`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    dice_type: Number(diceType),
-                    quantity,
-                    modifier,
-                    session_id: sessionId ?? null,
-                }),
-            });
-            const data = await response.json();
-
-            if (!response.ok) {
-                setError(data.error || "Le lancer a échoué.");
-                return;
-            }
-
-            setRolls((current) => [
-                data.roll,
-                ...current.filter((roll) => roll.id !== data.roll.id),
-            ]);
-        } catch {
-            setError("Erreur réseau pendant le lancer.");
-        } finally {
-            setIsRolling(false);
-            setIsLoading(false);
-        }
-    };
+    const handleRoll = () =>
+        rollDice(tableId, {
+            dice_type: Number(diceType),
+            quantity,
+            modifier,
+            session_id: sessionId ?? null,
+        });
 
     return (
         <div className="space-y-4">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check } from "lucide-react";
+import { useInvitationStore } from "@/store/invitation-store";
 
 type GroupInvitationAcceptButtonProps = Readonly<{
     token: string;
@@ -13,27 +14,20 @@ export function GroupInvitationAcceptButton({ token }: GroupInvitationAcceptButt
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const router = useRouter();
+    const acceptGroupInvitation = useInvitationStore((state) => state.acceptGroupInvitation);
 
     const handleAccept = async () => {
         setIsLoading(true);
-        try {
-            const res = await fetch(`/api/group-invitations/${token}/accept`, {
-                method: "POST",
-            });
-            const data = await res.json();
+        const result = await acceptGroupInvitation(token);
 
-            if (res.ok) {
-                setIsSuccess(true);
-                router.push(data.redirectTo);
-                router.refresh();
-            } else {
-                alert(data.error || "Une erreur est survenue.");
-            }
-        } catch {
-            alert("Erreur réseau.");
-        } finally {
-            setIsLoading(false);
+        if (result.success && result.redirectTo) {
+            setIsSuccess(true);
+            router.push(result.redirectTo);
+            router.refresh();
+        } else {
+            alert(result.error || "Une erreur est survenue.");
         }
+        setIsLoading(false);
     };
 
     return (

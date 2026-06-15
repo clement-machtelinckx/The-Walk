@@ -22,6 +22,12 @@ interface InvitationState {
         role: string,
         durationHours: number,
     ) => Promise<{ success: boolean; invitation?: GroupInvitation; error?: string }>;
+    acceptInvitation: (
+        token: string,
+    ) => Promise<{ success: boolean; redirectTo?: string; error?: string }>;
+    acceptGroupInvitation: (
+        token: string,
+    ) => Promise<{ success: boolean; redirectTo?: string; error?: string }>;
 }
 
 export const useInvitationStore = create<InvitationState>((set, get) => ({
@@ -160,6 +166,50 @@ export const useInvitationStore = create<InvitationState>((set, get) => ({
             }
         } catch {
             return { success: false, error: "Erreur réseau" };
+        }
+    },
+
+    acceptInvitation: async (token: string) => {
+        set({ error: null });
+        try {
+            const response = await fetch(`/api/invitations/${token}/accept`, {
+                method: "POST",
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.error || "Une erreur est survenue.";
+                set({ error });
+                return { success: false, error };
+            }
+
+            return { success: true, redirectTo: data.redirectTo || "/tables" };
+        } catch {
+            const error = "Erreur réseau ou serveur.";
+            set({ error });
+            return { success: false, error };
+        }
+    },
+
+    acceptGroupInvitation: async (token: string) => {
+        set({ error: null });
+        try {
+            const response = await fetch(`/api/group-invitations/${token}/accept`, {
+                method: "POST",
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.error || "Une erreur est survenue.";
+                set({ error });
+                return { success: false, error };
+            }
+
+            return { success: true, redirectTo: data.redirectTo };
+        } catch {
+            const error = "Erreur réseau.";
+            set({ error });
+            return { success: false, error };
         }
     },
 }));
