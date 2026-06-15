@@ -9,6 +9,7 @@ import { RoleBadge } from "@/components/special/role-badge";
 import { useRouter } from "next/navigation";
 import { useTableStore } from "@/store/table-store";
 import { useSessionStore } from "@/store/session-store";
+import { ContextMenuActions, type ContextMenuAction } from "@/components/ui/context-menu-actions";
 
 type TableHeaderProps = Readonly<{
     tableId: string;
@@ -55,6 +56,18 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
         }
     };
 
+    const tableActions: ContextMenuAction[] = [
+        {
+            id: "leave-table",
+            label: isLeaving ? "Départ en cours..." : "Quitter la table",
+            icon: isLeaving ? Loader2 : LogOut,
+            iconClassName: isLeaving ? "animate-spin" : undefined,
+            onSelect: handleLeaveTable,
+            disabled: isLeaving,
+            destructive: true,
+        },
+    ];
+
     return (
         <div className="space-y-4 border-b pb-4">
             <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -86,25 +99,15 @@ export function TableHeader({ tableId, name, description, myRole }: TableHeaderP
                         <Button size="sm" asChild className="bg-green-600 hover:bg-green-700">
                             <Link href={`/tables/${tableId}/session/live/${activeSession.id}`}>
                                 <Play className="mr-2 h-4 w-4 fill-current" />
-                                LIVE
+                                Rejoindre la session
                             </Link>
                         </Button>
                     )}
 
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-destructive ml-auto"
-                        onClick={handleLeaveTable}
-                        disabled={isLeaving}
-                    >
-                        {isLeaving ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <LogOut className="mr-2 h-4 w-4" />
-                        )}
-                        Quitter
-                    </Button>
+                    <ContextMenuActions
+                        actions={tableActions}
+                        label="Ouvrir les actions de table"
+                    />
                 </div>
             </div>
         </div>

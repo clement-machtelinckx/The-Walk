@@ -2,15 +2,8 @@
 
 import { useState } from "react";
 import { Session } from "@/types/session";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-    CardFooter,
-} from "@/components/ui/card";
-import { AlertCircle, Calendar, ArrowRight, Loader2, Play, Plus, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { AlertCircle, Calendar, ArrowRight, Loader2, Play, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -129,7 +122,7 @@ export function NextSessionSummary({
                 <CardFooter>
                     <Button className="w-full bg-green-600 shadow-sm hover:bg-green-700" asChild>
                         <Link href={`/tables/${tableId}/session/live/${activeSession.id}`}>
-                            Rejoindre le Live
+                            Rejoindre la session
                             <ArrowRight size={16} className="ml-2" />
                         </Link>
                     </Button>
@@ -214,6 +207,7 @@ export function NextSessionSummary({
                 onDeleteSession={handleDeleteSession}
                 isCancelling={isCancellingSession}
                 isDeleting={isDeletingSession}
+                rsvp={<ResponseBlock sessionId={session.id} />}
             />
 
             {actionError && (
@@ -241,21 +235,7 @@ export function NextSessionSummary({
                 </div>
             )}
 
-            <Card className="border-primary/20 bg-card/50 overflow-hidden">
-                <CardHeader className="bg-primary/5 border-b">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                        <Users className="text-primary h-5 w-5" />
-                        Participation
-                    </CardTitle>
-                    <CardDescription>
-                        Confirmez votre présence et consultez les réponses du groupe.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4 pt-6">
-                    <ResponseBlock sessionId={session.id} />
-                    <ResponseSummary sessionId={session.id} collapsible defaultExpanded={false} />
-                </CardContent>
-            </Card>
+            <ResponseSummary sessionId={session.id} collapsible defaultExpanded={false} />
         </div>
     );
 }
