@@ -16,6 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useTableStore } from "@/store/table-store";
 
+const DELETE_CONFIRMATION = "SUPPRIMER";
+
 type DeleteTableDangerZoneProps = Readonly<{
     tableId: string;
     tableName: string;
@@ -28,7 +30,7 @@ export function DeleteTableDangerZone({ tableId, tableName }: DeleteTableDangerZ
     const [confirmation, setConfirmation] = useState("");
     const [error, setError] = useState<string | null>(null);
 
-    const canDelete = confirmation === tableName;
+    const canDelete = confirmation === DELETE_CONFIRMATION;
 
     const handleOpenChange = (open: boolean) => {
         if (open) {
@@ -80,16 +82,16 @@ export function DeleteTableDangerZone({ tableId, tableName }: DeleteTableDangerZ
                         <DialogHeader>
                             <DialogTitle>Supprimer la table</DialogTitle>
                             <DialogDescription>
-                                Cette action supprimera la table, ses sessions, invitations,
-                                messages, notes et journaux liés. Une session live doit être
-                                clôturée ou annulée avant suppression.
+                                Cette action supprimera la table « {tableName} », ses sessions,
+                                invitations, messages, notes et journaux liés. Une session live doit
+                                être clôturée ou annulée avant suppression.
                             </DialogDescription>
                         </DialogHeader>
 
                         <div className="space-y-3">
                             <div className="bg-destructive/10 text-destructive border-destructive/20 rounded-lg border p-3 text-sm font-medium">
                                 Pour confirmer, saisissez exactement :{" "}
-                                <span className="font-bold">{tableName}</span>
+                                <span className="font-bold">{DELETE_CONFIRMATION}</span>
                             </div>
                             <Input
                                 value={confirmation}
@@ -97,7 +99,7 @@ export function DeleteTableDangerZone({ tableId, tableName }: DeleteTableDangerZ
                                     setConfirmation(event.target.value);
                                     setError(null);
                                 }}
-                                placeholder={tableName}
+                                placeholder={DELETE_CONFIRMATION}
                                 autoComplete="off"
                             />
                             {error && (
