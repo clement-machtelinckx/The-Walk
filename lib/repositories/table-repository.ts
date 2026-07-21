@@ -4,6 +4,19 @@ import { NotFoundError } from "@/lib/errors";
 import { Table, TableRole } from "@/types/table";
 import { CreateTableInput, UpdateTableInput } from "@/lib/validators/table";
 
+export interface UserTableSummaryRow {
+    id: string;
+    name: string;
+    description: string | null;
+    myRole: TableRole;
+}
+
+type TableWithMembershipRole = Pick<Table, "id" | "name" | "description"> & {
+    table_memberships: Array<{
+        role: TableRole;
+    }>;
+};
+
 export const TableRepository = {
     async create(input: CreateTableInput, ownerId: string): Promise<Table> {
         const supabase = await getServerClient();
@@ -58,6 +71,28 @@ export const TableRepository = {
         const { error } = await supabase.from("tables").delete().eq("id", id);
 
         handleDbError(error, "TableRepository.delete");
+    },
+
+    /**
+     * List the compact table data required by /tables without an unused count query.
+     * The authenticated user's role is embedded in the same database request.
+     */
+    async listSummariesByUserId(userId: string): Promise<UserTableSummaryRow[]> {
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("tables")
+            .select("id, name, description, table_memberships!inner(role)")
+            .eq("table_memberships.user_id", userId);
+
+        handleDbError(error, "TableRepository.listSummariesByUserId");
+
+        const rows = (data || []) as unknown as TableWithMembershipRole[];
+        return rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            description: row.description,
+            myRole: row.table_memberships[0]?.role || "player",
+        }));
     },
 
     async listByUserId(
