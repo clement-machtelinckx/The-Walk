@@ -22,31 +22,82 @@ export interface TableDetailsDTO {
     activeSession: Session | null;
 }
 
+interface TableSessionSummary {
+    nextSession: Session | null;
+    activeSession: Session | null;
+}
+
+function shouldUseAsNextSession(candidate: Session, current: Session | null): boolean {
+    if (!current) {
+        return true;
+    }
+
+    if (!candidate.scheduled_at) {
+        return false;
+    }
+
+    if (!current.scheduled_at) {
+        return true;
+    }
+
+    return candidate.scheduled_at < current.scheduled_at;
+}
+
+function groupSummarySessions(sessions: Session[]): Map<string, TableSessionSummary> {
+    const summaries = new Map<string, TableSessionSummary>();
+
+    for (const session of sessions) {
+        const summary = summaries.get(session.table_id) || {
+            nextSession: null,
+            activeSession: null,
+        };
+
+        if (session.status === "active" && !summary.activeSession) {
+            summary.activeSession = session;
+        }
+
+        if (
+            session.status === "scheduled" &&
+            shouldUseAsNextSession(session, summary.nextSession)
+        ) {
+            summary.nextSession = session;
+        }
+
+        summaries.set(session.table_id, summary);
+    }
+
+    return summaries;
+}
+
 export const TableService = {
     /**
      * List all tables for a user with role and next session summary.
+     * Uses one table query and one grouped session query, regardless of table count.
      */
     async listUserTables(userId: string): Promise<TableSummaryDTO[]> {
-        const paginatedTables = await TableRepository.listByUserId(userId);
+        const tables = await TableRepository.listSummariesByUserId(userId);
 
-        const summaries = await Promise.all(
-            paginatedTables.data.map(async (table) => {
-                const membership = await MembershipService.getMembership(userId, table.id);
-                const nextSession = await SessionRepository.getNextSession(table.id);
-                const activeSession = await SessionRepository.getActiveSessionByTable(table.id);
+        if (tables.length === 0) {
+            return [];
+        }
 
-                return {
-                    id: table.id,
-                    name: table.name,
-                    description: table.description,
-                    myRole: membership?.role || "player", // Fallback, though user should be member
-                    nextSession,
-                    activeSession,
-                };
-            }),
+        const sessions = await SessionRepository.listSummarySessionsByTableIds(
+            tables.map((table) => table.id),
         );
+        const sessionsByTable = groupSummarySessions(sessions);
 
-        return summaries;
+        return tables.map((table) => {
+            const summary = sessionsByTable.get(table.id);
+
+            return {
+                id: table.id,
+                name: table.name,
+                description: table.description,
+                myRole: table.myRole,
+                nextSession: summary?.nextSession || null,
+                activeSession: summary?.activeSession || null,
+            };
+        });
     },
 
     /**
