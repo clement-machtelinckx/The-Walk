@@ -3,7 +3,6 @@ import { Poppins, Quicksand } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteConfig } from "@/config/site";
-import { AuthProvider } from "@/components/auth/auth-provider";
 
 const poppins = Poppins({
     subsets: ["latin"],
@@ -85,9 +84,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             suppressHydrationWarning
         >
             <body className="bg-background text-foreground flex min-h-dvh flex-col antialiased">
-                <AuthProvider>
-                    <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
-                </AuthProvider>
+                <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
                 <SpeedInsights />
             </body>
         </html>
