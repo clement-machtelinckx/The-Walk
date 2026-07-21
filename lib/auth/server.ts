@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getServerClient } from "@/lib/db";
 import { ProfileRepository } from "@/lib/repositories/profile-repository";
 import { MembershipRepository } from "@/lib/repositories/membership-repository";
@@ -7,13 +8,12 @@ import { TableRole } from "@/types/table";
 import { redirect } from "next/navigation";
 
 /**
- * Get the current authenticated user and their business profile.
- * Returns null if not authenticated.
+ * Resolve the current authenticated user and their business profile.
+ * React cache deduplicates repeated calls during the same server render/request.
  */
-export async function getCurrentUser(): Promise<AppUser | null> {
+const loadCurrentUser = async (): Promise<AppUser | null> => {
     const supabase = await getServerClient();
 
-    // Get auth user from Supabase session
     const {
         data: { user: supabaseUser },
         error: authError,
@@ -23,7 +23,6 @@ export async function getCurrentUser(): Promise<AppUser | null> {
         return null;
     }
 
-    // Get business profile
     try {
         const profile = await ProfileRepository.getById(supabaseUser.id);
         return {
@@ -34,7 +33,6 @@ export async function getCurrentUser(): Promise<AppUser | null> {
         };
     } catch (error) {
         console.error("Error fetching profile for user:", supabaseUser.id, error);
-        // Fallback: return user with null profile if it doesn't exist yet
         return {
             id: supabaseUser.id,
             email: supabaseUser.email!,
@@ -42,7 +40,9 @@ export async function getCurrentUser(): Promise<AppUser | null> {
             supabaseUser,
         };
     }
-}
+};
+
+export const getCurrentUser = cache(loadCurrentUser);
 
 /**
  * Ensure the user is authenticated, or throw UnauthorizedError.
