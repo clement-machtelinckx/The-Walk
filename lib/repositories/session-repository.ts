@@ -81,6 +81,26 @@ export const SessionRepository = {
         };
     },
 
+    /**
+     * Load all scheduled and active sessions used by the /tables summaries.
+     * The caller groups the rows by table, keeping the query count constant.
+     */
+    async listSummarySessionsByTableIds(tableIds: string[]): Promise<Session[]> {
+        if (tableIds.length === 0) {
+            return [];
+        }
+
+        const supabase = await getServerClient();
+        const { data, error } = await supabase
+            .from("sessions")
+            .select("*")
+            .in("table_id", tableIds)
+            .in("status", ["scheduled", "active"]);
+
+        handleDbError(error, "SessionRepository.listSummarySessionsByTableIds");
+        return data || [];
+    },
+
     async getNextSession(tableId: string): Promise<Session | null> {
         const supabase = await getServerClient();
 
