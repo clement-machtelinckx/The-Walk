@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr";
-import { getSafeNextPath } from "@/lib/auth/redirect";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
@@ -29,23 +28,17 @@ export async function updateSession(request: NextRequest) {
     );
 
     // Validate and refresh the JWT using Supabase's SSR flow.
+    // Account existence is reconciled by the server layouts/pages through getUser().
     const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-    const isAuthenticated = !claimsError && Boolean(claimsData?.claims?.sub);
+    const hasValidClaims = !claimsError && Boolean(claimsData?.claims?.sub);
 
     const path = request.nextUrl.pathname;
-    const isAuthRoute = path === "/login" || path === "/register";
     const isProtectedRoute = path.startsWith("/tables") || path.startsWith("/mon-compte");
 
-    if (!isAuthenticated && isProtectedRoute) {
+    if (!hasValidClaims && isProtectedRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         url.searchParams.set("next", path);
-        return NextResponse.redirect(url);
-    }
-
-    if (isAuthenticated && isAuthRoute) {
-        const nextPath = getSafeNextPath(request.nextUrl.searchParams.get("next")) || "/tables";
-        const url = new URL(nextPath, request.nextUrl.origin);
         return NextResponse.redirect(url);
     }
 
