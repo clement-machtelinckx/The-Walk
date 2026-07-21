@@ -38,17 +38,26 @@ describe("Supabase proxy session handling", () => {
         expect(getUser).not.toHaveBeenCalled();
     });
 
-    it("redirects an authenticated user away from login using a safe next path", async () => {
+    it("keeps a protected route accessible when the JWT claims are valid", async () => {
+        const { getClaims, getUser } = mockClaims("user-123");
+
+        const response = await updateSession(new NextRequest("https://the-walk.test/tables"));
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get("location")).toBeNull();
+        expect(getClaims).toHaveBeenCalledOnce();
+        expect(getUser).not.toHaveBeenCalled();
+    });
+
+    it("keeps auth routes accessible so the page guard can verify the current user", async () => {
         const { getClaims, getUser } = mockClaims("user-123");
 
         const response = await updateSession(
             new NextRequest("https://the-walk.test/login?next=%2Ftables%2Ftable-123"),
         );
 
-        expect(response.status).toBe(307);
-        expect(response.headers.get("location")).toBe(
-            "https://the-walk.test/tables/table-123",
-        );
+        expect(response.status).toBe(200);
+        expect(response.headers.get("location")).toBeNull();
         expect(getClaims).toHaveBeenCalledOnce();
         expect(getUser).not.toHaveBeenCalled();
     });
