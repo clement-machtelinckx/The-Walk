@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useEffect } from "react";
-import { AuthSession } from "@/types/auth";
+import React, { createContext, useContext, useEffect, useLayoutEffect } from "react";
+import { AuthSession, PublicUser } from "@/types/auth";
 import { useRouter } from "next/navigation";
 import { useAuthStore, AuthState } from "@/store/auth-store";
 
@@ -16,23 +16,37 @@ interface AuthContextType extends AuthSession {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * AuthProvider acts as a bridge between the initial server state/refresh
- * and the Zustand store. It keeps the same API as before for compatibility.
- */
 type AuthProviderProps = Readonly<{
     children: React.ReactNode;
+    initialUser?: PublicUser | null;
 }>;
 
-export function AuthProvider({ children }: AuthProviderProps) {
+/**
+ * Bridges the server-authenticated user and the Zustand auth store.
+ * Public routes without an initial user keep the /api/me fallback.
+ */
+export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     const store = useAuthStore();
     const router = useRouter();
+    const hasServerState = initialUser !== undefined;
+
+    useLayoutEffect(() => {
+        if (!hasServerState) return;
+
+        useAuthStore.setState({
+            user: initialUser,
+            status: initialUser ? "authenticated" : "unauthenticated",
+        });
+    }, [hasServerState, initialUser]);
 
     useEffect(() => {
-        // Initial hydration
-        store.refreshUser();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        if (hasServerState || useAuthStore.getState().status !== "loading") return;
+
+        useAuthStore
+            .getState()
+            .refreshUser()
+            .catch((error) => console.error("Failed to initialize auth state:", error));
+    }, [hasServerState]);
 
     const logout = async () => {
         await store.logout();
@@ -40,11 +54,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         router.refresh();
     };
 
+    const useInitialState = hasServerState && store.status === "loading";
+    const user = useInitialState ? (initialUser ?? null) : store.user;
+    const status = useInitialState
+        ? initialUser
+            ? "authenticated"
+            : "unauthenticated"
+        : store.status;
+
     return (
         <AuthContext.Provider
             value={{
-                user: store.user,
-                status: store.status,
+                user,
+                status,
                 login: store.login,
                 register: store.register,
                 logout,
