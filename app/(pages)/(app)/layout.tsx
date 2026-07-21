@@ -2,15 +2,21 @@ import { AuthProvider } from "@/components/auth/auth-provider";
 import { Container } from "@/components/layout/container";
 import { AppHeader } from "@/components/layout/app-header";
 import { MobileBottomNav } from "@/components/layout/app-nav";
-import { requireAuth } from "@/lib/auth/server";
+import { getCurrentUser } from "@/lib/auth/server";
 import type { PublicUser } from "@/types/auth";
+import { redirect } from "next/navigation";
 
 type AppLayoutProps = Readonly<{
     children: React.ReactNode;
 }>;
 
 export default async function AppLayout({ children }: AppLayoutProps) {
-    const user = await requireAuth();
+    const user = await getCurrentUser();
+
+    if (!user) {
+        redirect("/login");
+    }
+
     const initialUser: PublicUser = {
         id: user.id,
         email: user.email,
