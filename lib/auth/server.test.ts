@@ -12,6 +12,9 @@ import { ProfileRepository } from "@/lib/repositories/profile-repository";
 import { ForbiddenError, UnauthorizedError } from "@/lib/errors";
 import { redirect } from "next/navigation";
 
+vi.mock("react", () => ({
+    cache: <T extends (...args: never[]) => unknown>(fn: T) => fn,
+}));
 vi.mock("@/lib/db");
 vi.mock("@/lib/repositories/profile-repository");
 vi.mock("@/lib/repositories/membership-repository");
