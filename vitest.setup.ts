@@ -11,6 +11,7 @@ vi.mock("@supabase/ssr", () => ({
     })),
     createServerClient: vi.fn(() => ({
         auth: {
+            getClaims: vi.fn(),
             getUser: vi.fn(),
         },
         from: vi.fn(() => ({
