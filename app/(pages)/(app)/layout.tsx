@@ -1,21 +1,33 @@
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { Container } from "@/components/layout/container";
 import { AppHeader } from "@/components/layout/app-header";
 import { MobileBottomNav } from "@/components/layout/app-nav";
+import { requireAuth } from "@/lib/auth/server";
+import type { PublicUser } from "@/types/auth";
 
 type AppLayoutProps = Readonly<{
     children: React.ReactNode;
 }>;
 
-export default function AppLayout({ children }: AppLayoutProps) {
+export default async function AppLayout({ children }: AppLayoutProps) {
+    const user = await requireAuth();
+    const initialUser: PublicUser = {
+        id: user.id,
+        email: user.email,
+        profile: user.profile,
+    };
+
     return (
-        <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-            <AppHeader />
+        <AuthProvider initialUser={initialUser}>
+            <div className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+                <AppHeader />
 
-            <main className="flex-1 py-6 md:py-8">
-                <Container>{children}</Container>
-            </main>
+                <main className="flex-1 py-6 md:py-8">
+                    <Container>{children}</Container>
+                </main>
 
-            <MobileBottomNav />
-        </div>
+                <MobileBottomNav />
+            </div>
+        </AuthProvider>
     );
 }
