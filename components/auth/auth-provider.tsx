@@ -55,12 +55,9 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     };
 
     const useInitialState = hasServerState && store.status === "loading";
+    const initialStatus = initialUser ? "authenticated" : "unauthenticated";
     const user = useInitialState ? (initialUser ?? null) : store.user;
-    const status = useInitialState
-        ? initialUser
-            ? "authenticated"
-            : "unauthenticated"
-        : store.status;
+    const status = useInitialState ? initialStatus : store.status;
 
     return (
         <AuthContext.Provider
