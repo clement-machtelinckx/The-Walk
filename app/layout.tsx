@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Poppins, Quicksand } from "next/font/google";
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteConfig } from "@/config/site";
 import { AuthProvider } from "@/components/auth/auth-provider";
 
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 <AuthProvider>
                     <div className="relative z-10 flex min-h-screen flex-col">{children}</div>
                 </AuthProvider>
+                <SpeedInsights />
             </body>
         </html>
     );
