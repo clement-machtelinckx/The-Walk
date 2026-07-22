@@ -33,6 +33,10 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
     useLayoutEffect(() => {
         if (!hasServerState) return;
 
+        // Seed only a fresh client store. An explicit logout is authoritative and
+        // must not be overwritten if the router restores a cached protected layout.
+        if (useAuthStore.getState().status !== "loading") return;
+
         useAuthStore.setState({
             user: initialUser,
             status: initialUser ? "authenticated" : "unauthenticated",
@@ -50,7 +54,7 @@ export function AuthProvider({ children, initialUser }: AuthProviderProps) {
 
     const logout = async () => {
         await store.logout();
-        router.push("/login");
+        router.replace("/login");
         router.refresh();
     };
 
