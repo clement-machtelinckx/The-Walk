@@ -52,6 +52,36 @@ describe("AuthProvider", () => {
         expect(refreshUser).not.toHaveBeenCalled();
     });
 
+    it("does not restore a stale server user after an explicit logout", async () => {
+        const refreshUser = vi.fn().mockResolvedValue(undefined);
+        useAuthStore.setState({
+            user: null,
+            status: "unauthenticated",
+            refreshUser,
+        });
+
+        const staleInitialUser: PublicUser = {
+            id: "user-123",
+            email: "stale@example.com",
+            profile: null,
+        };
+
+        render(
+            <AuthProvider initialUser={staleInitialUser}>
+                <AuthProbe />
+            </AuthProvider>,
+        );
+
+        expect(screen.getByTestId("auth-state")).toHaveTextContent("unauthenticated:none");
+        await waitFor(() => {
+            expect(useAuthStore.getState()).toMatchObject({
+                user: null,
+                status: "unauthenticated",
+            });
+        });
+        expect(refreshUser).not.toHaveBeenCalled();
+    });
+
     it("keeps the /api/me fallback when no server user is provided", async () => {
         const refreshUser = vi.fn().mockResolvedValue(undefined);
         useAuthStore.setState({ refreshUser });
